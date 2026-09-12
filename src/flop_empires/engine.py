@@ -11,6 +11,7 @@ from .canonical import dumps, sha256
 from .combat import attack_succeeds, raid_reward
 from .events import append_event
 from .github_evidence import validate_evidence_url
+from .github_evidence import VerifiedEvidence
 from .identity import Signer, require_signer
 from .models import Command, Receipt, SeasonStatus
 from .protocol import parse_command
@@ -69,6 +70,16 @@ class Engine:
             receipt = issue_receipt(self.signer, unsigned)
             self.store.conn.execute("INSERT INTO requests VALUES(?,?,?,?)", (command.actor_did, command.request_id, command_hash, dumps(asdict(receipt))))
             return receipt
+
+    def record_verified_contribution(self, evidence: VerifiedEvidence, contributor_did: str,
+                                     request_id: str) -> Receipt:
+        """Trusted adapter boundary: only a verifier-created typed result enters scoring."""
+        if not isinstance(evidence, VerifiedEvidence):
+            raise TypeError("evidence must be VerifiedEvidence")
+        return self.execute({"action": "add_contribution", "actor_did": self.signer.did,
+            "request_id": request_id, "payload": {"contributor_did": contributor_did,
+            "cluster_id": evidence.cluster_id, "evidence_class": evidence.evidence_class,
+            "url": evidence.url, "verified": True, "self_owned": evidence.self_owned}})
 
     def _status(self) -> str:
         return self.store.one("SELECT value FROM config WHERE key='season_status'")[0]

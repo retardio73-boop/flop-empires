@@ -31,7 +31,10 @@ class SignedRecord:
     payload: dict[str, Any]
     signature: str
     seq: int | None = None
-    ts: int | None = None
+    ts: int | str | None = None
+    room: str | None = None
+    nonce: str | None = None
+    raw_text: str | None = None
 
 
 @dataclass(frozen=True)
