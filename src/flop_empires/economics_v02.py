@@ -99,15 +99,18 @@ class EconomicRulesV02:
             "stockpile_cost":charged_carrying,"total":total}
 
     def epoch_attribution(self, prestige: int, available_engineering: int,
-                          noncapital_territories: int, fortification_power: int) -> dict[str, Any]:
+                          noncapital_territories: int, fortification_power: int, *,
+                          effective_prestige: int | None = None) -> dict[str, Any]:
         """Single normative epoch formula shared by engine and simulations."""
-        spendable = self.spendable_total(prestige)
-        allocation = self.epoch_allocation(prestige)
+        effective=prestige if effective_prestige is None else effective_prestige
+        if effective<0 or effective>prestige: raise ValueError("effective prestige out of range")
+        spendable = self.spendable_total(effective)
+        allocation = self.epoch_allocation(effective)
         territory_raw = noncapital_territories * self.territory_benefit_units
         territory_effective = self.territory_benefit(noncapital_territories)
         before_cost = available_engineering + allocation["ENGINEERING"] + territory_effective
         costs = self.upkeep_components(before_cost,noncapital_territories,fortification_power)
-        return {"raw_contribution":prestige,"prestige":prestige,
+        result={"raw_contribution":prestige,"prestige":prestige,
             "effective_spendable_yield":spendable,
             "gross_spendable_yield":sum(allocation.values()),
             "diminishing_return_loss":max(0,prestige-spendable),
@@ -116,6 +119,10 @@ class EconomicRulesV02:
             "overextension_penalty":territory_raw-territory_effective,
             "upkeep":costs["territory_upkeep"]+costs["fortification_upkeep"],
             "stockpile_cost":costs["stockpile_cost"],"total_cost":costs["total"]}
+        if effective_prestige is not None and effective!=prestige:
+            result["effective_contribution_for_spendable"]=effective
+            result["bootstrap_excluded_or_discounted"]=prestige-effective
+        return result
 
     def offensive_cost(self, base_cost: int, recent_successes: int) -> int:
         fatigue = min(self.fatigue_max_bp, max(0, recent_successes) * self.fatigue_step_bp)

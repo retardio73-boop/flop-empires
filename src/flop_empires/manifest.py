@@ -3,9 +3,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+import re
 
 from .canonical import loads, sha256
 from .economics_v02 import EconomicRulesV02
+from .identity import verify_key_from_did
+
+ROOM_NAME=re.compile(r"^[a-z0-9][a-z0-9_-]{0,47}$")
 
 
 @dataclass(frozen=True)
@@ -61,6 +65,67 @@ class SeasonManifestV02:
     def manifest_hash(self): return self.value["manifest_hash"]
     @property
     def rules(self): return EconomicRulesV02.from_manifest(self.value)
+    def __getattr__(self,name):
+        try: return self.value[name]
+        except KeyError as exc: raise AttributeError(name) from exc
+
+
+@dataclass(frozen=True)
+class SeasonZeroCandidateManifest:
+    """Strict, deliberately non-activatable production candidate."""
+    value: dict[str,Any]
+
+    @classmethod
+    def load(cls,path: str|Path)->"SeasonZeroCandidateManifest":
+        value=loads(Path(path).read_text(encoding="utf-8"))
+        if not isinstance(value,dict): raise ValueError("invalid Season 0 candidate")
+        required={"activation","candidate_hash","environment","season_id","intended_duration_days",
+            "epoch_count","protocol_version","economic_rules_version","technical_yield_version",
+            "referee_did","actions_namespace","events_namespace","registration_boundary",
+            "world_graph_hash","world_fixture","epoch_duration","initial_balances","bootstrap_policy",
+            "economic_parameters","combat_parameters","alliance_parameters","github_allowlist"}
+        if set(value)!=required: raise ValueError("Season 0 candidate fields mismatch")
+        unsigned=dict(value); supplied=unsigned.pop("candidate_hash")
+        if sha256(unsigned)!=supplied: raise ValueError("Season 0 candidate hash mismatch")
+        result=cls(value); result.validate()
+        world_path=Path(path).resolve().parent.parent/value["world_fixture"]
+        if not world_path.is_file() or sha256(loads(world_path.read_text(encoding="utf-8")))!=value["world_graph_hash"]:
+            raise ValueError("world graph hash mismatch")
+        return result
+
+    def validate(self)->None:
+        v=self.value
+        if v["activation"]!="DISABLED_PENDING_FINAL_REVIEW" or v["environment"]!="production-candidate-not-active":
+            raise ValueError("candidate must remain disabled")
+        if v["registration_boundary"] is not None: raise ValueError("registration must remain unopened")
+        if v["intended_duration_days"]!=14 or v["epoch_duration"]!=21_600 or v["epoch_count"]!=56:
+            raise ValueError("invalid Season 0 cadence")
+        verify_key_from_did(v["referee_did"])
+        for room in (v["actions_namespace"],v["events_namespace"]):
+            if not ROOM_NAME.fullmatch(room) or "staging" in room:
+                raise ValueError("invalid production candidate namespace")
+        if v["actions_namespace"]==v["events_namespace"]: raise ValueError("rooms must differ")
+        if v["economic_rules_version"]!="technical-yield-v0.2" or v["technical_yield_version"]!="technical-yield-v0.2":
+            raise ValueError("Season 0 candidate must select v0.2")
+        policy=v["bootstrap_policy"]
+        if policy!={"lookback_days":0,"historical_spendable_weight_bp":0,
+                "prestige_retains_full_verified_value":True}:
+            raise ValueError("unvalidated bootstrap policy")
+        if set(v["initial_balances"])!={"ENGINEERING","KNOWLEDGE","INFLUENCE"} or any(
+                not isinstance(x,int) or isinstance(x,bool) or x<0 for x in v["initial_balances"].values()):
+            raise ValueError("invalid initial balances")
+        if v["combat_parameters"].get("min_deadline_seconds")!=30:
+            raise ValueError("unvalidated minimum deadline")
+        if v["alliance_parameters"].get("support_coefficient_bp")!=10_000:
+            raise ValueError("unvalidated alliance support")
+        EconomicRulesV02.from_manifest(v)
+
+    @property
+    def candidate_hash(self): return self.value["candidate_hash"]
+
+    @property
+    def rules(self): return EconomicRulesV02.from_manifest(self.value)
+
     def __getattr__(self,name):
         try: return self.value[name]
         except KeyError as exc: raise AttributeError(name) from exc

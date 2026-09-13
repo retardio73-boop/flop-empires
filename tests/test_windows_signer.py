@@ -25,6 +25,9 @@ def test_dpapi_signer_wrong_expected_did_fails_closed(tmp_path):
 
 
 def test_season_one_actor_roles_are_explicit_and_bounded():
-    from flop_empires.windows_signer import ROLES
+    from flop_empires.windows_signer import ROLES, directory_for_role, production_directory
     assert "season1-player-1" in ROLES and "season1-player-8" in ROLES
     assert "season1-player-9" not in ROLES
+    assert "season0-referee" in ROLES
+    assert directory_for_role("season0-referee")==production_directory()
+    assert "staging-identities" not in str(production_directory())

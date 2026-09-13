@@ -30,11 +30,13 @@ class RuleViolation(ValueError):
 class Engine:
     @classmethod
     def from_manifest(cls,store: Store,manifest,signer: Signer,clock=None)->"Engine":
+        manifest_value=getattr(manifest,"value",{})
         return cls(store,manifest.referee_did,signer,clock=clock,economic_rules=manifest.rules,
             manifest_hash=manifest.manifest_hash,initial_balances=manifest.initial_balances,
             epoch_duration=manifest.epoch_duration,environment=manifest.environment,
             combat_parameters=manifest.combat_parameters,
-            alliance_parameters=manifest.alliance_parameters)
+            alliance_parameters=manifest.alliance_parameters,
+            bootstrap_policy=manifest_value.get("bootstrap_policy") if isinstance(manifest_value,dict) else None)
 
     def __init__(self, store: Store, configured_referee_did: str, signer: Signer | None,
                  clock: Callable[[], int] | None = None, *,
@@ -43,7 +45,8 @@ class Engine:
                  initial_balances: dict[str,int] | None = None,
                  epoch_duration: int = EPOCH_SECONDS,
                  environment: str = "local",combat_parameters: dict[str,Any] | None = None,
-                 alliance_parameters: dict[str,Any] | None = None):
+                 alliance_parameters: dict[str,Any] | None = None,
+                 bootstrap_policy: dict[str,Any] | None = None):
         self.store = store
         if store.one("SELECT 1 FROM events LIMIT 1"): require_valid_chain(store)
         self.signer = require_signer(configured_referee_did, signer)
@@ -56,6 +59,7 @@ class Engine:
             "raid_reward_divisor":2,"tie_goes_to_defender":True}
         self.alliance_parameters=alliance_parameters or {"eligibility_snapshotted":True,
             "max_defensive_alliances":2,"support_coefficient_bp":10_000}
+        self.bootstrap_policy=bootstrap_policy
         existing = store.one("SELECT value FROM config WHERE key='referee_did'")
         if existing and existing[0] != configured_referee_did:
             raise RuntimeError("database belongs to a different referee DID")
@@ -287,7 +291,26 @@ class Engine:
             empire=row["empire_id"]
             noncap=self.store.one("SELECT COUNT(*) FROM territories WHERE owner_empire_id=? AND is_capital=0",(empire,))[0]
             fort=self.store.one("SELECT COALESCE(SUM(fortification),0) FROM territories WHERE owner_empire_id=?",(empire,))[0]
-            attr=self.economic_rules.epoch_attribution(row["prestige"],row["engineering"],noncap,fort)
+            effective_prestige=row["prestige"]
+            if self.bootstrap_policy is not None:
+                policy=self.bootstrap_policy
+                weight=policy.get("historical_spendable_weight_bp")
+                lookback_days=policy.get("lookback_days")
+                if (not isinstance(weight,int) or isinstance(weight,bool) or not 0<=weight<=10_000 or
+                        not isinstance(lookback_days,int) or isinstance(lookback_days,bool) or lookback_days<0):
+                    raise RuleViolation("invalid bootstrap policy")
+                season_start=int(started[0])
+                historical=self.store.one(
+                    "SELECT COALESCE(SUM(base_units),0) FROM contribution_clusters "
+                    "WHERE empire_id=? AND self_owned=0 AND verified_at<?",(empire,season_start))[0]
+                cutoff=season_start-lookback_days*86_400
+                eligible=self.store.one(
+                    "SELECT COALESCE(SUM(base_units),0) FROM contribution_clusters "
+                    "WHERE empire_id=? AND self_owned=0 AND verified_at>=? AND verified_at<?",
+                    (empire,cutoff,season_start))[0] if lookback_days else 0
+                effective_prestige=row["prestige"]-historical+(eligible*weight//10_000)
+            attr=self.economic_rules.epoch_attribution(row["prestige"],row["engineering"],noncap,fort,
+                effective_prestige=effective_prestige)
             allocation=attr["allocation"]
             eng_delta=allocation["ENGINEERING"]+attr["territory_production"]-attr["total_cost"]
             self.store.conn.execute("UPDATE empire_economy SET engineering=engineering+?,knowledge=knowledge+?,influence=influence+?,last_settled_epoch=? WHERE empire_id=?",

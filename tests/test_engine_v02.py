@@ -28,6 +28,13 @@ def manifest(referee,r):
             "max_defensive_alliances":2,"support_coefficient_bp":10000})
 
 
+def bootstrap_manifest(referee,r):
+    value={"bootstrap_policy":{"lookback_days":0,"historical_spendable_weight_bp":0,
+        "prestige_retains_full_verified_value":True}}
+    base=manifest(referee,r)
+    return SimpleNamespace(**base.__dict__,value=value)
+
+
 def test_v02_prestige_epoch_attribution_and_no_double_settlement():
     r=rules(); ref=EphemeralSigner(b"r"*32); actor=EphemeralSigner(b"a"*32); now=[100]
     store=Store(); engine=Engine.from_manifest(store,manifest(ref,r),ref,clock=lambda:now[0])
@@ -115,6 +122,26 @@ def test_v02_engine_halts_when_materialized_state_diverges_from_ledger():
         assert str(exc)=="impossible replay divergence"
     else:
         raise AssertionError("tampered materialized state must halt")
+
+
+def test_v02_no_historical_bootstrap_preserves_prestige_but_excludes_spendable_yield():
+    r=rules(); ref=EphemeralSigner(b"r"*32); actor=EphemeralSigner(b"a"*32); now=[100]
+    store=Store(); engine=Engine.from_manifest(store,bootstrap_manifest(ref,r),ref,clock=lambda:now[0])
+    for c in [command(actor.did,"reg","register_actor"),
+              command(actor.did,"emp","create_empire",empire_id="e",name="E",capital_id="c"),
+              command(actor.did,"bind","bind_github",login="author",verified=True),
+              command(ref.did,"contribution","add_contribution",contributor_did=actor.did,
+                cluster_id="cluster",evidence_class="merged_pull_request",
+                url="https://github.com/upstream/repo/pull/1",verified=True,self_owned=False)]:
+        assert engine.execute(c).accepted
+    now[0]=200; assert engine.execute(command(ref.did,"active","activate_season")).accepted
+    receipt=engine.execute(command(ref.did,"epoch","settle_epoch",epoch=0)); assert receipt.accepted
+    economy=store.one("SELECT * FROM empire_economy WHERE empire_id='e'")
+    attr=json.loads(store.one("SELECT attribution_json FROM economic_epochs")[0])
+    assert economy["prestige"]>0
+    assert attr["prestige"]==economy["prestige"]
+    assert attr["effective_contribution_for_spendable"]==0
+    assert attr["gross_spendable_yield"]==0
 
 
 def test_v01_state_projection_excludes_v02_migration_tables():

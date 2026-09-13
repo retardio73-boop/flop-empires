@@ -19,7 +19,8 @@ from .technocore import RoomEnvelope
 MAGIC = b"FLOP-EMPIRES-DPAPI-V1\x00"
 ENTROPY = b"FLOPEmpires/StagingSigner/DPAPI/v1"
 UI_FORBIDDEN = 0x1
-ROLES = {"referee", "player", *(f"season1-player-{number}" for number in range(1, 9))}
+PRODUCTION_ROLES = {"season0-referee"}
+ROLES = {"referee", "player", *(f"season1-player-{number}" for number in range(1, 9)), *PRODUCTION_ROLES}
 
 
 class SecureSignerError(RuntimeError):
@@ -35,6 +36,17 @@ def default_directory() -> Path:
     if not root:
         raise SecureSignerError("LOCAL_APP_DATA_UNAVAILABLE")
     return Path(root) / "FLOPEmpires" / "staging-identities-v1"
+
+
+def production_directory() -> Path:
+    root = os.environ.get("LOCALAPPDATA")
+    if not root:
+        raise SecureSignerError("LOCAL_APP_DATA_UNAVAILABLE")
+    return Path(root) / "FLOPEmpires" / "season0-identities-v1"
+
+
+def directory_for_role(role: str) -> Path:
+    return production_directory() if role in PRODUCTION_ROLES else default_directory()
 
 
 def _blob(data: bytes | bytearray):
@@ -74,7 +86,7 @@ def _prepare(directory: Path) -> None:
 def enroll(role: str, directory: Path | None = None) -> dict[str, str]:
     if role not in ROLES:
         raise SecureSignerError("INVALID_STAGING_ROLE")
-    directory = directory or default_directory(); _prepare(directory)
+    directory = directory or directory_for_role(role); _prepare(directory)
     credential, public = directory / f"{role}.dpapi", directory / f"{role}.public.json"
     if credential.exists() or public.exists():
         raise SecureSignerError("STAGING_IDENTITY_ALREADY_ENROLLED")
@@ -99,7 +111,7 @@ class WindowsDpapiSigner:
         if role not in ROLES:
             raise SecureSignerError("INVALID_STAGING_ROLE")
         self.role, self._did = role, expected_did
-        self.directory = directory or default_directory()
+        self.directory = directory or directory_for_role(role)
         self.credential = self.directory / f"{role}.dpapi"
         self.nonce_db = self.directory / "nonces.sqlite3"
         self._verify_identity()
@@ -144,7 +156,7 @@ class WindowsDpapiSigner:
 
 
 def public_status(role: str, directory: Path | None = None) -> dict:
-    directory=directory or default_directory(); path=directory/f"{role}.public.json"
+    directory=directory or directory_for_role(role); path=directory/f"{role}.public.json"
     try:
         value=json.loads(path.read_text(encoding="utf-8")); WindowsDpapiSigner(role,value["did"],directory)
         return {**value,"available":True,"secret_exposed":False}
@@ -154,7 +166,7 @@ def public_status(role: str, directory: Path | None = None) -> dict:
 
 def migrate_public_did_encoding(role: str, directory: Path | None = None) -> dict:
     """One-time representation repair; preserves the exact enrolled private seed."""
-    directory=directory or default_directory(); public_path=directory/f"{role}.public.json"
+    directory=directory or directory_for_role(role); public_path=directory/f"{role}.public.json"
     current=json.loads(public_path.read_text(encoding="utf-8")); credential=directory/f"{role}.dpapi"
     encoded=credential.read_bytes()
     if not encoded.startswith(MAGIC): raise SecureSignerError("SECURE_CREDENTIAL_CORRUPT")

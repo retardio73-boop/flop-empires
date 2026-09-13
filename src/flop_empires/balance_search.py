@@ -25,18 +25,23 @@ def _manifest_candidates(base: EconomicRulesV02) -> list[EconomicRulesV02]:
 
 
 def simulate_scenario(rules: EconomicRulesV02, scenario: str, seed: int,
-                      actions: int = 50_000, comeback_profile: str = "continued") -> dict:
+                      actions: int = 50_000, comeback_profile: str = "continued", *,
+                      historical_weight_bp: int | None = None,
+                      alliance_support_bp: int = 10_000) -> dict:
     rng, n = random.Random(seed), 8
     multiplier = {"WHALE_2X":2,"WHALE_5X":5,"WHALE_10X":10}.get(scenario, 1)
     prestige = [1000] * n; prestige[0] *= multiplier
     if scenario == "CONTRIBUTOR": prestige[0] *= 5
-    resources = [rules.allocate(p)["ENGINEERING"] * 3 for p in prestige]
     owners = [i % n for i in range(n * 4)]
     capitals = set(range(n)); fort = [0] * len(owners)
     lost = {n, 2*n} if scenario == "COMEBACK" else set()
     if lost:
         prestige[0] = 5000
         for t in lost: owners[t] = 1
+    effective_prestige=list(prestige)
+    if historical_weight_bp is not None:
+        effective_prestige=[p*historical_weight_bp//10_000 for p in prestige]
+    resources = [rules.allocate(p)["ENGINEERING"] * 3 for p in effective_prestige]
     fatigue = [deque() for _ in range(n)]
     wins = Counter(); tries = Counter(); raid_cost = raid_income = 0
     combat_created = 0; dominance_at = None; invariant_failures = []
@@ -45,11 +50,13 @@ def simulate_scenario(rules: EconomicRulesV02, scenario: str, seed: int,
     for empire,p in enumerate(prestige):
         attribution[empire]["raw_technical_contribution"]=p
         attribution[empire]["prestige"]=p
-        attribution[empire]["gross_spendable_yield"]=rules.spendable_total(p)
-        attribution[empire]["diminishing_return_loss"]=p-rules.spendable_total(p)
+        attribution[empire]["gross_spendable_yield"]=rules.spendable_total(effective_prestige[empire])
+        attribution[empire]["diminishing_return_loss"]=p-rules.spendable_total(effective_prestige[empire])
     peak_resource=(0.0,0); peak_territory=(0.0,0); above={40:0,50:0,60:0}
     first_above_50=None; first_territory_dominance=None; reversal_time=None; recovery_streak=0; recovery_at=None
     recovery_resource_cost=0; recovery_attacks=0; recovery_defense=0; new_contribution=0
+    alliance_support_events=0
+    cartel_defenses=cartel_breaches=0
     def observe(step):
         nonlocal peak_resource,peak_territory,first_above_50,first_territory_dominance,reversal_time
         shares=Counter(owners); resource_share=resources[0]/max(1,sum(resources)); territory_share=shares[0]/len(owners)
@@ -66,12 +73,14 @@ def simulate_scenario(rules: EconomicRulesV02, scenario: str, seed: int,
             if scenario=="COMEBACK":
                 added={"none":0,"low":10,"continued":50,"high":100}.get(comeback_profile,50)
                 prestige[0]+=added
+                effective_prestige[0]+=added
                 if recovery_at is None: new_contribution+=added
                 attribution[0]["new_technical_contribution"]+=added
             for empire in range(n):
                 noncap = sum(1 for t,o in enumerate(owners) if t not in capitals and o == empire)
                 epoch=rules.epoch_attribution(prestige[empire],resources[empire],noncap,
-                    sum(fort[t] for t,o in enumerate(owners) if o==empire))
+                    sum(fort[t] for t,o in enumerate(owners) if o==empire),
+                    effective_prestige=effective_prestige[empire])
                 gross=epoch["allocation"]["ENGINEERING"]
                 territory_effective=epoch["territory_production"]
                 produced=gross+territory_effective
@@ -110,7 +119,7 @@ def simulate_scenario(rules: EconomicRulesV02, scenario: str, seed: int,
         kind = "raid" if scenario == "RAIDER" or rng.randrange(3) == 0 else "siege"
         base_cost = 10 + rng.randrange(31)
         cost = rules.offensive_cost(base_cost, len(fatigue[actor]))
-        sustainable=rules.allocate(prestige[actor])["ENGINEERING"]//20
+        sustainable=rules.epoch_allocation(effective_prestige[actor])["ENGINEERING"]
         if scenario not in {"RAIDER","COMEBACK"} and resources[actor] < cost+2*sustainable:
             continue
         if resources[actor] < cost:
@@ -123,10 +132,13 @@ def simulate_scenario(rules: EconomicRulesV02, scenario: str, seed: int,
         engineering_defense = min(resources[defender], 10 + fort[target] // 5)
         alliance = 0
         if scenario == "CARTEL" and defender < 3:
-            alliance = sum(min(5, resources[x]) for x in range(3) if x != defender)
+            alliance = sum(min(5, resources[x]) for x in range(3) if x != defender)*alliance_support_bp//10_000
+            if alliance: alliance_support_events+=1
+            cartel_defenses+=1
         defense = rules.defense_power(engineering_defense, fort[target], alliance)
         resources[actor] -= cost; tries[kind] += 1
         if base_cost > defense:
+            if scenario=="CARTEL" and defender<3: cartel_breaches+=1
             wins[kind] += 1
             if kind == "raid":
                 reward = raid_reward(cost, resources[defender])
@@ -149,9 +161,9 @@ def simulate_scenario(rules: EconomicRulesV02, scenario: str, seed: int,
     for empire,p in enumerate(prestige):
         attribution[empire]["raw_technical_contribution"]=p
         attribution[empire]["prestige"]=p
-        attribution[empire]["gross_spendable_yield"]=rules.spendable_total(p)
-        attribution[empire]["diminishing_return_loss"]=p-rules.spendable_total(p)
-    viable=sum(1 for empire in range(1,n) if territory[empire]>0 and rules.allocate(prestige[empire])["ENGINEERING"]>0)
+        attribution[empire]["gross_spendable_yield"]=rules.spendable_total(effective_prestige[empire])
+        attribution[empire]["diminishing_return_loss"]=p-rules.spendable_total(effective_prestige[empire])
+    viable=sum(1 for empire in range(1,n) if territory[empire]>0 and rules.epoch_allocation(effective_prestige[empire])["ENGINEERING"]>0)
     return {"scenario":scenario,"seed":seed,"actions":actions,
         "manifest_hash":rules.manifest_hash,"resource_shares":[x/max(1,total) for x in resources],
         "largest_resource_share":max(resources)/max(1,total),
@@ -159,6 +171,17 @@ def simulate_scenario(rules: EconomicRulesV02, scenario: str, seed: int,
         "whale_resource_rank":sorted(resources,reverse=True).index(resources[0])+1,
         "combat_resource_creation":combat_created,"circular_raid_profit":raid_income-raid_cost,
         "win_rates":{k:wins[k]/max(1,tries[k]) for k in ("raid","siege")},
+        "attack_count":sum(tries.values()),"successful_raids":wins["raid"],
+        "successful_sieges":wins["siege"],"alliance_support_events":alliance_support_events,
+        "yield_produced":sum(x["gross_yield"]+x["territory_production"] for x in attribution),
+        "upkeep_total":sum(x["upkeep"] for x in attribution),
+        "carrying_cost_total":sum(x["stockpile_cost"] for x in attribution),
+        "overextension_total":sum(x["overextension_penalty"] for x in attribution),
+        "fatigue_cost_total":sum(x["offensive_fatigue_cost"] for x in attribution),
+        "focus_resource_share":resources[0]/max(1,total),
+        "focus_territory_share":territory[0]/len(owners),
+        "cartel_territory_share":sum(v for owner,v in territory.items() if owner<3)/len(owners),
+        "cartel_defense_rate":1-cartel_breaches/max(1,cartel_defenses),
         "time_to_dominance":dominance_at,"comeback_recovery":recovered,
         "invariant_failures":sorted(set(invariant_failures)),"technical_creation":created_yield,
         "attribution":[dict(x) for x in attribution],"time_to_peak_share":peak_resource[1],

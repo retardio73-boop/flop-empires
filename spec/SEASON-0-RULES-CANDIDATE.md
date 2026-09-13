@@ -1,33 +1,58 @@
 # FLOP Empires Season 0 rules candidate
 
-Status: **CANDIDATE — NOT ACTIVE**. This document does not open registration,
-create a namespace, or make production claims. Human review and an explicit
-immutable production manifest are required.
+Status: **freeze candidate — not active**. Registration and start timestamps are
+unset. This document does not launch Season 0.
 
-Season 0 selects FLOP Empires Protocol v0.1 with `technical-yield-v0.2` for
-Prestige and spendable resources. Historical v0.1 ledgers keep their original
-state projection and event-chain verification.
+## Season rhythm
 
-Prestige is the uncompressed sum of unique verified non-self-owned contribution
-clusters. It is non-transferable, non-spendable, hashed in state, and shown on a
-leaderboard separate from Strategic Power. Spendable yield uses the manifest
-threshold and square-root tail, resource weights, and epoch divisor defined in
-Technical Yield v0.2.
+The intended Season lasts 14 days. An economic epoch lasts 6 hours (21,600
+seconds), producing 56 epochs. This replaces the earlier seven-day candidate
+default: two epochs were insufficient to materialize yield, upkeep, stockpile
+costs, fatigue, alliances, attacks, and productive comeback during a 14-day game.
+Simulation advances deterministic clocks; it never waits six real hours.
 
-Every epoch is a single sequential `ECONOMIC_EPOCH_SETTLED` transition containing
-gross yield, diminishing-return loss, territory production, overextension,
-upkeep, and carrying-cost attribution. Combat costs and successful offensive
-fatigue are ledgered in their attack transitions. Replay must reproduce the
-persisted state hash exactly.
+The protocol minimum attack deadline is 30 seconds. It is only a transport-safety
+floor. A Season may use longer Raid and Siege defense windows.
 
-Defense is additive: modified defender ENGINEERING + fortification + eligible
-alliance support. Eligibility is snapshotted at attack creation. Ties go to the
-defender, raids cannot mint, circular raids are net-negative, and Capitals cannot
-be conquered.
+## Prestige and Strategic Power
 
-Expected hostile room records are rejected and processing continues. Integrity
-corruption, signer/DID mismatch, and replay divergence halt fail-closed.
+Prestige is the uncompressed value of unique, verified, non-self-owned technical
+contribution clusters. It cannot be transferred, spent, or used directly in
+combat. Strategic Power is separate: it reflects spendable resources,
+territories, and fortification. The leaderboards remain separate, so the highest
+Prestige does not necessarily control the most territory.
 
-The accompanying JSON is intentionally non-operational: production DID and rooms
-remain unassigned, activation is disabled, and the staging identities/namespaces
-must not be reused.
+Technical Yield v0.2 converts eligible contribution into ENGINEERING, KNOWLEDGE,
+and INFLUENCE. It is linear through the manifest threshold and follows a
+square-root tail above it, so useful contribution always increases production
+but with diminishing marginal spendable power. Season 0 gives historical
+pre-season contributions full Prestige but **no historical spendable bootstrap**.
+Only in-Season eligible contribution produces new spendable yield; old work
+therefore cannot create indefinite Season power.
+
+## Territory and conflict
+
+Territories add productive value, but overextension reduces marginal benefit and
+territory/fortification upkeep consumes ENGINEERING without taking a balance
+below zero. Reserves above the soft limit pay a deterministic carrying cost.
+Repeated successful territorial aggression adds offensive fatigue that decays
+within the manifest window; defense is not fatigued.
+
+Fortification spends ENGINEERING for durable defense and later incurs upkeep.
+Defense is additive: modified defending ENGINEERING, fortification, and eligible
+alliance support. At most two defensive alliances contribute, and eligibility is
+snapshotted when an attack is created. An alliance formed afterward cannot help.
+
+Raids transfer a bounded amount below attacker cost, never territory, and cannot
+mint resources. Sieges may transfer an eligible adjacent non-capital territory.
+Ties go to the defender. Capitals cannot be conquered.
+
+## Boundaries
+
+Technocore supplies transport, signed identity records, and publication evidence;
+it is not the game database, authoritative combat clock, or settlement system.
+The referee uses its persisted accepted time for deadlines and its append-only
+ledger for state and receipts.
+
+There are no real-money or token rewards, no FLOP settlement, no TCLK payments,
+no wallets or NFTs, and no COMPUTE resource in this candidate.
