@@ -61,9 +61,20 @@ def verify_key_from_did(did: str) -> VerifyKey:
 
 def verify(did: str, message: bytes, signature: str) -> bool:
     try:
-        verify_key_from_did(did).verify(message, base64.b64decode(signature, validate=True))
+        if not isinstance(signature, str):
+            return False
+        if len(signature) == 86 and "=" not in signature:
+            raw_signature = base64.urlsafe_b64decode(signature + "==")
+        else:
+            # Historical v0.1 receipts used padded standard base64. Keep them
+            # verifiable for replay while new signatures use Technocore's
+            # canonical unpadded base64url spelling.
+            raw_signature = base64.b64decode(signature, validate=True)
+        if len(raw_signature) != 64:
+            return False
+        verify_key_from_did(did).verify(message, raw_signature)
         return True
-    except (ValueError, BadSignatureError):
+    except (ValueError, BadSignatureError, base64.binascii.Error):
         return False
 
 
@@ -77,7 +88,7 @@ class EphemeralSigner:
         return did_from_verify_key(bytes(self._key.verify_key))
 
     def sign(self, message: bytes) -> str:
-        return base64.b64encode(self._key.sign(message).signature).decode()
+        return base64.urlsafe_b64encode(self._key.sign(message).signature).decode().rstrip("=")
 
 
 class ExternalSigningBackend(Protocol):

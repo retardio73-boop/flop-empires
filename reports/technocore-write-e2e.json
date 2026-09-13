@@ -1,0 +1,55 @@
+{
+  "action_positions": [
+    "mb-p-staging-flop-empires-9442aff0-actions/1/1",
+    "mb-p-staging-flop-empires-9442aff0-actions/1/2",
+    "mb-p-staging-flop-empires-9442aff0-actions/1/3",
+    "mb-p-staging-flop-empires-9442aff0-actions/1/4",
+    "mb-p-staging-flop-empires-9442aff0-actions/1/5",
+    "mb-p-staging-flop-empires-9442aff0-actions/1/6",
+    "mb-p-staging-flop-empires-9442aff0-actions/1/7",
+    "mb-p-staging-flop-empires-9442aff0-actions/1/8"
+  ],
+  "actions_namespace": "mb-p-staging-flop-empires-9442aff0-actions",
+  "commands_accepted": 6,
+  "commands_rejected": 1,
+  "commands_sent": 7,
+  "completed_at": 1789261128,
+  "crash_recovery": {
+    "window_a": {
+      "after_recovery": 1,
+      "before_publish": 0,
+      "published_by_recovery": 1,
+      "semantic_publications": 1,
+      "state_hash_unchanged": true
+    },
+    "window_b": {
+      "after_recovery": 1,
+      "before_reconcile": 1,
+      "initial_publish_ref": "mb-p-staging-flop-empires-9442aff0-events/1/5",
+      "reconciled_by_recovery": 1,
+      "semantic_publications": 1
+    }
+  },
+  "duplicate_result": "same_receipt",
+  "empire_count": 1,
+  "event_chain_verified": true,
+  "events_namespace": "mb-p-staging-flop-empires-9442aff0-events",
+  "manifest_hash": "6bfb13eaeb726a097fe11d7f1e000b9db373aac326cfbc56f75fb126d4560aa5",
+  "player_did": "did:key:z6MkkYwBhMKAqGSdvbFxhZ6GPZgyiXzcppNB1KCShdurtJdW",
+  "protocol": "technocore-room-json-signed-v1",
+  "receipt_positions": [
+    "mb-p-staging-flop-empires-9442aff0-events/1/1",
+    "mb-p-staging-flop-empires-9442aff0-events/1/2",
+    "mb-p-staging-flop-empires-9442aff0-events/1/3",
+    "mb-p-staging-flop-empires-9442aff0-events/1/4",
+    "mb-p-staging-flop-empires-9442aff0-events/1/5",
+    "mb-p-staging-flop-empires-9442aff0-events/1/6"
+  ],
+  "referee_did": "did:key:z6MkhLY6YepcVnmjeZ7fKLJoCp6uUAHTKxCpAsebdmiffQ3T",
+  "request_conflict_result": "REQUEST_ID_CONFLICT",
+  "season_id": "staging-season-minus-one-9442aff0",
+  "secrets_in_report": false,
+  "state_final_hash": "721ca888d3a14af6eb5bffe5a00b8d9737096f8e8763169293452a4e21ab11da",
+  "technocore_action_writes_observed": 8,
+  "verified_readbacks": 6
+}

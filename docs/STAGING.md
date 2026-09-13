@@ -21,10 +21,17 @@ reports `writes_performed=0` (canonical state/network writes).
 
 ## Write staging
 
-Write staging is a library boundary until a site supplies an explicit manifest,
-an allowlist, distinct `staging-*` mailbox/events rooms, and a matching external
+Write staging requires an explicit manifest, an allowlist, distinct
+`mb-p-staging-flop-empires-*` mailbox/events rooms, and a matching external
 signer. Receipt publication is an idempotent outbox workflow. A network publish
 is not `PUBLISHED` until readback verifies. Exact network delivery is not assumed.
+
+The low-volume live smoke is gated by `--confirm-live-write`:
+
+```console
+flop-empires staging write-smoke runtime/technocore-staging-write.db \
+  --manifest season/staging-live.json --confirm-live-write
+```
 
 No production namespace, DID, mailbox, or signer is selected automatically.
 
@@ -34,7 +41,9 @@ one-time and refuses replacement. `season/staging-live.json` contains only the
 public DIDs and a canonical manifest hash.
 
 The concrete `TechnocoreTransport` implements the detected current room JSON
-protocol (`GET/POST /r/{room}`, generation/sequence cursor, and Ed25519 over
-exact `room|nonce|text`). Publishing first searches for a semantically identical
+protocol (`GET/POST /r/{room}`, 48-character room bound, generation/sequence
+cursor, standard Ed25519 `did:key:z6Mk...`, unpadded base64url signatures, and
+signing over exact `room|nonce|text`). Publishing first searches for a semantically identical
 verified readback, retries only bounded transient failures, posts a canonical
-receipt envelope, and requires cryptographically verified readback.
+receipt envelope, and requires cryptographically verified readback. An ambiguous
+delivery is reconciled by readback before retry so a landed nonce is not reposted.

@@ -10,6 +10,7 @@ from .observability import health_summary
 from .economics_v02 import EconomicRulesV02, economic_leaderboard
 from .simulator import simulate
 from .staging import ReadOnlyObserver
+from .live_staging import run_live_crash_a, run_live_write_smoke, write_report
 from .store import Store
 from .technocore import TechnocoreHttpMailbox
 
@@ -36,6 +37,15 @@ def main(argv: list[str] | None = None) -> int:
     observe = staging_sub.add_parser("observe", help="read and classify without game-state writes")
     observe.add_argument("database", type=Path)
     observe.add_argument("--mailbox", required=True)
+    write_smoke = staging_sub.add_parser("write-smoke", help="explicit low-volume signed live staging E2E")
+    write_smoke.add_argument("database", type=Path)
+    write_smoke.add_argument("--manifest", type=Path, required=True)
+    write_smoke.add_argument("--confirm-live-write", action="store_true")
+    write_smoke.add_argument("--report-prefix", type=Path, default=Path("reports/technocore-write-e2e"))
+    crash_a = staging_sub.add_parser("crash-a-smoke", help="exercise DB-commit-before-publish recovery")
+    crash_a.add_argument("database", type=Path)
+    crash_a.add_argument("--manifest", type=Path, required=True)
+    crash_a.add_argument("--confirm-live-write", action="store_true")
     args = parser.parse_args(argv)
     if args.command == "init":
         if not args.referee_did.startswith("did:key:"):
@@ -60,6 +70,17 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(health_summary(store, mode=args.mode), indent=2, sort_keys=True))
         return 0
     if args.command == "staging":
+        if args.staging_command == "crash-a-smoke":
+            print(json.dumps(run_live_crash_a(args.manifest,args.database,
+                confirm_live_write=args.confirm_live_write),indent=2,sort_keys=True))
+            return 0
+        if args.staging_command == "write-smoke":
+            result = run_live_write_smoke(args.manifest, args.database,
+                confirm_live_write=args.confirm_live_write)
+            write_report(result, args.report_prefix.with_suffix(".json"),
+                         args.report_prefix.with_suffix(".md"))
+            print(json.dumps(result, indent=2, sort_keys=True))
+            return 0
         store = Store(args.database)
         with httpx.Client(headers={"User-Agent": "flop-empires/0.1 staging-read-only"}) as client:
             source = TechnocoreHttpMailbox(client, args.mailbox)

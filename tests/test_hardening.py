@@ -224,9 +224,9 @@ def test_event_and_receipt_tampering_detected():
 
 
 @pytest.mark.parametrize("season,mailbox,events", [
-    ("prod", "staging-in", "staging-out"),
-    ("staging-x", "prod", "staging-out"),
-    ("staging-x", "staging-same", "staging-same"),
+    ("prod", "mb-p-staging-flop-empires-in", "mb-p-staging-flop-empires-out"),
+    ("staging-x", "prod", "mb-p-staging-flop-empires-out"),
+    ("staging-x", "mb-p-staging-flop-empires-same", "mb-p-staging-flop-empires-same"),
 ])
 def test_staging_manifest_namespace_guards(season, mailbox, events):
     did = EphemeralSigner(b"x"*32).did

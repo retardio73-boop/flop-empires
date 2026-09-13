@@ -3,7 +3,7 @@ import json
 import pytest
 
 from flop_empires.canonical import CanonicalError, dumps, loads
-from flop_empires.identity import EphemeralSigner, verify
+from flop_empires.identity import EphemeralSigner, did_from_verify_key, verify
 from flop_empires.protocol import parse_command
 
 
@@ -22,3 +22,13 @@ def test_ed25519_roundtrip():
     assert verify(signer.did, b"hello", sig)
     assert not verify(signer.did, b"other", sig)
     assert signer.did.startswith("did:key:z6Mk") and len(signer.did) == 56
+    assert len(sig) == 86 and "=" not in sig
+
+
+def test_historical_padded_standard_base64_signature_still_verifies():
+    import base64
+    from nacl.signing import SigningKey
+    key = SigningKey(b"l" * 32)
+    did = did_from_verify_key(bytes(key.verify_key))
+    signature = base64.b64encode(key.sign(b"legacy").signature).decode()
+    assert verify(did, b"legacy", signature)

@@ -54,8 +54,9 @@ class StagingManifest:
     def validate(self) -> None:
         if self.environment != "staging" or not self.season_id.startswith("staging-"):
             raise ValueError("staging season namespace must start with staging-")
-        if not self.mailbox.startswith("staging-") or not self.events_room.startswith("staging-"):
-            raise ValueError("staging rooms require staging- namespace")
+        prefix = "mb-p-staging-flop-empires-"
+        if not self.mailbox.startswith(prefix) or not self.events_room.startswith(prefix):
+            raise ValueError("staging rooms require signed, unlisted FLOP Empires namespace")
         if self.mailbox == self.events_room:
             raise ValueError("mailbox and events room must differ")
         if not self.referee_did.startswith("did:key:"):

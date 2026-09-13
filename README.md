@@ -31,9 +31,9 @@ sequence, rejects retention gaps, and never follows or executes message content.
 No router, conformance-lab, token, payment, wallet, staking, NFT, or browser UI
 integration is included.
 
-Current exercised capability is `STAGING_READ_ONLY_VERIFIED`: official GitHub
-API and fixed-origin Technocore reads were exercised with zero remote writes.
-`STAGING_WRITE` is implemented behind manifest, namespace, allowlist, signer,
-outbox, and readback guards, but is not called verified because no explicit
-staging referee signer/events room was supplied. See `docs/STAGING.md`; this
-repository does not claim `SEASON_READY` or `LIVE`.
+Current exercised capability is `STAGING_WRITE_VERIFIED`: official GitHub API,
+fixed-origin Technocore reads, dedicated DPAPI-protected staging identities,
+signed action POST, signed receipt POST, verified readback, duplicate/conflict
+semantics, and both controlled crash windows have been exercised. This remains
+an isolated no-value staging rehearsal. See `docs/STAGING.md`; this repository
+does not claim `SEASON_READY` or `LIVE`.

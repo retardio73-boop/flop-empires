@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import re
+import time
+import unicodedata
 from dataclasses import asdict, dataclass
 from typing import Protocol
 
@@ -42,7 +44,7 @@ def verify_signed_record(record: SignedRecord) -> bool:
 class TechnocoreHttpMailbox:
     """Bounded, read-only adapter for the fixed Technocore room JSON endpoint."""
     ORIGIN = "https://technocore.chat"
-    ROOM = re.compile(r"^[a-z0-9][a-z0-9_-]{0,63}$")
+    ROOM = re.compile(r"^[a-z0-9][a-z0-9_-]{0,47}$")
 
     def __init__(self, client: httpx.Client, room: str, *, limit: int = 200):
         if not self.ROOM.fullmatch(room) or not 1 <= limit <= 200:
@@ -97,7 +99,9 @@ class TechnocoreHttpMailbox:
     def records_after(self, cursor: str) -> list[MailboxItem]:
         generation, seq = self._parse_cursor(cursor)
         value = self._read(seq)
-        if value["generation"] != generation:
+        if generation == 0 and seq == 0 and value["generation"] == 1:
+            generation = 1  # Empty, never-created room acquired its first durable generation.
+        elif value["generation"] != generation:
             raise RuleViolation("Technocore generation changed; explicit audit/bootstrap required")
         messages = sorted(value["messages"], key=lambda x: x.get("seq", -1) if isinstance(x, dict) else -1)
         items: list[MailboxItem] = []
@@ -168,11 +172,20 @@ class TechnocoreTransport(TechnocoreHttpMailbox):
 
     def _find_readback(self, did: str, text: str) -> tuple[str, bool] | None:
         value = self._read(0)
-        for message in value["messages"]:
+        for message in reversed(value["messages"]):
             if isinstance(message, dict) and self._valid_readback(self.room, message, did, text):
                 seq = message.get("seq")
                 if isinstance(seq, int) and not isinstance(seq, bool) and seq >= 1:
                     return f"{self.room}/{value['generation']}/{seq}", True
+        return None
+
+    def _wait_readback(self, did: str, text: str, *, attempts: int = 20) -> tuple[str, bool] | None:
+        for attempt in range(attempts):
+            found = self._find_readback(did, text)
+            if found:
+                return found
+            if attempt < attempts - 1:
+                time.sleep(0.5)
         return None
 
     def publish_and_verify(self, receipt_hash: str, canonical_receipt: str) -> tuple[str, bool]:
@@ -185,9 +198,14 @@ class TechnocoreTransport(TechnocoreHttpMailbox):
         value = loads(canonical_text)
         if not isinstance(value, dict) or dumps(value) != canonical_text or sha256(value) != content_hash:
             raise ValueError("content must be canonical and match content hash")
+        swept = "".join(" " if unicodedata.category(char) in
+            {"Cc", "Cf", "Cs", "Co", "Zl", "Zp"} else char for char in canonical_text).strip()
+        if len(canonical_text) > 4096 or swept != canonical_text:
+            raise ValueError("content cannot survive Technocore's bounded single-line transport")
         existing = self._find_readback(self.signer.did, canonical_text)
         if semantic_dedupe and existing:
             return existing
+        prior_ref = existing[0] if existing else None
         envelope = self.signer.sign_room(self.room, canonical_text)
         if (not isinstance(envelope, RoomEnvelope) or envelope.did != self.signer.did or
                 envelope.text != canonical_text or not envelope.nonce or
@@ -200,6 +218,9 @@ class TechnocoreTransport(TechnocoreHttpMailbox):
                     "sig":envelope.signature,"nonce":envelope.nonce,"text":envelope.text},
                     follow_redirects=False, timeout=10.0)
                 if 300 <= response.status_code < 500:
+                    found = self._wait_readback(envelope.did, canonical_text)
+                    if found and (semantic_dedupe or found[0] != prior_ref):
+                        return found
                     response.raise_for_status()
                 if response.status_code >= 500:
                     raise httpx.HTTPStatusError("transient Technocore failure", request=response.request,
@@ -208,17 +229,24 @@ class TechnocoreTransport(TechnocoreHttpMailbox):
             except (httpx.TimeoutException, httpx.TransportError, httpx.HTTPStatusError) as exc:
                 if isinstance(exc, httpx.HTTPStatusError) and exc.response.status_code < 500:
                     raise
+                found = self._wait_readback(envelope.did, canonical_text)
+                if found and (semantic_dedupe or found[0] != prior_ref):
+                    return found
                 if attempt == self.retries:
                     raise
-        found = self._find_readback(envelope.did, canonical_text)
-        if not found:
-            return "", False
-        return found
+        for _ in range(20):
+            found = self._find_readback(envelope.did, canonical_text)
+            if found and (semantic_dedupe or found[0] != prior_ref):
+                return found
+            time.sleep(0.5)
+        return "", False
 
 
 class TechnocoreIngestor:
-    def __init__(self, store: Store, engine: Engine, mailbox: str):
+    def __init__(self, store: Store, engine: Engine, mailbox: str,
+                 allowed_dids: tuple[str, ...] | None = None):
         self.store, self.engine, self.mailbox = store, engine, mailbox
+        self.allowed_dids = frozenset(allowed_dids) if allowed_dids is not None else None
 
     def bootstrap(self, current_cursor: str, *, replay: bool = False) -> str:
         row = self.store.one("SELECT cursor FROM technocore_state WHERE mailbox=?", (self.mailbox,))
@@ -234,6 +262,8 @@ class TechnocoreIngestor:
             return Receipt(**json.loads(old[0]))
         if not verify_signed_record(record):
             raise RuleViolation("Technocore signed-record verification failed")
+        if self.allowed_dids is not None and record.signer_did not in self.allowed_dids:
+            raise RuleViolation("Technocore signer is not allowlisted for staging")
         if record.raw_text is not None:
             try:
                 if loads(record.raw_text) != record.payload or record.raw_text != dumps(record.payload):

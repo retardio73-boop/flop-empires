@@ -14,7 +14,8 @@
 - A referee compromise remains a trusted-computing-base failure. Receipts and the
   event chain make it detectable but cannot prevent a valid stolen-key signature.
 - Signer outage, mismatch, timeout, or invalid returned signature fails closed.
-- Network partitions retain the last durable cursor and pending receipt outbox.
+- Network partitions retain the last durable cursor and pending receipt outbox;
+  ambiguous delivery is checked by signed readback before any retry.
 - Cursor generation changes or gaps require explicit audit/bootstrap.
 - SQLite tampering is detected by integrity checks, state hashes, receipt signatures,
   and the event hash chain; operators must retain independent receipt copies.

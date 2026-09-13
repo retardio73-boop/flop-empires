@@ -126,7 +126,7 @@ class WindowsDpapiSigner:
 
     def sign(self, message: bytes) -> str:
         seed=self._seed()
-        try: signature=base64.b64encode(SigningKey(bytes(seed)).sign(message).signature).decode()
+        try: signature=base64.urlsafe_b64encode(SigningKey(bytes(seed)).sign(message).signature).decode().rstrip("=")
         finally: seed[:]=b"\x00"*len(seed)
         if not verify(self._did,message,signature): raise SecureSignerError("LOCAL_SIGNATURE_VERIFICATION_FAILED")
         return signature
