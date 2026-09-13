@@ -11,6 +11,7 @@ from .economics_v02 import EconomicRulesV02, economic_leaderboard
 from .simulator import simulate
 from .staging import ReadOnlyObserver
 from .live_staging import run_live_crash_a, run_live_write_smoke, write_report
+from .season_minus_one import run_season_minus_one, write_season_report
 from .store import Store
 from .technocore import TechnocoreHttpMailbox
 
@@ -46,6 +47,11 @@ def main(argv: list[str] | None = None) -> int:
     crash_a.add_argument("database", type=Path)
     crash_a.add_argument("--manifest", type=Path, required=True)
     crash_a.add_argument("--confirm-live-write", action="store_true")
+    rehearsal = staging_sub.add_parser("season-minus-one", help="run deterministic private Season -1")
+    rehearsal.add_argument("database",type=Path)
+    rehearsal.add_argument("--manifest",type=Path,required=True)
+    rehearsal.add_argument("--confirm-live-write",action="store_true")
+    rehearsal.add_argument("--report-prefix",type=Path,default=Path("reports/season-minus-one"))
     args = parser.parse_args(argv)
     if args.command == "init":
         if not args.referee_did.startswith("did:key:"):
@@ -70,6 +76,12 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(health_summary(store, mode=args.mode), indent=2, sort_keys=True))
         return 0
     if args.command == "staging":
+        if args.staging_command == "season-minus-one":
+            result=run_season_minus_one(args.manifest,args.database,
+                confirm_live_write=args.confirm_live_write)
+            write_season_report(result,args.report_prefix.with_suffix(".json"),
+                args.report_prefix.with_suffix(".md"))
+            print(json.dumps(result,indent=2,sort_keys=True)); return 0
         if args.staging_command == "crash-a-smoke":
             print(json.dumps(run_live_crash_a(args.manifest,args.database,
                 confirm_live_write=args.confirm_live_write),indent=2,sort_keys=True))

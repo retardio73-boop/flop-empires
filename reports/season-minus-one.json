@@ -1,0 +1,118 @@
+{
+  "actor_count": 4,
+  "actors": [
+    "did:key:z6MkoABpefAfqTe2YQT1JnVRREzzsRLdH9bBCEEYzfP5gonj",
+    "did:key:z6MkftyNv5UjqPHbsK8bLnbxspaWfG3mGSoR294YRA5XDz5u",
+    "did:key:z6MkuCEkyhfbrfqHCazXy7sFpJEKEHYD2YsiWYzvQ5zXhw8N",
+    "did:key:z6Mkfc8AXJFDhWgeJBn831yvuxmDxJd8DkaS2AVyGUC1JtCp"
+  ],
+  "all_receipt_signatures_verified": true,
+  "alliances": [
+    {
+      "active": 1,
+      "created_event_seq": 27,
+      "id": "s1-a12"
+    },
+    {
+      "active": 1,
+      "created_event_seq": 28,
+      "id": "s1-a23"
+    }
+  ],
+  "combat_results": [
+    {
+      "id": "s1-raid-1",
+      "kind": "RAID",
+      "success": 1
+    },
+    {
+      "id": "s1-raid-2",
+      "kind": "RAID",
+      "success": 1
+    },
+    {
+      "id": "s1-raid-3",
+      "kind": "RAID",
+      "success": 1
+    },
+    {
+      "id": "s1-raid-4",
+      "kind": "RAID",
+      "success": 0
+    },
+    {
+      "id": "s1-raid-5",
+      "kind": "RAID",
+      "success": 1
+    },
+    {
+      "id": "s1-raid-6",
+      "kind": "RAID",
+      "success": 1
+    },
+    {
+      "id": "s1-raid-7",
+      "kind": "RAID",
+      "success": 1
+    },
+    {
+      "id": "s1-raid-8",
+      "kind": "RAID",
+      "success": 1
+    },
+    {
+      "id": "s1-siege-1",
+      "kind": "SIEGE",
+      "success": 1
+    },
+    {
+      "id": "s1-siege-2",
+      "kind": "SIEGE",
+      "success": 1
+    },
+    {
+      "id": "s1-siege-3",
+      "kind": "SIEGE",
+      "success": 1
+    }
+  ],
+  "commands_accepted": 53,
+  "commands_rejected": 2,
+  "completed_at": 1789262410,
+  "conflicts": 1,
+  "cursor_after_restart": "{\"generation\":1,\"seq\":56}",
+  "cursor_before_restart": "{\"generation\":1,\"seq\":56}",
+  "cursor_restarts": 1,
+  "db_restarts": 1,
+  "duplicates": 1,
+  "event_chain_verification": true,
+  "manifest_hash": "4f8367bd731812fe716fa28e90b5d08c7c15961a23b05625d23eb95528faca26",
+  "no_economic_value": true,
+  "rate_policy": "fixed deterministic 56-command plan; deliberately below load-test volume",
+  "receipts": 55,
+  "resources": [
+    {
+      "available": 165,
+      "empire_id": "s1-e1",
+      "locked": 0
+    },
+    {
+      "available": 172,
+      "empire_id": "s1-e2",
+      "locked": 0
+    },
+    {
+      "available": 173,
+      "empire_id": "s1-e3",
+      "locked": 0
+    }
+  ],
+  "restart_replayed_commands": 0,
+  "season_id": "staging-season-minus-one-9442-s1",
+  "secrets_in_report": false,
+  "semantic_commands": 56,
+  "signature_failures": 0,
+  "state_final_hash": "a8df5fa5e1fc8b4ffdc5d3cb1c3dd1bc6fafef60b6e1bf5becc0d661dbb7e363",
+  "technocore_action_writes": 56,
+  "verified_readbacks": 55
+}

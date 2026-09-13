@@ -22,3 +22,9 @@ def test_dpapi_signer_wrong_expected_did_fails_closed(tmp_path):
     enroll("player",tmp_path)
     with pytest.raises(SecureSignerError,match="IDENTITY_MISMATCH"):
         WindowsDpapiSigner("player","did:key:not-the-enrolled-key",tmp_path)
+
+
+def test_season_one_actor_roles_are_explicit_and_bounded():
+    from flop_empires.windows_signer import ROLES
+    assert "season1-player-1" in ROLES and "season1-player-8" in ROLES
+    assert "season1-player-9" not in ROLES

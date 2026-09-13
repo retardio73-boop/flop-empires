@@ -35,6 +35,12 @@ flop-empires staging write-smoke runtime/technocore-staging-write.db \
 
 No production namespace, DID, mailbox, or signer is selected automatically.
 
+The private Season -1 rehearsal uses a separate hashed manifest and separate
+signed/unlisted rooms. Its deterministic rule-based plan is deliberately capped
+at 56 action records because the goal is end-to-end correctness, not load testing.
+It exercises four actors, shared empire membership, alliances, fortification,
+recon, raid, siege, replay/conflict behavior, and DB/cursor restart.
+
 The dedicated Season -1 identities are stored outside Git under Windows DPAPI
 CurrentUser in `%LOCALAPPDATA%\FLOPEmpires\staging-identities-v1`. Enrollment is
 one-time and refuses replacement. `season/staging-live.json` contains only the

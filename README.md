@@ -34,6 +34,6 @@ integration is included.
 Current exercised capability is `STAGING_WRITE_VERIFIED`: official GitHub API,
 fixed-origin Technocore reads, dedicated DPAPI-protected staging identities,
 signed action POST, signed receipt POST, verified readback, duplicate/conflict
-semantics, and both controlled crash windows have been exercised. This remains
-an isolated no-value staging rehearsal. See `docs/STAGING.md`; this repository
-does not claim `SEASON_READY` or `LIVE`.
+semantics, both controlled crash windows, and a four-actor private Season -1
+have been exercised. This remains an isolated no-value staging rehearsal. See
+`docs/STAGING.md`; this repository does not claim `SEASON_READY` or `LIVE`.

@@ -19,7 +19,7 @@ from .technocore import RoomEnvelope
 MAGIC = b"FLOP-EMPIRES-DPAPI-V1\x00"
 ENTROPY = b"FLOPEmpires/StagingSigner/DPAPI/v1"
 UI_FORBIDDEN = 0x1
-ROLES = {"referee", "player"}
+ROLES = {"referee", "player", *(f"season1-player-{number}" for number in range(1, 9))}
 
 
 class SecureSignerError(RuntimeError):
