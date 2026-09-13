@@ -38,7 +38,9 @@ def test_idempotency_hashes_receipts_and_membership_freeze(game):
     assert store.one("SELECT available FROM balances WHERE empire_id='a'")[0] == 100
     assert verify_receipt(first) and verify_chain(store)
     assert first.state_before_hash != first.state_after_hash
-    with pytest.raises(RuleViolation): engine.execute(command(referee.did, "mint", "mint_resources", empire_id="a", amount=101))
+    conflict = engine.execute(command(referee.did, "mint", "mint_resources", empire_id="a", amount=101))
+    assert not conflict.accepted and conflict.details["error"] == "REQUEST_ID_CONFLICT"
+    assert conflict.state_before_hash == conflict.state_after_hash
     engine.execute(command(referee.did, "active", "activate_season"))
     rejected = engine.execute(command(alice.did, "late", "join_empire", empire_id="b"))
     assert not rejected.accepted and rejected.state_before_hash == rejected.state_after_hash

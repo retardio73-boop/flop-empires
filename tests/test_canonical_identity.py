@@ -21,3 +21,4 @@ def test_ed25519_roundtrip():
     sig = signer.sign(b"hello")
     assert verify(signer.did, b"hello", sig)
     assert not verify(signer.did, b"other", sig)
+    assert signer.did.startswith("did:key:z6Mk") and len(signer.did) == 56

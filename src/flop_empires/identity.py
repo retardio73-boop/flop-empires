@@ -7,6 +7,25 @@ from typing import Protocol, runtime_checkable
 from nacl.exceptions import BadSignatureError
 from nacl.signing import SigningKey, VerifyKey
 
+BASE58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+
+
+def _b58encode(data: bytes) -> str:
+    zeroes = len(data) - len(data.lstrip(b"\0")); number = int.from_bytes(data, "big")
+    out = ""
+    while number:
+        number, remainder = divmod(number, 58); out = BASE58[remainder] + out
+    return "1" * zeroes + (out or ("" if zeroes else "1"))
+
+
+def _b58decode(text: str) -> bytes:
+    if not text or any(c not in BASE58 for c in text):
+        raise ValueError("invalid base58btc")
+    number = 0
+    for char in text: number = number * 58 + BASE58.index(char)
+    body = number.to_bytes((number.bit_length()+7)//8, "big") if number else b""
+    return b"\0" * (len(text)-len(text.lstrip("1"))) + body
+
 
 @runtime_checkable
 class Signer(Protocol):
@@ -16,6 +35,12 @@ class Signer(Protocol):
 
 
 def did_from_verify_key(key: bytes) -> str:
+    if len(key) != 32:
+        raise ValueError("Ed25519 verify key must be 32 bytes")
+    return "did:key:z" + _b58encode(b"\xed\x01" + key)
+
+
+def legacy_did_from_verify_key(key: bytes) -> str:
     return "did:key:" + base64.urlsafe_b64encode(key).decode().rstrip("=")
 
 
@@ -24,6 +49,11 @@ def verify_key_from_did(did: str) -> VerifyKey:
         raise ValueError("unsupported DID")
     raw = did[8:]
     try:
+        if raw.startswith("z"):
+            decoded = _b58decode(raw[1:])
+            if not decoded.startswith(b"\xed\x01") or len(decoded) != 34:
+                raise ValueError("unsupported did:key multicodec")
+            return VerifyKey(decoded[2:])
         return VerifyKey(base64.urlsafe_b64decode(raw + "=" * (-len(raw) % 4)))
     except Exception as exc:
         raise ValueError("invalid did:key") from exc

@@ -13,7 +13,7 @@ from pathlib import Path
 
 from nacl.signing import SigningKey
 
-from .identity import did_from_verify_key, verify
+from .identity import did_from_verify_key, legacy_did_from_verify_key, verify
 from .technocore import RoomEnvelope
 
 MAGIC = b"FLOP-EMPIRES-DPAPI-V1\x00"
@@ -152,9 +152,27 @@ def public_status(role: str, directory: Path | None = None) -> dict:
         return {"role":role,"available":False,"secret_exposed":False}
 
 
+def migrate_public_did_encoding(role: str, directory: Path | None = None) -> dict:
+    """One-time representation repair; preserves the exact enrolled private seed."""
+    directory=directory or default_directory(); public_path=directory/f"{role}.public.json"
+    current=json.loads(public_path.read_text(encoding="utf-8")); credential=directory/f"{role}.dpapi"
+    encoded=credential.read_bytes()
+    if not encoded.startswith(MAGIC): raise SecureSignerError("SECURE_CREDENTIAL_CORRUPT")
+    seed=bytearray(_dpapi(False,encoded[len(MAGIC):]))
+    try:
+        verify_key=bytes(SigningKey(bytes(seed)).verify_key)
+        legacy,standard=legacy_did_from_verify_key(verify_key),did_from_verify_key(verify_key)
+    finally: seed[:]=b"\x00"*len(seed)
+    if current.get("did") not in {legacy,standard}:
+        raise SecureSignerError("SECURE_CREDENTIAL_IDENTITY_MISMATCH")
+    value={"role":role,"did":standard,"provider":"windows_dpapi_current_user"}
+    public_path.write_text(json.dumps(value,sort_keys=True,separators=(",",":")),encoding="utf-8")
+    return {**value,"private_material_replaced":False}
+
+
 def main(argv=None) -> int:
-    p=argparse.ArgumentParser(); p.add_argument("command",choices=("enroll","status")); p.add_argument("--role",choices=sorted(ROLES),required=True); a=p.parse_args(argv)
-    result=enroll(a.role) if a.command=="enroll" else public_status(a.role)
+    p=argparse.ArgumentParser(); p.add_argument("command",choices=("enroll","status","migrate-did-encoding")); p.add_argument("--role",choices=sorted(ROLES),required=True); a=p.parse_args(argv)
+    result=enroll(a.role) if a.command=="enroll" else migrate_public_did_encoding(a.role) if a.command=="migrate-did-encoding" else public_status(a.role)
     print(json.dumps(result,sort_keys=True)); return 0
 
 

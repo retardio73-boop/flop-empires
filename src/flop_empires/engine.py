@@ -46,7 +46,25 @@ class Engine:
             prior = self.store.one("SELECT command_hash,receipt_json FROM requests WHERE actor_did=? AND request_id=?", (command.actor_did, command.request_id))
             if prior:
                 if prior["command_hash"] != command_hash:
-                    raise RuleViolation("request_id reused with different command")
+                    conflict = self.store.one("SELECT receipt_json FROM request_conflicts WHERE actor_did=? AND request_id=? AND command_hash=?",
+                        (command.actor_did, command.request_id, command_hash))
+                    if conflict:
+                        return Receipt(**json.loads(conflict[0]))
+                    accepted_at = int(self.clock()); before = self.store.state_hash()
+                    details = {"error":"REQUEST_ID_CONFLICT","original_command_hash":prior["command_hash"],
+                               "conflicting_command_hash":command_hash}
+                    seq,event_hash = append_event(self.store,event_type="REQUEST_ID_CONFLICT",
+                        actor_did=command.actor_did,request_id=command.request_id,
+                        accepted_at=accepted_at,accepted=False,command_hash=command_hash,
+                        before=before,after=before,details=details)
+                    receipt=issue_receipt(self.signer,{"referee_did":self.signer.did,
+                        "request_id":command.request_id,"actor_did":command.actor_did,
+                        "accepted":False,"accepted_at":accepted_at,"event_seq":seq,
+                        "state_before_hash":before,"state_after_hash":before,
+                        "details":{**details,"event_hash":event_hash}})
+                    self.store.conn.execute("INSERT INTO request_conflicts VALUES(?,?,?,?)",
+                        (command.actor_did,command.request_id,command_hash,dumps(asdict(receipt))))
+                    return receipt
                 return Receipt(**json.loads(prior["receipt_json"]))
             accepted_at = int(self.clock())
             before = self.store.state_hash()

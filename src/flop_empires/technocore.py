@@ -176,17 +176,21 @@ class TechnocoreTransport(TechnocoreHttpMailbox):
         return None
 
     def publish_and_verify(self, receipt_hash: str, canonical_receipt: str) -> tuple[str, bool]:
+        return self.post_canonical(receipt_hash, canonical_receipt, semantic_dedupe=True)
+
+    def post_canonical(self, content_hash: str, canonical_text: str,
+                       *, semantic_dedupe: bool = True) -> tuple[str, bool]:
         if self.signer is None:
             raise RuntimeError("Technocore write disabled: no room signer")
-        value = loads(canonical_receipt)
-        if not isinstance(value, dict) or dumps(value) != canonical_receipt or sha256(value) != receipt_hash:
-            raise ValueError("receipt must be canonical and match receipt hash")
-        existing = self._find_readback(self.signer.did, canonical_receipt)
-        if existing:
+        value = loads(canonical_text)
+        if not isinstance(value, dict) or dumps(value) != canonical_text or sha256(value) != content_hash:
+            raise ValueError("content must be canonical and match content hash")
+        existing = self._find_readback(self.signer.did, canonical_text)
+        if semantic_dedupe and existing:
             return existing
-        envelope = self.signer.sign_room(self.room, canonical_receipt)
+        envelope = self.signer.sign_room(self.room, canonical_text)
         if (not isinstance(envelope, RoomEnvelope) or envelope.did != self.signer.did or
-                envelope.text != canonical_receipt or not envelope.nonce or
+                envelope.text != canonical_text or not envelope.nonce or
                 not verify(envelope.did, f"{self.room}|{envelope.nonce}|{envelope.text}".encode("utf-8"),
                            envelope.signature)):
             raise RuntimeError("invalid Technocore signed envelope")
@@ -206,7 +210,7 @@ class TechnocoreTransport(TechnocoreHttpMailbox):
                     raise
                 if attempt == self.retries:
                     raise
-        found = self._find_readback(envelope.did, canonical_receipt)
+        found = self._find_readback(envelope.did, canonical_text)
         if not found:
             return "", False
         return found

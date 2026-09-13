@@ -125,7 +125,8 @@ class ReceiptOutbox:
 
     def recover(self) -> int:
         inserted = 0
-        for row in self.store.conn.execute("SELECT actor_did,request_id,receipt_json FROM requests ORDER BY actor_did,request_id"):
+        rows = self.store.conn.execute("SELECT actor_did,request_id,receipt_json FROM requests UNION ALL SELECT actor_did,request_id,receipt_json FROM request_conflicts ORDER BY actor_did,request_id")
+        for row in rows:
             digest = sha256(loads(row["receipt_json"]))
             cur = self.store.conn.execute("INSERT OR IGNORE INTO receipt_outbox(receipt_hash,actor_did,request_id,receipt_json,status) VALUES(?,?,?,?, 'PENDING')",
                 (digest, row["actor_did"], row["request_id"], row["receipt_json"]))

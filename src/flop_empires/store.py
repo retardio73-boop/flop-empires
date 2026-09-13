@@ -71,6 +71,30 @@ CREATE TABLE IF NOT EXISTS attack_defenses(
   submitted_at INTEGER NOT NULL,
   PRIMARY KEY(attack_id,empire_id)
 );
+""",
+"""
+CREATE TABLE IF NOT EXISTS request_conflicts(
+  actor_did TEXT NOT NULL,
+  request_id TEXT NOT NULL,
+  command_hash TEXT NOT NULL,
+  receipt_json TEXT NOT NULL,
+  PRIMARY KEY(actor_did,request_id,command_hash)
+);
+""",
+"""
+CREATE TABLE receipt_outbox_v2(
+  receipt_hash TEXT PRIMARY KEY,
+  actor_did TEXT NOT NULL,
+  request_id TEXT NOT NULL,
+  receipt_json TEXT NOT NULL,
+  status TEXT NOT NULL CHECK(status IN('PENDING','PUBLISHED')),
+  publish_ref TEXT,
+  readback_verified INTEGER NOT NULL DEFAULT 0 CHECK(readback_verified IN(0,1)),
+  attempts INTEGER NOT NULL DEFAULT 0
+);
+INSERT INTO receipt_outbox_v2 SELECT receipt_hash,actor_did,request_id,receipt_json,status,publish_ref,readback_verified,attempts FROM receipt_outbox;
+DROP TABLE receipt_outbox;
+ALTER TABLE receipt_outbox_v2 RENAME TO receipt_outbox;
 """
 ]
 
