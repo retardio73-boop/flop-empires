@@ -10,9 +10,10 @@ from flop_empires.identity import EphemeralSigner
 from flop_empires.models import SignedRecord
 from flop_empires.simulator import simulate
 from flop_empires.store import Store
-from flop_empires.canonical import dumps
+from flop_empires.canonical import dumps, sha256
 from flop_empires.technocore import (MailboxItem, TechnocoreHttpMailbox,
-    TechnocoreIngestor, signed_record_body, verify_signed_record)
+    RoomEnvelope, TechnocoreIngestor, TechnocoreTransport, signed_record_body,
+    verify_signed_record)
 
 
 def test_signed_mailbox_bootstrap_verification_and_duplicates():
@@ -81,6 +82,38 @@ def test_http_mailbox_rejects_generation_change():
     mailbox = TechnocoreHttpMailbox(client, "empire-room")
     with pytest.raises(RuleViolation, match="generation changed"):
         mailbox.records_after(dumps({"generation": 3, "seq": 5}))
+
+
+def test_concrete_transport_publish_readback_and_semantic_dedupe():
+    key = EphemeralSigner(b"p" * 32)
+    messages, posts = [], [0]
+    class RoomSigner:
+        did = key.did
+        def sign_room(self, room, text):
+            nonce = "77"
+            return RoomEnvelope(self.did, nonce, key.sign(f"{room}|{nonce}|{text}".encode()), text)
+    def handler(request):
+        if request.method == "POST":
+            posts[0] += 1
+            body = __import__("json").loads(request.content)
+            messages.append({"seq":1,"ts":"now","from":body["did"],"nonce":body["nonce"],
+                             "sig":body["sig"],"text":body["text"]})
+            return httpx.Response(200, json={"ok":True}, request=request)
+        return httpx.Response(200, json={"generation":1,"messages":messages}, request=request)
+    transport = TechnocoreTransport(httpx.Client(transport=httpx.MockTransport(handler)),
+                                    "staging-events", signer=RoomSigner())
+    body = dumps({"receipt":"safe"}); digest = sha256({"receipt":"safe"})
+    assert transport.publish_and_verify(digest, body) == ("staging-events/1/1", True)
+    assert transport.publish_and_verify(digest, body) == ("staging-events/1/1", True)
+    assert posts[0] == 1
+
+
+def test_concrete_transport_write_disabled_without_signer():
+    client = httpx.Client(transport=httpx.MockTransport(
+        lambda request: httpx.Response(200, json={"generation":1,"messages":[]}, request=request)))
+    transport = TechnocoreTransport(client, "staging-events")
+    with pytest.raises(RuntimeError, match="write disabled"):
+        transport.publish_and_verify(sha256({"x":1}), dumps({"x":1}))
 
 
 def test_100k_deterministic_simulation():

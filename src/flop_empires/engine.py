@@ -17,7 +17,8 @@ from .models import Command, Receipt, SeasonStatus
 from .protocol import parse_command
 from .receipts import issue_receipt
 from .store import Store
-from .technical_yield import BASE_UNITS, LIFETIME_SECONDS, empire_yield
+from .technical_yield import (BASE_UNITS, EPOCH_SECONDS, LIFETIME_SECONDS,
+    empire_yield, epoch_yield)
 from .world import add_edge, adjacent
 
 
@@ -147,6 +148,8 @@ class Engine:
         if self._status() != SeasonStatus.REGISTRATION:
             raise RuleViolation("season cannot be activated")
         self.store.conn.execute("UPDATE config SET value=? WHERE key='season_status'", (SeasonStatus.ACTIVE,))
+        self.store.conn.execute("INSERT OR REPLACE INTO config(key,value) VALUES('season_started_at',?)",
+            (str(now),))
         return {"status": SeasonStatus.ACTIVE}
 
     def _do_bind_github(self, did: str, p: dict[str, Any], now: int) -> dict[str, Any]:
@@ -192,9 +195,15 @@ class Engine:
 
     def _do_claim_yield(self, did: str, p: dict[str, Any], now: int) -> dict[str, Any]:
         empire = self._empire(did)
-        amount = empire_yield(self.store, empire, now)
-        # Claims are deliberately snapshots for alpha; each cluster can be claimed once.
-        key = f"yield_claimed:{empire}"
+        started = self.store.one("SELECT value FROM config WHERE key='season_started_at'")
+        if not started or now < int(started[0]) or (now - int(started[0])) % EPOCH_SECONDS:
+            raise RuleViolation("yield can be claimed only at a valid epoch boundary")
+        rows = [dict(r) for r in self.store.conn.execute(
+            "SELECT id,actor_did,base_units,verified_at,self_owned FROM contribution_clusters WHERE empire_id=?",
+            (empire,))]
+        amount = epoch_yield(rows, now, int(started[0]))
+        epoch = (now - int(started[0])) // EPOCH_SECONDS
+        key = f"yield_claimed:{empire}:{epoch}"
         if self.store.one("SELECT 1 FROM config WHERE key=?", (key,)):
             raise RuleViolation("yield already claimed")
         self.store.conn.execute("INSERT INTO config VALUES(?,?)", (key, str(now)))
@@ -257,6 +266,88 @@ class Engine:
             raise RuleViolation("unknown territory")
         return {"territory_id": tid, "owner_empire_id": row[0], "is_capital": bool(row[1]), "fortification": row[2]}
 
+    def _do_create_attack(self, did: str, p: dict[str, Any], now: int) -> dict[str, Any]:
+        attacker = self._empire(did)
+        attack_id, origin, target = self._text(p, "attack_id"), self._text(p, "origin_id"), self._text(p, "target_id")
+        kind, power = self._text(p, "kind").upper(), self._amount(p, "power")
+        deadline_seconds = self._amount(p, "deadline_seconds")
+        if kind not in {"RAID", "SIEGE"} or deadline_seconds > 86_400:
+            raise RuleViolation("invalid attack kind or deadline")
+        o = self.store.one("SELECT owner_empire_id FROM territories WHERE id=?", (origin,))
+        t = self.store.one("SELECT owner_empire_id,is_capital FROM territories WHERE id=?", (target,))
+        if not o or not t or o[0] != attacker or t[0] == attacker or not adjacent(self.store, origin, target):
+            raise RuleViolation("invalid combat territories")
+        if kind == "SIEGE" and t[1]:
+            raise RuleViolation("Capital conquest forbidden")
+        if self.store.one("SELECT available FROM balances WHERE empire_id=?", (attacker,))[0] < power:
+            raise RuleViolation("insufficient attack resources")
+        alliance_id = p.get("alliance_id")
+        eligible = active_allies(self.store, t[0], alliance_id) if isinstance(alliance_id, str) else []
+        self.store.conn.execute("UPDATE balances SET available=available-?,locked=locked+? WHERE empire_id=?",
+            (power, power, attacker))
+        self.store.conn.execute("INSERT INTO attacks(id,kind,attacker_empire_id,defender_empire_id,origin_id,target_id,attack_power,allied_defense,alliance_id,created_at,resolved,success,deadline_at,attacker_cost_locked) VALUES(?,?,?,?,?,?,?,?,?,?,0,NULL,?,?)",
+            (attack_id, kind, attacker, t[0], origin, target, power, 0, alliance_id, now,
+             now + deadline_seconds, power))
+        for ally in eligible:
+            self.store.conn.execute("INSERT INTO attack_eligible_allies VALUES(?,?)", (attack_id, ally))
+        return {"attack_id": attack_id, "deadline_at": now + deadline_seconds,
+            "eligible_allies": eligible, "resources_locked": power}
+
+    def _do_submit_defense(self, did: str, p: dict[str, Any], now: int) -> dict[str, Any]:
+        empire, attack_id = self._empire(did), self._text(p, "attack_id")
+        amount = self._amount(p, "amount")
+        attack = self.store.one("SELECT resolved,deadline_at FROM attacks WHERE id=?", (attack_id,))
+        if not attack or attack["resolved"] or now > attack["deadline_at"]:
+            raise RuleViolation("defense deadline expired or attack unavailable")
+        if not self.store.one("SELECT 1 FROM attack_eligible_allies WHERE attack_id=? AND empire_id=?",
+                              (attack_id, empire)):
+            raise RuleViolation("alliance was not eligible at attack creation")
+        if self.store.one("SELECT available FROM balances WHERE empire_id=?", (empire,))[0] < amount:
+            raise RuleViolation("ally has insufficient unlocked resources")
+        self.store.conn.execute("UPDATE balances SET available=available-?,locked=locked+? WHERE empire_id=?",
+            (amount, amount, empire))
+        self.store.conn.execute("INSERT INTO attack_defenses VALUES(?,?,?,?)",
+            (attack_id, empire, amount, now))
+        self.store.conn.execute("UPDATE attacks SET allied_defense=allied_defense+? WHERE id=?",
+            (amount, attack_id))
+        return {"attack_id": attack_id, "empire_id": empire, "resources_locked": amount}
+
+    def _do_resolve_attack(self, did: str, p: dict[str, Any], now: int) -> dict[str, Any]:
+        self._referee(did)
+        attack_id = self._text(p, "attack_id")
+        attack = self.store.one("SELECT * FROM attacks WHERE id=?", (attack_id,))
+        if not attack or attack["resolved"]:
+            raise RuleViolation("attack unavailable or already resolved")
+        if now < attack["deadline_at"]:
+            raise RuleViolation("defense deadline has not elapsed")
+        target = self.store.one("SELECT is_capital,fortification FROM territories WHERE id=?",
+                                (attack["target_id"],))
+        if not target:
+            raise RuleViolation("target no longer exists")
+        defense = target["fortification"] + attack["allied_defense"]
+        success = attack_succeeds(attack["attack_power"], defense)
+        attacker, defender = attack["attacker_empire_id"], attack["defender_empire_id"]
+        self.store.conn.execute("UPDATE balances SET locked=locked-? WHERE empire_id=?",
+            (attack["attacker_cost_locked"], attacker))
+        reward = 0
+        if attack["kind"] == "RAID" and success:
+            defender_available = self.store.one("SELECT available FROM balances WHERE empire_id=?", (defender,))[0]
+            reward = raid_reward(attack["attack_power"], defender_available)
+            self.store.conn.execute("UPDATE balances SET available=available-? WHERE empire_id=?", (reward, defender))
+            self.store.conn.execute("UPDATE balances SET available=available+? WHERE empire_id=?", (reward, attacker))
+        elif attack["kind"] == "SIEGE" and success:
+            if target["is_capital"]:
+                raise RuleViolation("Capital conquest forbidden")
+            self.store.conn.execute("UPDATE territories SET owner_empire_id=? WHERE id=?",
+                (attacker, attack["target_id"]))
+        for row in self.store.conn.execute("SELECT empire_id,amount FROM attack_defenses WHERE attack_id=?", (attack_id,)):
+            self.store.conn.execute("UPDATE balances SET available=available+?,locked=locked-? WHERE empire_id=?",
+                (row["amount"], row["amount"], row["empire_id"]))
+        self.store.conn.execute("UPDATE attacks SET resolved=1,success=?,attacker_cost_locked=0 WHERE id=?",
+            (int(success), attack_id))
+        return {"attack_id": attack_id, "success": success, "attack": attack["attack_power"],
+            "defense": defense, "raid_reward": reward}
+
     def _combat(self, did: str, p: dict[str, Any], now: int, kind: str) -> dict[str, Any]:
         attacker = self._empire(did)
         attack_id, origin, target = self._text(p, "attack_id"), self._text(p, "origin_id"), self._text(p, "target_id")
@@ -288,7 +379,9 @@ class Engine:
         self.store.conn.execute("UPDATE balances SET available=available-? WHERE empire_id=?", (power, attacker))
         defense = t[2] + allied_total
         success = attack_succeeds(power, defense)
-        self.store.conn.execute("INSERT INTO attacks VALUES(?,?,?,?,?,?,?,?,?,?,1,?)", (attack_id, kind, attacker, defender, origin, target, power, allied_total, alliance_id, now, int(success)))
+        self.store.conn.execute("INSERT INTO attacks(id,kind,attacker_empire_id,defender_empire_id,origin_id,target_id,attack_power,allied_defense,alliance_id,created_at,resolved,success,deadline_at,attacker_cost_locked) VALUES(?,?,?,?,?,?,?,?,?,?,1,?,NULL,0)",
+            (attack_id, kind, attacker, defender, origin, target, power, allied_total,
+             alliance_id, now, int(success)))
         reward = 0
         if kind == "RAID" and success:
             defender_available = self.store.one("SELECT available FROM balances WHERE empire_id=?", (defender,))[0]

@@ -10,6 +10,8 @@ pytest
 flop-empires init game.db --referee-did did:key:YOUR_EXTERNALLY_MANAGED_PUBLIC_KEY
 flop-empires simulate --actions 100000 --seed 0 --output simulation-report.json
 flop-empires state game.db
+flop-empires status game.db
+flop-empires staging observe staging.db --mailbox staging-example-inbox
 ```
 
 `init` records only the public referee DID. It never creates or stores a signing
@@ -28,3 +30,10 @@ sequence, rejects retention gaps, and never follows or executes message content.
 
 No router, conformance-lab, token, payment, wallet, staking, NFT, or browser UI
 integration is included.
+
+Current exercised capability is `STAGING_READ_ONLY_VERIFIED`: official GitHub
+API and fixed-origin Technocore reads were exercised with zero remote writes.
+`STAGING_WRITE` is implemented behind manifest, namespace, allowlist, signer,
+outbox, and readback guards, but is not called verified because no explicit
+staging referee signer/events room was supplied. See `docs/STAGING.md`; this
+repository does not claim `SEASON_READY` or `LIVE`.

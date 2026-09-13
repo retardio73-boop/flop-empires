@@ -1,0 +1,118 @@
+{
+  "adversarial": {
+    "actions": 250000,
+    "alliance_concentration": {
+      "empire-0": 1,
+      "empire-1": 4,
+      "empire-2": 469,
+      "empire-3": 1619,
+      "empire-4": 2,
+      "empire-5": 81,
+      "empire-6": 3,
+      "empire-7": 467
+    },
+    "comeback_probability_after_losing_50pct_territory": 0.0,
+    "contribution_farming_profitability": 0,
+    "exploits_found": [],
+    "final_state_hash": "eab84023d0e0d86deebd61b16a4e01010e587d462cba19923b7bcccf97e5a651",
+    "gini_like_concentration": 0.7314471422775162,
+    "invariant_failures": [],
+    "largest_empire_share": 0.6986227678673189,
+    "profiles": [
+      "FARMER",
+      "SYBIL",
+      "WHALE",
+      "CARTEL",
+      "RAIDER",
+      "TURTLE",
+      "CONTRIBUTOR",
+      "OPPORTUNIST"
+    ],
+    "repeated_raid_profitability": -29451,
+    "resource_conservation": {
+      "consumed": 126927,
+      "created": 6280,
+      "initial": 340000,
+      "remaining": 219353
+    },
+    "resource_creation_by_source": {
+      "initial_allocation": 340000,
+      "technical_yield": 6280
+    },
+    "seed": 7,
+    "sybil_profitability": 0,
+    "territory_concentration": {
+      "empire-0": 1,
+      "empire-1": 1,
+      "empire-2": 21,
+      "empire-3": 3,
+      "empire-4": 1,
+      "empire-5": 2,
+      "empire-6": 1,
+      "empire-7": 2
+    },
+    "time_to_dominance": 13282,
+    "win_rate_by_attack_type": {
+      "raid": 0.7305453761586549,
+      "siege": 0.5663559698180204
+    }
+  },
+  "stress": {
+    "actions": 1000000,
+    "alliance_concentration": {
+      "empire-0": 1,
+      "empire-1": 4,
+      "empire-2": 469,
+      "empire-3": 1619,
+      "empire-4": 2,
+      "empire-5": 81,
+      "empire-6": 3,
+      "empire-7": 467
+    },
+    "comeback_probability_after_losing_50pct_territory": 0.0,
+    "contribution_farming_profitability": 0,
+    "exploits_found": [],
+    "final_state_hash": "a1d668862703c39b150a5e784400a96093b33cac0a273fa74a6fa980544e6d5c",
+    "gini_like_concentration": 0.6602875002968205,
+    "invariant_failures": [],
+    "largest_empire_share": 0.496426281670743,
+    "profiles": [
+      "FARMER",
+      "SYBIL",
+      "WHALE",
+      "CARTEL",
+      "RAIDER",
+      "TURTLE",
+      "CONTRIBUTOR",
+      "OPPORTUNIST"
+    ],
+    "repeated_raid_profitability": -29451,
+    "resource_conservation": {
+      "consumed": 196548,
+      "created": 25000,
+      "initial": 340000,
+      "remaining": 168452
+    },
+    "resource_creation_by_source": {
+      "initial_allocation": 340000,
+      "technical_yield": 25000
+    },
+    "seed": 7,
+    "sybil_profitability": 0,
+    "territory_concentration": {
+      "empire-0": 1,
+      "empire-1": 1,
+      "empire-2": 21,
+      "empire-3": 3,
+      "empire-4": 1,
+      "empire-5": 2,
+      "empire-6": 1,
+      "empire-7": 2
+    },
+    "time_to_dominance": 13282,
+    "win_rate_by_attack_type": {
+      "raid": 0.4938073728690077,
+      "siege": 0.286484059272564
+    }
+  }
+}

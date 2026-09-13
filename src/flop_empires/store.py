@@ -28,6 +28,49 @@ CREATE TABLE IF NOT EXISTS events(seq INTEGER PRIMARY KEY AUTOINCREMENT, event_t
 CREATE TABLE IF NOT EXISTS requests(actor_did TEXT NOT NULL, request_id TEXT NOT NULL, command_hash TEXT NOT NULL, receipt_json TEXT NOT NULL, PRIMARY KEY(actor_did,request_id));
 CREATE TABLE IF NOT EXISTS technocore_state(mailbox TEXT PRIMARY KEY, cursor TEXT NOT NULL, bootstrapped INTEGER NOT NULL DEFAULT 0);
 CREATE TABLE IF NOT EXISTS technocore_records(record_id TEXT PRIMARY KEY, mailbox TEXT NOT NULL, seq INTEGER, ts INTEGER, accepted_at INTEGER NOT NULL, receipt_json TEXT NOT NULL);
+""",
+"""
+CREATE TABLE IF NOT EXISTS staging_diagnostics(
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  observed_at INTEGER NOT NULL,
+  mailbox TEXT NOT NULL,
+  record_id TEXT NOT NULL,
+  outcome TEXT NOT NULL,
+  details_json TEXT NOT NULL,
+  UNIQUE(mailbox,record_id)
+);
+CREATE TABLE IF NOT EXISTS receipt_outbox(
+  receipt_hash TEXT PRIMARY KEY,
+  actor_did TEXT NOT NULL,
+  request_id TEXT NOT NULL,
+  receipt_json TEXT NOT NULL,
+  status TEXT NOT NULL CHECK(status IN('PENDING','PUBLISHED')),
+  publish_ref TEXT,
+  readback_verified INTEGER NOT NULL DEFAULT 0 CHECK(readback_verified IN(0,1)),
+  attempts INTEGER NOT NULL DEFAULT 0,
+  UNIQUE(actor_did,request_id)
+);
+CREATE TABLE IF NOT EXISTS publication_evidence(
+  receipt_hash TEXT PRIMARY KEY REFERENCES receipt_outbox(receipt_hash),
+  publish_ref TEXT NOT NULL,
+  verified_at INTEGER NOT NULL
+);
+""",
+"""
+ALTER TABLE attacks ADD COLUMN deadline_at INTEGER;
+ALTER TABLE attacks ADD COLUMN attacker_cost_locked INTEGER NOT NULL DEFAULT 0 CHECK(attacker_cost_locked>=0);
+CREATE TABLE IF NOT EXISTS attack_eligible_allies(
+  attack_id TEXT NOT NULL REFERENCES attacks(id),
+  empire_id TEXT NOT NULL REFERENCES empires(id),
+  PRIMARY KEY(attack_id,empire_id)
+);
+CREATE TABLE IF NOT EXISTS attack_defenses(
+  attack_id TEXT NOT NULL REFERENCES attacks(id),
+  empire_id TEXT NOT NULL REFERENCES empires(id),
+  amount INTEGER NOT NULL CHECK(amount>0),
+  submitted_at INTEGER NOT NULL,
+  PRIMARY KEY(attack_id,empire_id)
+);
 """
 ]
 
@@ -67,7 +110,7 @@ class Store:
         return self.conn.execute(sql, args).fetchone()
 
     def state(self) -> dict[str, Any]:
-        tables = ["config", "actors", "empires", "memberships", "github_bindings", "contribution_clusters", "contribution_evidence", "balances", "territories", "territory_edges", "alliances", "alliance_members", "attacks"]
+        tables = ["config", "actors", "empires", "memberships", "github_bindings", "contribution_clusters", "contribution_evidence", "balances", "territories", "territory_edges", "alliances", "alliance_members", "attacks", "attack_eligible_allies", "attack_defenses"]
         result: dict[str, Any] = {}
         for table in tables:
             rows = [dict(r) for r in self.conn.execute(f"SELECT * FROM {table} ORDER BY 1,2")]

@@ -4,8 +4,13 @@ import argparse
 import json
 from pathlib import Path
 
+import httpx
+
+from .observability import health_summary
 from .simulator import simulate
+from .staging import ReadOnlyObserver
 from .store import Store
+from .technocore import TechnocoreHttpMailbox
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -20,6 +25,15 @@ def main(argv: list[str] | None = None) -> int:
     sim.add_argument("--seed", type=int, default=0)
     sim.add_argument("--actions", type=int, default=100_000)
     sim.add_argument("--output", type=Path)
+    status = sub.add_parser("status", help="print local health summary")
+    status.add_argument("database", type=Path)
+    status.add_argument("--mode", default="LOCAL_SIMULATION",
+                        choices=["LOCAL_SIMULATION","STAGING_READ_ONLY","STAGING_WRITE"])
+    staging = sub.add_parser("staging", help="safe staging operations")
+    staging_sub = staging.add_subparsers(dest="staging_command", required=True)
+    observe = staging_sub.add_parser("observe", help="read and classify without game-state writes")
+    observe.add_argument("database", type=Path)
+    observe.add_argument("--mailbox", required=True)
     args = parser.parse_args(argv)
     if args.command == "init":
         if not args.referee_did.startswith("did:key:"):
@@ -33,6 +47,17 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "state":
         store = Store(args.database)
         print(json.dumps({"state": store.state(), "state_hash": store.state_hash()}, indent=2, sort_keys=True))
+        return 0
+    if args.command == "status":
+        store = Store(args.database)
+        print(json.dumps(health_summary(store, mode=args.mode), indent=2, sort_keys=True))
+        return 0
+    if args.command == "staging":
+        store = Store(args.database)
+        with httpx.Client(headers={"User-Agent": "flop-empires/0.1 staging-read-only"}) as client:
+            source = TechnocoreHttpMailbox(client, args.mailbox)
+            result = ReadOnlyObserver(store, args.mailbox).observe(source)
+        print(json.dumps(result, indent=2, sort_keys=True))
         return 0
     report = simulate(args.seed, args.actions)
     text = json.dumps(report, indent=2, sort_keys=True)

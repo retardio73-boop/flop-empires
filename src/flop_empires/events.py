@@ -34,3 +34,8 @@ def verify_chain(store: Store) -> bool:
             return False
         prev = row["event_hash"]
     return True
+
+
+def require_valid_chain(store: Store) -> None:
+    if not verify_chain(store):
+        raise RuntimeError("invalid historical event chain")

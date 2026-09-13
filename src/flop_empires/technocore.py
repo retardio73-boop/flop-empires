@@ -7,7 +7,7 @@ from typing import Protocol
 
 import httpx
 
-from .canonical import bytes_, dumps, loads
+from .canonical import bytes_, dumps, loads, sha256
 from .engine import Engine, RuleViolation
 from .identity import verify
 from .models import Receipt, SignedRecord
@@ -33,8 +33,6 @@ def signed_record_body(record: SignedRecord) -> dict:
 def verify_signed_record(record: SignedRecord) -> bool:
     if record.room is not None or record.nonce is not None or record.raw_text is not None:
         if not all(isinstance(x, str) and x for x in (record.room, record.nonce, record.raw_text)):
-            return False
-        if record.raw_text != dumps(record.payload):
             return False
         return verify(record.signer_did,
             f"{record.room}|{record.nonce}|{record.raw_text}".encode("utf-8"), record.signature)
@@ -115,17 +113,103 @@ class TechnocoreHttpMailbox:
             if not all(isinstance(x, str) and x for x in (signer, nonce, signature, text)):
                 raise RuleViolation("unsigned Technocore message")
             try:
-                payload = loads(text)
-            except ValueError as exc:
-                raise RuleViolation("Technocore text is not a canonical command") from exc
-            if not isinstance(payload, dict) or text != dumps(payload):
-                raise RuleViolation("Technocore command is not canonical")
+                parsed = loads(text)
+                payload = parsed if isinstance(parsed, dict) and text == dumps(parsed) else {}
+            except ValueError:
+                payload = {}
             record = SignedRecord(f"{self.room}/{generation}/{msg_seq}", signer, payload,
                 signature, seq=msg_seq, ts=message.get("ts"), room=self.room,
                 nonce=nonce, raw_text=text)
             items.append(MailboxItem(record, self._cursor(generation, msg_seq)))
             expected += 1
         return items
+
+
+@dataclass(frozen=True)
+class RoomEnvelope:
+    did: str
+    nonce: str
+    signature: str
+    text: str
+
+
+class RoomEnvelopeSigner(Protocol):
+    @property
+    def did(self) -> str: ...
+    def sign_room(self, room: str, canonical_text: str) -> RoomEnvelope: ...
+
+
+class TechnocoreTransport(TechnocoreHttpMailbox):
+    """Current room JSON transport: read always; publish only with injected signer."""
+    def __init__(self, client: httpx.Client, room: str, *, signer: RoomEnvelopeSigner | None = None,
+                 limit: int = 200, retries: int = 2):
+        super().__init__(client, room, limit=limit)
+        if not 0 <= retries <= 3:
+            raise ValueError("invalid retry bound")
+        self.signer, self.retries = signer, retries
+
+    def _read(self, since: int) -> dict:
+        for attempt in range(self.retries + 1):
+            try:
+                return super()._read(since)
+            except (httpx.TimeoutException, httpx.TransportError, httpx.HTTPStatusError) as exc:
+                if isinstance(exc, httpx.HTTPStatusError) and exc.response.status_code < 500:
+                    raise
+                if attempt == self.retries:
+                    raise
+        raise RuntimeError("unreachable Technocore retry state")
+
+    @staticmethod
+    def _valid_readback(room: str, message: dict, did: str, text: str) -> bool:
+        nonce, signature = str(message.get("nonce", "")), message.get("sig")
+        return (message.get("from") == did and message.get("text") == text and
+            isinstance(signature, str) and verify(did,
+                f"{room}|{nonce}|{text}".encode("utf-8"), signature))
+
+    def _find_readback(self, did: str, text: str) -> tuple[str, bool] | None:
+        value = self._read(0)
+        for message in value["messages"]:
+            if isinstance(message, dict) and self._valid_readback(self.room, message, did, text):
+                seq = message.get("seq")
+                if isinstance(seq, int) and not isinstance(seq, bool) and seq >= 1:
+                    return f"{self.room}/{value['generation']}/{seq}", True
+        return None
+
+    def publish_and_verify(self, receipt_hash: str, canonical_receipt: str) -> tuple[str, bool]:
+        if self.signer is None:
+            raise RuntimeError("Technocore write disabled: no room signer")
+        value = loads(canonical_receipt)
+        if not isinstance(value, dict) or dumps(value) != canonical_receipt or sha256(value) != receipt_hash:
+            raise ValueError("receipt must be canonical and match receipt hash")
+        existing = self._find_readback(self.signer.did, canonical_receipt)
+        if existing:
+            return existing
+        envelope = self.signer.sign_room(self.room, canonical_receipt)
+        if (not isinstance(envelope, RoomEnvelope) or envelope.did != self.signer.did or
+                envelope.text != canonical_receipt or not envelope.nonce or
+                not verify(envelope.did, f"{self.room}|{envelope.nonce}|{envelope.text}".encode("utf-8"),
+                           envelope.signature)):
+            raise RuntimeError("invalid Technocore signed envelope")
+        for attempt in range(self.retries + 1):
+            try:
+                response = self.client.post(f"{self.ORIGIN}/r/{self.room}", json={"did":envelope.did,
+                    "sig":envelope.signature,"nonce":envelope.nonce,"text":envelope.text},
+                    follow_redirects=False, timeout=10.0)
+                if 300 <= response.status_code < 500:
+                    response.raise_for_status()
+                if response.status_code >= 500:
+                    raise httpx.HTTPStatusError("transient Technocore failure", request=response.request,
+                                                response=response)
+                break
+            except (httpx.TimeoutException, httpx.TransportError, httpx.HTTPStatusError) as exc:
+                if isinstance(exc, httpx.HTTPStatusError) and exc.response.status_code < 500:
+                    raise
+                if attempt == self.retries:
+                    raise
+        found = self._find_readback(envelope.did, canonical_receipt)
+        if not found:
+            return "", False
+        return found
 
 
 class TechnocoreIngestor:
@@ -146,6 +230,12 @@ class TechnocoreIngestor:
             return Receipt(**json.loads(old[0]))
         if not verify_signed_record(record):
             raise RuleViolation("Technocore signed-record verification failed")
+        if record.raw_text is not None:
+            try:
+                if loads(record.raw_text) != record.payload or record.raw_text != dumps(record.payload):
+                    raise RuleViolation("Technocore signed text/payload mismatch")
+            except ValueError as exc:
+                raise RuleViolation("Technocore signed text is not a canonical command") from exc
         command = record.payload
         if not isinstance(command, dict) or command.get("actor_did") != record.signer_did:
             raise RuleViolation("signed record actor mismatch")

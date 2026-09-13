@@ -32,3 +32,12 @@ where `lifetime = 7,776,000` seconds (90 days), future ages are clamped to zero,
 and expired contributions yield zero. Integer arithmetic is mandatory. Each
 cluster is counted once. Verification failure or an unsupported class yields
 zero.
+
+## Epoch caps and bootstrap
+
+Canonical epoch evaluation occurs every 604,800 seconds from persisted Season
+start. Non-boundary evaluation awards zero and evidence is never backdated.
+Each cluster is capped at 160 base units and counted once. Each contributor is
+capped at 320 units per epoch after modifiers. During the first 2,592,000
+seconds (30 days), eligible yield has a deterministic 2x bootstrap multiplier,
+still subject to the contributor cap. These limits apply before empire totals.
