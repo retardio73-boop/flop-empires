@@ -7,11 +7,13 @@ from pathlib import Path
 import httpx
 
 from .observability import health_summary
-from .economics_v02 import EconomicRulesV02, economic_leaderboard
+from .economics_v02 import (EconomicRulesV02, prestige_leaderboard,
+    strategic_power_leaderboard)
 from .simulator import simulate
 from .staging import ReadOnlyObserver
 from .live_staging import run_live_crash_a, run_live_write_smoke, write_report
 from .season_minus_one import run_season_minus_one, write_season_report
+from .season_minus_one_b import run as run_season_minus_one_b, write_report as write_season_minus_one_b_report
 from .store import Store
 from .technocore import TechnocoreHttpMailbox
 
@@ -52,6 +54,10 @@ def main(argv: list[str] | None = None) -> int:
     rehearsal.add_argument("--manifest",type=Path,required=True)
     rehearsal.add_argument("--confirm-live-write",action="store_true")
     rehearsal.add_argument("--report-prefix",type=Path,default=Path("reports/season-minus-one"))
+    rehearsal_b=staging_sub.add_parser("season-minus-one-b",help="run integrated v0.2 private rehearsal")
+    rehearsal_b.add_argument("database",type=Path); rehearsal_b.add_argument("--manifest",type=Path,required=True)
+    rehearsal_b.add_argument("--confirm-live-write",action="store_true")
+    rehearsal_b.add_argument("--report-prefix",type=Path,default=Path("reports/season-minus-one-b"))
     args = parser.parse_args(argv)
     if args.command == "init":
         if not args.referee_did.startswith("did:key:"):
@@ -68,7 +74,8 @@ def main(argv: list[str] | None = None) -> int:
         if args.economic_manifest:
             rules = EconomicRulesV02.from_manifest(json.loads(args.economic_manifest.read_text(encoding="utf-8")))
             value["economic_rules_version"] = rules.version
-            value["leaderboard"] = economic_leaderboard(store, rules)
+            value["leaderboards"] = {"PRESTIGE":prestige_leaderboard(store),
+                "STRATEGIC_POWER":strategic_power_leaderboard(store,rules)}
         print(json.dumps(value, indent=2, sort_keys=True))
         return 0
     if args.command == "status":
@@ -76,6 +83,10 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(health_summary(store, mode=args.mode), indent=2, sort_keys=True))
         return 0
     if args.command == "staging":
+        if args.staging_command == "season-minus-one-b":
+            result=run_season_minus_one_b(args.manifest,args.database,confirm_live_write=args.confirm_live_write)
+            write_season_minus_one_b_report(result,args.report_prefix.with_suffix(".json"),args.report_prefix.with_suffix(".md"))
+            print(json.dumps(result,indent=2,sort_keys=True)); return 0
         if args.staging_command == "season-minus-one":
             result=run_season_minus_one(args.manifest,args.database,
                 confirm_live_write=args.confirm_live_write)

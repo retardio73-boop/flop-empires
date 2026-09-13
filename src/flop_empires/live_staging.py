@@ -33,9 +33,11 @@ def _message_count(transport: TechnocoreTransport, did: str, text: str) -> int:
 
 
 def _post_and_ingest(command: dict, action_transport: TechnocoreTransport,
-                     ingestor: TechnocoreIngestor, *, semantic_dedupe: bool = True):
-    text = dumps(command); ref, verified = action_transport.post_canonical(
-        sha256(command), text, semantic_dedupe=semantic_dedupe)
+                     ingestor: TechnocoreIngestor, *, semantic_dedupe: bool = True,
+                     season_id: str | None = None):
+    wire={"season_id":season_id,"command":command} if season_id else command
+    text = dumps(wire); ref, verified = action_transport.post_canonical(
+        sha256(wire), text, semantic_dedupe=semantic_dedupe)
     if not verified:
         raise RuntimeError("ACTION_READBACK_NOT_VERIFIED")
     receipts = []
