@@ -7,6 +7,7 @@ from pathlib import Path
 import httpx
 
 from .observability import health_summary
+from .economics_v02 import EconomicRulesV02, economic_leaderboard
 from .simulator import simulate
 from .staging import ReadOnlyObserver
 from .store import Store
@@ -21,6 +22,7 @@ def main(argv: list[str] | None = None) -> int:
     init.add_argument("--referee-did", required=True)
     state = sub.add_parser("state", help="print complete materialized state as JSON")
     state.add_argument("database", type=Path)
+    state.add_argument("--economic-manifest", type=Path)
     sim = sub.add_parser("simulate", help="run deterministic invariant simulation")
     sim.add_argument("--seed", type=int, default=0)
     sim.add_argument("--actions", type=int, default=100_000)
@@ -46,7 +48,12 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "state":
         store = Store(args.database)
-        print(json.dumps({"state": store.state(), "state_hash": store.state_hash()}, indent=2, sort_keys=True))
+        value = {"state": store.state(), "state_hash": store.state_hash()}
+        if args.economic_manifest:
+            rules = EconomicRulesV02.from_manifest(json.loads(args.economic_manifest.read_text(encoding="utf-8")))
+            value["economic_rules_version"] = rules.version
+            value["leaderboard"] = economic_leaderboard(store, rules)
+        print(json.dumps(value, indent=2, sort_keys=True))
         return 0
     if args.command == "status":
         store = Store(args.database)
