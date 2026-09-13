@@ -9,7 +9,7 @@ from typing import Any, Callable
 from .alliances import active_allies
 from .canonical import dumps, sha256
 from .combat import attack_succeeds, raid_reward
-from .events import append_event
+from .events import append_event, require_valid_chain
 from .github_evidence import validate_evidence_url
 from .github_evidence import VerifiedEvidence
 from .identity import Signer, require_signer
@@ -20,6 +20,7 @@ from .store import Store
 from .technical_yield import (BASE_UNITS, EPOCH_SECONDS, LIFETIME_SECONDS,
     empire_yield, epoch_yield)
 from .world import add_edge, adjacent
+from .economics_v02 import EconomicRulesV02
 
 
 class RuleViolation(ValueError):
@@ -27,16 +28,41 @@ class RuleViolation(ValueError):
 
 
 class Engine:
+    @classmethod
+    def from_manifest(cls,store: Store,manifest,signer: Signer,clock=None)->"Engine":
+        return cls(store,manifest.referee_did,signer,clock=clock,economic_rules=manifest.rules,
+            manifest_hash=manifest.manifest_hash,initial_balances=manifest.initial_balances,
+            epoch_duration=manifest.epoch_duration,environment=manifest.environment)
+
     def __init__(self, store: Store, configured_referee_did: str, signer: Signer | None,
-                 clock: Callable[[], int] | None = None):
+                 clock: Callable[[], int] | None = None, *,
+                 economic_rules: EconomicRulesV02 | None = None,
+                 manifest_hash: str | None = None,
+                 initial_balances: dict[str,int] | None = None,
+                 epoch_duration: int = EPOCH_SECONDS,
+                 environment: str = "local"):
         self.store = store
+        if store.one("SELECT 1 FROM events LIMIT 1"): require_valid_chain(store)
         self.signer = require_signer(configured_referee_did, signer)
         self.clock = clock or (lambda: int(time.time()))
+        self.economic_rules=economic_rules
+        self.initial_balances=initial_balances or {"ENGINEERING":0,"KNOWLEDGE":0,"INFLUENCE":0}
+        self.epoch_duration=epoch_duration; self.environment=environment
         existing = store.one("SELECT value FROM config WHERE key='referee_did'")
         if existing and existing[0] != configured_referee_did:
             raise RuntimeError("database belongs to a different referee DID")
         store.conn.execute("INSERT OR IGNORE INTO config(key,value) VALUES('referee_did',?)", (configured_referee_did,))
         store.conn.execute("INSERT OR IGNORE INTO config(key,value) VALUES('season_status',?)", (SeasonStatus.REGISTRATION,))
+        version=economic_rules.version if economic_rules else "technical-yield-v0.1"
+        prior=store.one("SELECT value FROM config WHERE key='economic_rules_version'")
+        if prior and prior[0]!=version: raise RuntimeError("database economic rules mismatch")
+        if economic_rules:
+            store.conn.execute("INSERT OR IGNORE INTO config VALUES('economic_rules_version',?)",(version,))
+            store.conn.execute("INSERT OR IGNORE INTO config VALUES('environment',?)",(environment,))
+            if manifest_hash: store.conn.execute("INSERT OR IGNORE INTO config VALUES('manifest_hash',?)",(manifest_hash,))
+            last=store.one("SELECT state_after_hash FROM events ORDER BY seq DESC LIMIT 1")
+            if last and last[0]!=store.state_hash():
+                raise RuntimeError("impossible replay divergence")
 
     def execute(self, raw: str | bytes | dict[str, Any] | Command) -> Receipt:
         command = raw if isinstance(raw, Command) else parse_command(raw)
@@ -53,6 +79,7 @@ class Engine:
                     accepted_at = int(self.clock()); before = self.store.state_hash()
                     details = {"error":"REQUEST_ID_CONFLICT","original_command_hash":prior["command_hash"],
                                "conflicting_command_hash":command_hash}
+                    if self.economic_rules: details["command"]=obj
                     seq,event_hash = append_event(self.store,event_type="REQUEST_ID_CONFLICT",
                         actor_did=command.actor_did,request_id=command.request_id,
                         accepted_at=accepted_at,accepted=False,command_hash=command_hash,
@@ -78,8 +105,11 @@ class Engine:
                 self.store.conn.execute("RELEASE command_effect")
                 accepted = False
                 details = {"error": str(exc)}
+            if self.economic_rules:
+                details={**details,"command":obj,"economic_rules_version":self.economic_rules.version}
             after = self.store.state_hash()
-            seq, event_hash = append_event(self.store, event_type=command.action, actor_did=command.actor_did,
+            event_type=details.get("event_type",command.action) if self.economic_rules else command.action
+            seq, event_hash = append_event(self.store, event_type=event_type, actor_did=command.actor_did,
                 request_id=command.request_id, accepted_at=accepted_at, accepted=accepted,
                 command_hash=command_hash, before=before, after=after, details=details)
             unsigned = {"referee_did": self.signer.did, "request_id": command.request_id,
@@ -149,6 +179,12 @@ class Engine:
         self.store.conn.execute("INSERT INTO empires VALUES(?,?,?,?)", (empire_id, name, capital, now))
         self.store.conn.execute("INSERT INTO memberships VALUES(?,?,?)", (did, empire_id, now))
         self.store.conn.execute("INSERT INTO balances VALUES(?,0,0)", (empire_id,))
+        if self.economic_rules:
+            initial=self.initial_balances
+            self.store.conn.execute("INSERT INTO empire_economy VALUES(?,?,?,?,?,?)",
+                (empire_id,0,initial["ENGINEERING"],initial["KNOWLEDGE"],initial["INFLUENCE"],-1))
+            self.store.conn.execute("UPDATE balances SET available=? WHERE empire_id=?",
+                (initial["ENGINEERING"],empire_id))
         self.store.conn.execute("INSERT INTO territories VALUES(?,?,1,0)", (capital, empire_id))
         return {"empire_id": empire_id, "capital_id": capital}
 
@@ -200,6 +236,8 @@ class Engine:
         else:
             base = 0 if self_owned else BASE_UNITS[cls]
             self.store.conn.execute("INSERT INTO contribution_clusters VALUES(?,?,?,?,?,?,?,?,?)", (cluster, empire, actor, cls, repo, base, now, now + LIFETIME_SECONDS, int(self_owned)))
+            if self.economic_rules and base:
+                self.store.conn.execute("UPDATE empire_economy SET prestige=prestige+? WHERE empire_id=?",(base,empire))
         self.store.conn.execute("INSERT INTO contribution_evidence VALUES(?,?,1)", (url, cluster))
         return {"cluster_id": cluster, "base_units": 0 if self_owned else BASE_UNITS[cls]}
 
@@ -209,9 +247,51 @@ class Engine:
         cur = self.store.conn.execute("UPDATE balances SET available=available+? WHERE empire_id=?", (amount, empire))
         if cur.rowcount != 1:
             raise RuleViolation("unknown empire")
+        if self.economic_rules:
+            self.store.conn.execute("UPDATE empire_economy SET engineering=engineering+? WHERE empire_id=?",(amount,empire))
         return {"empire_id": empire, "amount": amount, "source": "season_allocation"}
 
+    def _do_add_synthetic_contribution(self,did: str,p: dict[str,Any],now: int)->dict[str,Any]:
+        self._referee(did)
+        if self.environment!="staging" or not self.economic_rules:
+            raise RuleViolation("synthetic contribution is staging only")
+        empire=self._text(p,"empire_id"); profile=self._text(p,"profile")
+        points=self._amount(p,"verified_points")
+        if p.get("marker")!="SIMULATION_STAGING_ONLY":
+            raise RuleViolation("synthetic contribution marker required")
+        cur=self.store.conn.execute("UPDATE empire_economy SET prestige=prestige+? WHERE empire_id=?",(points,empire))
+        if cur.rowcount!=1: raise RuleViolation("unknown empire")
+        return {"empire_id":empire,"profile":profile,"prestige_added":points,
+            "marker":"SIMULATION_STAGING_ONLY","real_github_evidence":False}
+
+    def _do_settle_epoch(self,did: str,p: dict[str,Any],now: int)->dict[str,Any]:
+        self._referee(did)
+        if not self.economic_rules: raise RuleViolation("settle_epoch requires technical-yield-v0.2")
+        epoch=self._amount(p,"epoch",zero=True)
+        started=self.store.one("SELECT value FROM config WHERE key='season_started_at'")
+        if not started or now < int(started[0])+epoch*self.epoch_duration:
+            raise RuleViolation("epoch boundary not reached")
+        rows=list(self.store.conn.execute("SELECT * FROM empire_economy ORDER BY empire_id"))
+        if any(row["last_settled_epoch"]>=epoch for row in rows): raise RuleViolation("epoch already settled")
+        if any(row["last_settled_epoch"]!=epoch-1 for row in rows): raise RuleViolation("epoch settlement must be sequential")
+        results=[]
+        for row in rows:
+            empire=row["empire_id"]
+            noncap=self.store.one("SELECT COUNT(*) FROM territories WHERE owner_empire_id=? AND is_capital=0",(empire,))[0]
+            fort=self.store.one("SELECT COALESCE(SUM(fortification),0) FROM territories WHERE owner_empire_id=?",(empire,))[0]
+            attr=self.economic_rules.epoch_attribution(row["prestige"],row["engineering"],noncap,fort)
+            allocation=attr["allocation"]
+            eng_delta=allocation["ENGINEERING"]+attr["territory_production"]-attr["total_cost"]
+            self.store.conn.execute("UPDATE empire_economy SET engineering=engineering+?,knowledge=knowledge+?,influence=influence+?,last_settled_epoch=? WHERE empire_id=?",
+                (eng_delta,allocation["KNOWLEDGE"],allocation["INFLUENCE"],epoch,empire))
+            self.store.conn.execute("UPDATE balances SET available=available+? WHERE empire_id=?",(eng_delta,empire))
+            self.store.conn.execute("INSERT INTO economic_epochs VALUES(?,?,?)",(empire,epoch,dumps(attr)))
+            results.append({"empire_id":empire,**attr,"engineering_net":eng_delta})
+        return {"event_type":"ECONOMIC_EPOCH_SETTLED","epoch":epoch,"empires":results}
+
     def _do_claim_yield(self, did: str, p: dict[str, Any], now: int) -> dict[str, Any]:
+        if self.economic_rules:
+            raise RuleViolation("v0.2 yield is settled by the referee at epoch boundary")
         empire = self._empire(did)
         started = self.store.one("SELECT value FROM config WHERE key='season_started_at'")
         if not started or now < int(started[0]) or (now - int(started[0])) % EPOCH_SECONDS:
@@ -251,6 +331,8 @@ class Engine:
         if bal < amount:
             raise RuleViolation("insufficient resources")
         self.store.conn.execute("UPDATE balances SET available=available-? WHERE empire_id=?", (amount, empire))
+        if self.economic_rules:
+            self.store.conn.execute("UPDATE empire_economy SET engineering=engineering-? WHERE empire_id=?",(amount,empire))
         self.store.conn.execute("UPDATE territories SET fortification=fortification+? WHERE id=?", (amount, tid))
         return {"territory_id": tid, "fortification_added": amount}
 
@@ -297,19 +379,23 @@ class Engine:
             raise RuleViolation("invalid combat territories")
         if kind == "SIEGE" and t[1]:
             raise RuleViolation("Capital conquest forbidden")
-        if self.store.one("SELECT available FROM balances WHERE empire_id=?", (attacker,))[0] < power:
+        cost=self._offensive_cost(attacker,power)
+        if self.store.one("SELECT available FROM balances WHERE empire_id=?", (attacker,))[0] < cost:
             raise RuleViolation("insufficient attack resources")
         alliance_id = p.get("alliance_id")
         eligible = active_allies(self.store, t[0], alliance_id) if isinstance(alliance_id, str) else []
         self.store.conn.execute("UPDATE balances SET available=available-?,locked=locked+? WHERE empire_id=?",
-            (power, power, attacker))
+            (cost, cost, attacker))
+        if self.economic_rules:
+            self.store.conn.execute("UPDATE empire_economy SET engineering=engineering-? WHERE empire_id=?",(cost,attacker))
         self.store.conn.execute("INSERT INTO attacks(id,kind,attacker_empire_id,defender_empire_id,origin_id,target_id,attack_power,allied_defense,alliance_id,created_at,resolved,success,deadline_at,attacker_cost_locked) VALUES(?,?,?,?,?,?,?,?,?,?,0,NULL,?,?)",
             (attack_id, kind, attacker, t[0], origin, target, power, 0, alliance_id, now,
-             now + deadline_seconds, power))
+             now + deadline_seconds, cost))
         for ally in eligible:
             self.store.conn.execute("INSERT INTO attack_eligible_allies VALUES(?,?)", (attack_id, ally))
         return {"attack_id": attack_id, "deadline_at": now + deadline_seconds,
-            "eligible_allies": eligible, "resources_locked": power}
+            "eligible_allies": eligible, "resources_locked": cost,
+            "base_power":power,"fatigue_cost":cost-power}
 
     def _do_submit_defense(self, did: str, p: dict[str, Any], now: int) -> dict[str, Any]:
         empire, attack_id = self._empire(did), self._text(p, "attack_id")
@@ -317,13 +403,16 @@ class Engine:
         attack = self.store.one("SELECT resolved,deadline_at FROM attacks WHERE id=?", (attack_id,))
         if not attack or attack["resolved"] or now > attack["deadline_at"]:
             raise RuleViolation("defense deadline expired or attack unavailable")
-        if not self.store.one("SELECT 1 FROM attack_eligible_allies WHERE attack_id=? AND empire_id=?",
+        defender=self.store.one("SELECT defender_empire_id FROM attacks WHERE id=?",(attack_id,))[0]
+        if empire != defender and not self.store.one("SELECT 1 FROM attack_eligible_allies WHERE attack_id=? AND empire_id=?",
                               (attack_id, empire)):
             raise RuleViolation("alliance was not eligible at attack creation")
         if self.store.one("SELECT available FROM balances WHERE empire_id=?", (empire,))[0] < amount:
             raise RuleViolation("ally has insufficient unlocked resources")
         self.store.conn.execute("UPDATE balances SET available=available-?,locked=locked+? WHERE empire_id=?",
             (amount, amount, empire))
+        if self.economic_rules:
+            self.store.conn.execute("UPDATE empire_economy SET engineering=engineering-? WHERE empire_id=?",(amount,empire))
         self.store.conn.execute("INSERT INTO attack_defenses VALUES(?,?,?,?)",
             (attack_id, empire, amount, now))
         self.store.conn.execute("UPDATE attacks SET allied_defense=allied_defense+? WHERE id=?",
@@ -342,7 +431,11 @@ class Engine:
                                 (attack["target_id"],))
         if not target:
             raise RuleViolation("target no longer exists")
-        defense = target["fortification"] + attack["allied_defense"]
+        defense_rows=list(self.store.conn.execute("SELECT empire_id,amount FROM attack_defenses WHERE attack_id=?",(attack_id,)))
+        defender_engineering=sum(r["amount"] for r in defense_rows if r["empire_id"]==attack["defender_empire_id"])
+        allied=sum(r["amount"] for r in defense_rows if r["empire_id"]!=attack["defender_empire_id"])
+        defense = (self.economic_rules.defense_power(defender_engineering,target["fortification"],allied)
+            if self.economic_rules else target["fortification"]+attack["allied_defense"])
         success = attack_succeeds(attack["attack_power"], defense)
         attacker, defender = attack["attacker_empire_id"], attack["defender_empire_id"]
         self.store.conn.execute("UPDATE balances SET locked=locked-? WHERE empire_id=?",
@@ -353,14 +446,20 @@ class Engine:
             reward = raid_reward(attack["attack_power"], defender_available)
             self.store.conn.execute("UPDATE balances SET available=available-? WHERE empire_id=?", (reward, defender))
             self.store.conn.execute("UPDATE balances SET available=available+? WHERE empire_id=?", (reward, attacker))
+            if self.economic_rules:
+                self.store.conn.execute("UPDATE empire_economy SET engineering=engineering-? WHERE empire_id=?",(reward,defender))
+                self.store.conn.execute("UPDATE empire_economy SET engineering=engineering+? WHERE empire_id=?",(reward,attacker))
         elif attack["kind"] == "SIEGE" and success:
             if target["is_capital"]:
                 raise RuleViolation("Capital conquest forbidden")
             self.store.conn.execute("UPDATE territories SET owner_empire_id=? WHERE id=?",
                 (attacker, attack["target_id"]))
+            self._record_fatigue(attack_id,attacker)
         for row in self.store.conn.execute("SELECT empire_id,amount FROM attack_defenses WHERE attack_id=?", (attack_id,)):
             self.store.conn.execute("UPDATE balances SET available=available+?,locked=locked-? WHERE empire_id=?",
                 (row["amount"], row["amount"], row["empire_id"]))
+            if self.economic_rules:
+                self.store.conn.execute("UPDATE empire_economy SET engineering=engineering+? WHERE empire_id=?",(row["amount"],row["empire_id"]))
         self.store.conn.execute("UPDATE attacks SET resolved=1,success=?,attacker_cost_locked=0 WHERE id=?",
             (int(success), attack_id))
         return {"attack_id": attack_id, "success": success, "attack": attack["attack_power"],
@@ -376,8 +475,9 @@ class Engine:
             raise RuleViolation("invalid combat territories")
         if kind == "SIEGE" and t[1]:
             raise RuleViolation("Capital conquest forbidden")
+        cost=self._offensive_cost(attacker,power)
         bal = self.store.one("SELECT available FROM balances WHERE empire_id=?", (attacker,))[0]
-        if bal < power:
+        if bal < cost:
             raise RuleViolation("insufficient attack resources")
         defender = t[0]
         alliance_id = p.get("alliance_id")
@@ -393,9 +493,13 @@ class Engine:
             if available < amount:
                 raise RuleViolation("ally has insufficient unlocked resources")
             self.store.conn.execute("UPDATE balances SET available=available-?,locked=locked+? WHERE empire_id=?", (amount, amount, empire))
+            if self.economic_rules:
+                self.store.conn.execute("UPDATE empire_economy SET engineering=engineering-? WHERE empire_id=?",(amount,empire))
             allied_total += amount
-        self.store.conn.execute("UPDATE balances SET available=available-? WHERE empire_id=?", (power, attacker))
-        defense = t[2] + allied_total
+        self.store.conn.execute("UPDATE balances SET available=available-? WHERE empire_id=?", (cost, attacker))
+        if self.economic_rules:
+            self.store.conn.execute("UPDATE empire_economy SET engineering=engineering-? WHERE empire_id=?",(cost,attacker))
+        defense = self.economic_rules.defense_power(0,t[2],allied_total) if self.economic_rules else t[2]+allied_total
         success = attack_succeeds(power, defense)
         self.store.conn.execute("INSERT INTO attacks(id,kind,attacker_empire_id,defender_empire_id,origin_id,target_id,attack_power,allied_defense,alliance_id,created_at,resolved,success,deadline_at,attacker_cost_locked) VALUES(?,?,?,?,?,?,?,?,?,?,1,?,NULL,0)",
             (attack_id, kind, attacker, defender, origin, target, power, allied_total,
@@ -406,12 +510,31 @@ class Engine:
             reward = raid_reward(power, defender_available)
             self.store.conn.execute("UPDATE balances SET available=available-? WHERE empire_id=?", (reward, defender))
             self.store.conn.execute("UPDATE balances SET available=available+? WHERE empire_id=?", (reward, attacker))
+            if self.economic_rules:
+                self.store.conn.execute("UPDATE empire_economy SET engineering=engineering-? WHERE empire_id=?",(reward,defender))
+                self.store.conn.execute("UPDATE empire_economy SET engineering=engineering+? WHERE empire_id=?",(reward,attacker))
         elif kind == "SIEGE" and success:
             self.store.conn.execute("UPDATE territories SET owner_empire_id=? WHERE id=?", (attacker, target))
+            self._record_fatigue(attack_id,attacker)
         for empire, amount in sorted(contributions.items()):
             self.store.conn.execute("UPDATE balances SET available=available+?,locked=locked-? WHERE empire_id=?", (amount, amount, empire))
+            if self.economic_rules:
+                self.store.conn.execute("UPDATE empire_economy SET engineering=engineering+? WHERE empire_id=?",(amount,empire))
         return {"attack_id": attack_id, "kind": kind, "success": success, "attack": power,
-                "defense": defense, "raid_reward": reward, "alliance_id_at_creation": alliance_id}
+                "offensive_cost":cost,"fatigue_cost":cost-power,"defense": defense,
+                "raid_reward": reward, "alliance_id_at_creation": alliance_id}
+
+    def _offensive_cost(self,empire: str,base: int)->int:
+        if not self.economic_rules: return base
+        next_seq=self.store.one("SELECT COALESCE(MAX(seq),0)+1 FROM events")[0]
+        count=self.store.one("SELECT COUNT(*) FROM offensive_fatigue WHERE empire_id=? AND event_seq>?",
+            (empire,next_seq-self.economic_rules.fatigue_window_actions))[0]
+        return self.economic_rules.offensive_cost(base,count)
+
+    def _record_fatigue(self,attack_id: str,empire: str)->None:
+        if self.economic_rules:
+            next_seq=self.store.one("SELECT COALESCE(MAX(seq),0)+1 FROM events")[0]
+            self.store.conn.execute("INSERT INTO offensive_fatigue VALUES(?,?,?)",(attack_id,empire,next_seq))
 
     def _do_raid(self, did: str, p: dict[str, Any], now: int) -> dict[str, Any]:
         return self._combat(did, p, now, "RAID")

@@ -33,6 +33,12 @@ spends available resources and permanently increases territory defense.
 Combat never mints resources. Adapter boundaries for possible future settlement
 systems are inert and outside v0.1.
 
+A Season manifest explicitly selects its economic rules version. Historical
+`technical-yield-v0.1` state projection remains unchanged. A v0.2 Season also
+materializes Prestige, resource-specific balances, epoch attribution, and
+offensive fatigue in hashed state. Epoch settlement is sequential and may occur
+once per epoch; restart cannot repeat accrual or upkeep.
+
 ## Alliances and intelligence
 
 Alliances are explicit and may be activated or deactivated. Only an alliance
@@ -59,6 +65,12 @@ is untrusted and never executed. Cursor and accepted record IDs persist locally.
 Normal startup bootstraps at the current cursor and does not replay history;
 audit/replay is explicit. Duplicate records are harmless. Outages never rewind
 state. `seq` and `ts` are evidence only; deadlines use persisted `accepted_at`.
+
+Expected hostile records (invalid signature, unknown or non-allowlisted DID,
+malformed command, wrong Season, actor spoofing, conflict, or unsupported action)
+are rejected and the durable cursor advances. They do not halt later valid work.
+Cryptographic signer mismatch, event-chain corruption, database integrity
+failure, or materialized-state divergence remains a fail-closed integrity halt.
 
 ## GitHub boundary
 

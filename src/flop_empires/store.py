@@ -95,6 +95,35 @@ CREATE TABLE receipt_outbox_v2(
 INSERT INTO receipt_outbox_v2 SELECT receipt_hash,actor_did,request_id,receipt_json,status,publish_ref,readback_verified,attempts FROM receipt_outbox;
 DROP TABLE receipt_outbox;
 ALTER TABLE receipt_outbox_v2 RENAME TO receipt_outbox;
+""",
+"""
+CREATE TABLE IF NOT EXISTS empire_economy(
+  empire_id TEXT PRIMARY KEY REFERENCES empires(id),
+  prestige INTEGER NOT NULL DEFAULT 0 CHECK(prestige>=0),
+  engineering INTEGER NOT NULL DEFAULT 0 CHECK(engineering>=0),
+  knowledge INTEGER NOT NULL DEFAULT 0 CHECK(knowledge>=0),
+  influence INTEGER NOT NULL DEFAULT 0 CHECK(influence>=0),
+  last_settled_epoch INTEGER NOT NULL DEFAULT -1
+);
+CREATE TABLE IF NOT EXISTS economic_epochs(
+  empire_id TEXT NOT NULL REFERENCES empires(id),
+  epoch INTEGER NOT NULL CHECK(epoch>=0),
+  attribution_json TEXT NOT NULL,
+  PRIMARY KEY(empire_id,epoch)
+);
+CREATE TABLE IF NOT EXISTS offensive_fatigue(
+  attack_id TEXT PRIMARY KEY REFERENCES attacks(id),
+  empire_id TEXT NOT NULL REFERENCES empires(id),
+  event_seq INTEGER NOT NULL CHECK(event_seq>0)
+);
+CREATE TABLE IF NOT EXISTS technocore_rejections(
+  record_id TEXT PRIMARY KEY,
+  mailbox TEXT NOT NULL,
+  seq INTEGER,
+  ts TEXT,
+  code TEXT NOT NULL,
+  observed_at INTEGER NOT NULL
+);
 """
 ]
 
@@ -106,6 +135,8 @@ class Store:
         self.conn.execute("PRAGMA foreign_keys=ON")
         self.conn.execute("PRAGMA journal_mode=WAL")
         self.migrate()
+        if self.conn.execute("PRAGMA quick_check").fetchone()[0] != "ok":
+            raise RuntimeError("database integrity failure")
 
     def migrate(self) -> None:
         self.conn.execute("CREATE TABLE IF NOT EXISTS schema_migrations(version INTEGER PRIMARY KEY)")
@@ -134,7 +165,13 @@ class Store:
         return self.conn.execute(sql, args).fetchone()
 
     def state(self) -> dict[str, Any]:
+        # Keep the v0.1 projection byte-for-byte stable. Empty v0.2 migration
+        # tables must not silently change a historical v0.1 state hash.
         tables = ["config", "actors", "empires", "memberships", "github_bindings", "contribution_clusters", "contribution_evidence", "balances", "territories", "territory_edges", "alliances", "alliance_members", "attacks", "attack_eligible_allies", "attack_defenses"]
+        version=self.one("SELECT value FROM config WHERE key='economic_rules_version'")
+        if version and version[0]=="technical-yield-v0.2":
+            tables[8:8]=["empire_economy","economic_epochs"]
+            tables.append("offensive_fatigue")
         result: dict[str, Any] = {}
         for table in tables:
             rows = [dict(r) for r in self.conn.execute(f"SELECT * FROM {table} ORDER BY 1,2")]

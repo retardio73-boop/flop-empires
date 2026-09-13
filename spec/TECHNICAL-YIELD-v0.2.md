@@ -19,7 +19,15 @@ Let `P` be Prestige and `T` the manifest `linear_threshold`:
 
 The curve is deterministic, monotonic, linear below the threshold, and strictly
 sublinear above it. Manifest basis-point weights allocate the result among
-ENGINEERING, KNOWLEDGE, and INFLUENCE.
+ENGINEERING, KNOWLEDGE, and INFLUENCE. Each epoch accrues the integer floor of
+each resource allocation divided by the manifest `yield_epoch_divisor`. This
+parameter is part of the normative Season rules; it is not simulator-only.
+
+The authoritative epoch transition is `epoch_attribution`: contribution value,
+Prestige, diminishing-return loss, per-epoch allocation, territory production,
+overextension, upkeep, and carrying cost are computed together and committed
+to the event ledger. Engine execution, replay, and v0.2 simulations call this
+same implementation.
 
 ## Structural expansion costs
 
