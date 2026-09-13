@@ -21,7 +21,11 @@ def command(did,rid,action,**payload):
 def manifest(referee,r):
     return SimpleNamespace(referee_did=referee.did,rules=r,manifest_hash="m"*64,
         initial_balances={"ENGINEERING":100,"KNOWLEDGE":0,"INFLUENCE":0},
-        epoch_duration=10,environment="staging")
+        epoch_duration=10,environment="staging",
+        combat_parameters={"capital_conquest":False,"max_deadline_seconds":86400,
+            "raid_reward_divisor":2,"tie_goes_to_defender":True},
+        alliance_parameters={"eligibility_snapshotted":True,
+            "max_defensive_alliances":2,"support_coefficient_bp":10000})
 
 
 def test_v02_prestige_epoch_attribution_and_no_double_settlement():

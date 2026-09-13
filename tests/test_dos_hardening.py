@@ -1,6 +1,7 @@
 from dataclasses import replace
 
 import pytest
+import httpx
 
 from flop_empires.canonical import bytes_
 from flop_empires.engine import Engine
@@ -8,7 +9,7 @@ from flop_empires.identity import EphemeralSigner
 from flop_empires.models import SignedRecord
 from flop_empires.store import Store
 from flop_empires.technocore import (ErrorDisposition,MailboxItem,TechnocoreIngestor,
-    signed_record_body)
+    ExpectedHostileInput,error_disposition,signed_record_body)
 
 
 def record(record_id,signer,payload,seq,valid=True):
@@ -40,6 +41,9 @@ def test_expected_hostile_batch_advances_and_valid_next_action_executes():
 def test_error_taxonomy_is_explicit():
     assert set(ErrorDisposition)=={ErrorDisposition.REJECT_AND_CONTINUE,
         ErrorDisposition.RETRY_TRANSIENT,ErrorDisposition.HALT_INTEGRITY_FAILURE}
+    assert error_disposition(ExpectedHostileInput("UNKNOWN_DID"))==ErrorDisposition.REJECT_AND_CONTINUE
+    assert error_disposition(httpx.ReadTimeout("timeout"))==ErrorDisposition.RETRY_TRANSIENT
+    assert error_disposition(TimeoutError())==ErrorDisposition.HALT_INTEGRITY_FAILURE
 
 
 def test_event_chain_corruption_halts_new_engine():

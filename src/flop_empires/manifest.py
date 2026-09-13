@@ -45,6 +45,16 @@ class SeasonManifestV02:
             raise ValueError("invalid actor allowlist")
         if set(v["initial_balances"])!={"ENGINEERING","KNOWLEDGE","INFLUENCE"}: raise ValueError("invalid initial balances")
         if any(not isinstance(x,int) or x<0 for x in v["initial_balances"].values()): raise ValueError("invalid initial balances")
+        combat=v["combat_parameters"]
+        if (combat.get("capital_conquest") is not False or combat.get("tie_goes_to_defender") is not True or
+                not isinstance(combat.get("max_deadline_seconds"),int) or combat["max_deadline_seconds"]<1 or
+                not isinstance(combat.get("raid_reward_divisor"),int) or combat["raid_reward_divisor"]<2):
+            raise ValueError("invalid combat parameters")
+        alliance=v["alliance_parameters"]
+        if (alliance.get("eligibility_snapshotted") is not True or
+                not isinstance(alliance.get("max_defensive_alliances"),int) or alliance["max_defensive_alliances"]<1 or
+                not isinstance(alliance.get("support_coefficient_bp"),int) or not 0<=alliance["support_coefficient_bp"]<=10_000):
+            raise ValueError("invalid alliance parameters")
         EconomicRulesV02.from_manifest(v)
 
     @property

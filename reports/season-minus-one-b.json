@@ -1,0 +1,3772 @@
+{
+  "action_records_seen": 165,
+  "actors": [
+    "did:key:z6MkoABpefAfqTe2YQT1JnVRREzzsRLdH9bBCEEYzfP5gonj",
+    "did:key:z6MkftyNv5UjqPHbsK8bLnbxspaWfG3mGSoR294YRA5XDz5u",
+    "did:key:z6MkuCEkyhfbrfqHCazXy7sFpJEKEHYD2YsiWYzvQ5zXhw8N",
+    "did:key:z6Mkfc8AXJFDhWgeJBn831yvuxmDxJd8DkaS2AVyGUC1JtCp"
+  ],
+  "all_receipts_verified": true,
+  "alliance_defenses_accepted": 6,
+  "capital_conquests": 0,
+  "combat_resource_creation": 0,
+  "commands": 162,
+  "conflict_result": "REQUEST_ID_CONFLICT",
+  "duplicate_same_receipt": true,
+  "economy": [
+    {
+      "empire_id": "s1b-e1",
+      "engineering": 2481,
+      "influence": 314,
+      "knowledge": 540,
+      "last_settled_epoch": 45,
+      "prestige": 1000
+    },
+    {
+      "empire_id": "s1b-e2",
+      "engineering": 3893,
+      "influence": 690,
+      "knowledge": 1150,
+      "last_settled_epoch": 45,
+      "prestige": 2000
+    },
+    {
+      "empire_id": "s1b-e3",
+      "engineering": 5241,
+      "influence": 1012,
+      "knowledge": 1702,
+      "last_settled_epoch": 45,
+      "prestige": 5000
+    },
+    {
+      "empire_id": "s1b-e4",
+      "engineering": 6078,
+      "influence": 1380,
+      "knowledge": 2300,
+      "last_settled_epoch": 45,
+      "prestige": 10000
+    }
+  ],
+  "epoch_attribution": [
+    {
+      "allocation": {
+        "ENGINEERING": 15,
+        "INFLUENCE": 3,
+        "KNOWLEDGE": 6
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 500,
+      "empire_id": "s1b-e1",
+      "epoch": 0,
+      "gross_spendable_yield": 24,
+      "overextension_penalty": 6,
+      "prestige": 500,
+      "raw_contribution": 500,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 8,
+      "upkeep": 8
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 0,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 8,
+      "upkeep": 8
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 0,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 8,
+      "upkeep": 8
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 0,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 8,
+      "upkeep": 8
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 15,
+        "INFLUENCE": 3,
+        "KNOWLEDGE": 6
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 500,
+      "empire_id": "s1b-e1",
+      "epoch": 1,
+      "gross_spendable_yield": 24,
+      "overextension_penalty": 6,
+      "prestige": 500,
+      "raw_contribution": 500,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 8,
+      "upkeep": 8
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 1,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 8,
+      "upkeep": 8
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 1,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 8,
+      "upkeep": 8
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 1,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 8,
+      "upkeep": 8
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 2,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 8,
+      "upkeep": 8
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 2,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 8,
+      "upkeep": 8
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 2,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 8,
+      "upkeep": 8
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 2,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 8,
+      "upkeep": 8
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 3,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 3,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 3,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 3,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 4,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 4,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 4,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 4,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 5,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 5,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 5,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 5,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 6,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 6,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 6,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 6,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 7,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 7,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 7,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 7,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 8,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 8,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 8,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 8,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 9,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 9,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 9,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 9,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 10,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 10,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 10,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 10,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 11,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 11,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 11,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 11,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 12,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 12,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 12,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 12,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 13,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 13,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 13,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 13,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 14,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 14,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 14,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 14,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 15,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 15,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 15,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 15,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 16,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 16,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 16,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 16,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 17,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 17,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 17,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 17,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 18,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 18,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 18,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 18,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 19,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 19,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 19,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 19,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 20,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 20,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 20,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 20,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 21,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 21,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 21,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 21,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 22,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 22,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 22,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 22,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 23,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 23,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 23,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 23,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 24,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 24,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 24,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 24,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 25,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 25,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 25,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 25,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 26,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 26,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 26,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 26,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 27,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 27,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 27,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 27,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 28,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 28,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 28,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 28,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 29,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 29,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 29,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 29,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 30,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 30,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 30,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 30,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 31,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 31,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 31,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 31,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 32,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 32,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 32,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 32,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 33,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 33,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 33,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 33,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 34,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 34,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 34,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 34,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 4,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 13,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 35,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 35,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 35,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 35,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 14,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 23,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 36,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 36,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 36,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 36,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 23,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 32,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 37,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 37,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 37,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 37,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 32,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 41,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 38,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 38,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 38,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 38,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 40,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 49,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 39,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 39,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 39,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 39,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 47,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 56,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 40,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 40,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 40,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 40,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 54,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 63,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 41,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 41,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 41,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 41,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 60,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 69,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 42,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 42,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 42,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 42,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 66,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 75,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 43,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 43,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 43,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 3,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 12,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 43,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 72,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 81,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 44,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 44,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 44,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 11,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 20,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 44,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 77,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 86,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 30,
+        "INFLUENCE": 7,
+        "KNOWLEDGE": 12
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 1000,
+      "empire_id": "s1b-e1",
+      "epoch": 45,
+      "gross_spendable_yield": 49,
+      "overextension_penalty": 6,
+      "prestige": 1000,
+      "raw_contribution": 1000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 60,
+        "INFLUENCE": 15,
+        "KNOWLEDGE": 25
+      },
+      "diminishing_return_loss": 0,
+      "effective_spendable_yield": 2000,
+      "empire_id": "s1b-e2",
+      "epoch": 45,
+      "gross_spendable_yield": 100,
+      "overextension_penalty": 6,
+      "prestige": 2000,
+      "raw_contribution": 2000,
+      "stockpile_cost": 0,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 9,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 90,
+        "INFLUENCE": 22,
+        "KNOWLEDGE": 37
+      },
+      "diminishing_return_loss": 2000,
+      "effective_spendable_yield": 3000,
+      "empire_id": "s1b-e3",
+      "epoch": 45,
+      "gross_spendable_yield": 149,
+      "overextension_penalty": 6,
+      "prestige": 5000,
+      "raw_contribution": 5000,
+      "stockpile_cost": 18,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 27,
+      "upkeep": 9
+    },
+    {
+      "allocation": {
+        "ENGINEERING": 120,
+        "INFLUENCE": 30,
+        "KNOWLEDGE": 50
+      },
+      "diminishing_return_loss": 6000,
+      "effective_spendable_yield": 4000,
+      "empire_id": "s1b-e4",
+      "epoch": 45,
+      "gross_spendable_yield": 200,
+      "overextension_penalty": 6,
+      "prestige": 10000,
+      "raw_contribution": 10000,
+      "stockpile_cost": 82,
+      "territory_production": 34,
+      "territory_production_raw": 40,
+      "total_cost": 91,
+      "upkeep": 9
+    }
+  ],
+  "epochs": 46,
+  "event_chain_verified": true,
+  "events": 161,
+  "hostile_records_rejected": 3,
+  "invalid_signature_rejected_by_technocore": true,
+  "locked_resources_preserved_across_restart": true,
+  "manifest_hash": "0f73e91358d8bb8f487c0996985ca9bfe9726e331c151bd282a0ab6c81f83d58",
+  "namespace": {
+    "actions": "mb-p-staging-flop-empires-s1b-9442-actions",
+    "events": "mb-p-staging-flop-empires-s1b-9442-events"
+  },
+  "overextension_penalty_total": 1104,
+  "pending_receipts": 0,
+  "prestige_order": [
+    "s1b-e4",
+    "s1b-e3",
+    "s1b-e2",
+    "s1b-e1"
+  ],
+  "replay": {
+    "events_replayed": 161,
+    "match": true,
+    "persisted_state_hash": "cd3527f6af01c695948a615e4ad369d6fa77bba396348592d5da848efb09fd2e",
+    "reconstructed_state_hash": "cd3527f6af01c695948a615e4ad369d6fa77bba396348592d5da848efb09fd2e"
+  },
+  "restarts": 3,
+  "season_id": "staging-season-minus-one-b-9442",
+  "secrets_in_report": false,
+  "spendable_order": [
+    "s1b-e4",
+    "s1b-e3",
+    "s1b-e2",
+    "s1b-e1"
+  ],
+  "state_final_hash": "cd3527f6af01c695948a615e4ad369d6fa77bba396348592d5da848efb09fd2e",
+  "stockpile_cost_total": 603,
+  "unauthorized_transitions": 0,
+  "upkeep_total": 1644,
+  "valid_after_hostile": true,
+  "verified_receipts": 161
+}

@@ -32,7 +32,9 @@ class Engine:
     def from_manifest(cls,store: Store,manifest,signer: Signer,clock=None)->"Engine":
         return cls(store,manifest.referee_did,signer,clock=clock,economic_rules=manifest.rules,
             manifest_hash=manifest.manifest_hash,initial_balances=manifest.initial_balances,
-            epoch_duration=manifest.epoch_duration,environment=manifest.environment)
+            epoch_duration=manifest.epoch_duration,environment=manifest.environment,
+            combat_parameters=manifest.combat_parameters,
+            alliance_parameters=manifest.alliance_parameters)
 
     def __init__(self, store: Store, configured_referee_did: str, signer: Signer | None,
                  clock: Callable[[], int] | None = None, *,
@@ -40,7 +42,8 @@ class Engine:
                  manifest_hash: str | None = None,
                  initial_balances: dict[str,int] | None = None,
                  epoch_duration: int = EPOCH_SECONDS,
-                 environment: str = "local"):
+                 environment: str = "local",combat_parameters: dict[str,Any] | None = None,
+                 alliance_parameters: dict[str,Any] | None = None):
         self.store = store
         if store.one("SELECT 1 FROM events LIMIT 1"): require_valid_chain(store)
         self.signer = require_signer(configured_referee_did, signer)
@@ -48,6 +51,11 @@ class Engine:
         self.economic_rules=economic_rules
         self.initial_balances=initial_balances or {"ENGINEERING":0,"KNOWLEDGE":0,"INFLUENCE":0}
         self.epoch_duration=epoch_duration; self.environment=environment
+        self.combat_parameters=combat_parameters or {"capital_conquest":False,
+            "max_deadline_seconds":86_400,"min_deadline_seconds":1,
+            "raid_reward_divisor":2,"tie_goes_to_defender":True}
+        self.alliance_parameters=alliance_parameters or {"eligibility_snapshotted":True,
+            "max_defensive_alliances":2,"support_coefficient_bp":10_000}
         existing = store.one("SELECT value FROM config WHERE key='referee_did'")
         if existing and existing[0] != configured_referee_did:
             raise RuntimeError("database belongs to a different referee DID")
@@ -355,6 +363,12 @@ class Engine:
         active = p.get("active")
         if not isinstance(active, bool):
             raise RuleViolation("active must be boolean")
+        if active:
+            members=[r[0] for r in self.store.conn.execute("SELECT empire_id FROM alliance_members WHERE alliance_id=?",(aid,))]
+            maximum=self.alliance_parameters["max_defensive_alliances"]
+            for member in members:
+                count=self.store.one("SELECT COUNT(*) FROM alliances a JOIN alliance_members m ON m.alliance_id=a.id WHERE m.empire_id=? AND a.active=1",(member,))[0]
+                if count>=maximum: raise RuleViolation("maximum defensive alliances reached")
         self.store.conn.execute("UPDATE alliances SET active=? WHERE id=?", (int(active), aid))
         return {"alliance_id": aid, "active": active}
 
@@ -371,7 +385,8 @@ class Engine:
         attack_id, origin, target = self._text(p, "attack_id"), self._text(p, "origin_id"), self._text(p, "target_id")
         kind, power = self._text(p, "kind").upper(), self._amount(p, "power")
         deadline_seconds = self._amount(p, "deadline_seconds")
-        if kind not in {"RAID", "SIEGE"} or deadline_seconds > 86_400:
+        if (kind not in {"RAID", "SIEGE"} or
+                not self.combat_parameters.get("min_deadline_seconds",1)<=deadline_seconds<=self.combat_parameters["max_deadline_seconds"]):
             raise RuleViolation("invalid attack kind or deadline")
         o = self.store.one("SELECT owner_empire_id FROM territories WHERE id=?", (origin,))
         t = self.store.one("SELECT owner_empire_id,is_capital FROM territories WHERE id=?", (target,))
@@ -434,7 +449,8 @@ class Engine:
         defense_rows=list(self.store.conn.execute("SELECT empire_id,amount FROM attack_defenses WHERE attack_id=?",(attack_id,)))
         defender_engineering=sum(r["amount"] for r in defense_rows if r["empire_id"]==attack["defender_empire_id"])
         allied=sum(r["amount"] for r in defense_rows if r["empire_id"]!=attack["defender_empire_id"])
-        defense = (self.economic_rules.defense_power(defender_engineering,target["fortification"],allied)
+        allied_effective=allied*self.alliance_parameters["support_coefficient_bp"]//10_000
+        defense = (self.economic_rules.defense_power(defender_engineering,target["fortification"],allied_effective)
             if self.economic_rules else target["fortification"]+attack["allied_defense"])
         success = attack_succeeds(attack["attack_power"], defense)
         attacker, defender = attack["attacker_empire_id"], attack["defender_empire_id"]
@@ -443,7 +459,8 @@ class Engine:
         reward = 0
         if attack["kind"] == "RAID" and success:
             defender_available = self.store.one("SELECT available FROM balances WHERE empire_id=?", (defender,))[0]
-            reward = raid_reward(attack["attack_power"], defender_available)
+            reward = (raid_reward(attack["attack_power"],defender_available) if not self.economic_rules else
+                min(attack["attack_power"]//self.combat_parameters["raid_reward_divisor"],defender_available))
             self.store.conn.execute("UPDATE balances SET available=available-? WHERE empire_id=?", (reward, defender))
             self.store.conn.execute("UPDATE balances SET available=available+? WHERE empire_id=?", (reward, attacker))
             if self.economic_rules:
@@ -499,7 +516,8 @@ class Engine:
         self.store.conn.execute("UPDATE balances SET available=available-? WHERE empire_id=?", (cost, attacker))
         if self.economic_rules:
             self.store.conn.execute("UPDATE empire_economy SET engineering=engineering-? WHERE empire_id=?",(cost,attacker))
-        defense = self.economic_rules.defense_power(0,t[2],allied_total) if self.economic_rules else t[2]+allied_total
+        allied_effective=allied_total*self.alliance_parameters["support_coefficient_bp"]//10_000
+        defense = self.economic_rules.defense_power(0,t[2],allied_effective) if self.economic_rules else t[2]+allied_total
         success = attack_succeeds(power, defense)
         self.store.conn.execute("INSERT INTO attacks(id,kind,attacker_empire_id,defender_empire_id,origin_id,target_id,attack_power,allied_defense,alliance_id,created_at,resolved,success,deadline_at,attacker_cost_locked) VALUES(?,?,?,?,?,?,?,?,?,?,1,?,NULL,0)",
             (attack_id, kind, attacker, defender, origin, target, power, allied_total,
@@ -507,7 +525,8 @@ class Engine:
         reward = 0
         if kind == "RAID" and success:
             defender_available = self.store.one("SELECT available FROM balances WHERE empire_id=?", (defender,))[0]
-            reward = raid_reward(power, defender_available)
+            reward = (raid_reward(power,defender_available) if not self.economic_rules else
+                min(power//self.combat_parameters["raid_reward_divisor"],defender_available))
             self.store.conn.execute("UPDATE balances SET available=available-? WHERE empire_id=?", (reward, defender))
             self.store.conn.execute("UPDATE balances SET available=available+? WHERE empire_id=?", (reward, attacker))
             if self.economic_rules:

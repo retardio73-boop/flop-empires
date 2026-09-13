@@ -28,6 +28,16 @@ class ExpectedHostileInput(RuleViolation):
     def __init__(self,code: str): self.code=code; super().__init__(code)
 
 
+def error_disposition(exc: BaseException)->ErrorDisposition:
+    """Stable operator taxonomy; classification never changes game semantics."""
+    if isinstance(exc,ExpectedHostileInput): return ErrorDisposition.REJECT_AND_CONTINUE
+    if isinstance(exc,(httpx.TimeoutException,httpx.TransportError)):
+        return ErrorDisposition.RETRY_TRANSIENT
+    if isinstance(exc,httpx.HTTPStatusError) and exc.response.status_code>=500:
+        return ErrorDisposition.RETRY_TRANSIENT
+    return ErrorDisposition.HALT_INTEGRITY_FAILURE
+
+
 @dataclass(frozen=True)
 class MailboxItem:
     record: SignedRecord

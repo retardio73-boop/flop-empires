@@ -19,3 +19,11 @@ def test_complete_season_minus_one_b_manifest_selects_normative_v02():
 def test_season_minus_one_b_requires_explicit_confirmation(tmp_path):
     with pytest.raises(RuntimeError,match="EXPLICIT_CONFIRMATION"):
         run(ROOT/"season/season-minus-one-b-live.json",tmp_path/"db.sqlite")
+
+
+def test_manifest_combat_and_alliance_safety_parameters_are_normative():
+    manifest=SeasonManifestV02.load(ROOT/"season/season-minus-one-b-live.json")
+    assert manifest.combat_parameters=={"capital_conquest":False,"max_deadline_seconds":86400,
+        "raid_reward_divisor":2,"tie_goes_to_defender":True}
+    assert manifest.alliance_parameters["eligibility_snapshotted"] is True
+    assert manifest.alliance_parameters["support_coefficient_bp"]==10000

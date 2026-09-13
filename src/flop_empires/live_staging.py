@@ -40,13 +40,6 @@ def _post_and_ingest(command: dict, action_transport: TechnocoreTransport,
         sha256(wire), text, semantic_dedupe=semantic_dedupe)
     if not verified:
         raise RuntimeError("ACTION_READBACK_NOT_VERIFIED")
-    receipts = []
-    for attempt in range(20):
-        receipts = ingestor.poll(action_transport)
-        if receipts:
-            break
-        if attempt < 19:
-            time.sleep(0.5)
     command_hash = sha256(command)
     prior = ingestor.store.one(
         "SELECT receipt_json FROM requests WHERE actor_did=? AND request_id=? AND command_hash=?",
@@ -55,6 +48,21 @@ def _post_and_ingest(command: dict, action_transport: TechnocoreTransport,
         prior = ingestor.store.one(
             "SELECT receipt_json FROM request_conflicts WHERE actor_did=? AND request_id=? AND command_hash=?",
             (command["actor_did"], command["request_id"], command_hash))
+    receipts = []
+    if not prior:
+        for attempt in range(20):
+            receipts = ingestor.poll(action_transport)
+            if receipts:
+                break
+            if attempt < 19:
+                time.sleep(0.5)
+        prior = ingestor.store.one(
+            "SELECT receipt_json FROM requests WHERE actor_did=? AND request_id=? AND command_hash=?",
+            (command["actor_did"], command["request_id"], command_hash))
+        if not prior:
+            prior = ingestor.store.one(
+                "SELECT receipt_json FROM request_conflicts WHERE actor_did=? AND request_id=? AND command_hash=?",
+                (command["actor_did"], command["request_id"], command_hash))
     if not prior:
         raise RuntimeError("ACTION_NOT_OBSERVED_AFTER_POST")
     from .models import Receipt

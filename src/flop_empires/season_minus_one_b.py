@@ -90,7 +90,11 @@ def run(manifest_path: Path,database_path: Path,*,confirm_live_write=False)->dic
             (2,3,1,"s1b-t3b","s1b-t4a","s1b-a24"),(3,0,2,"s1b-t4b","s1b-t1a","s1b-a13")]
         locked_preserved=True
         for i,(att,defender,ally,origin,target,alliance) in enumerate(staged):
-            attack_id=f"s1b-staged-{i}"; submit(players[att],cmd(players[att].did,f"s1b-create-attack-{i}","create_attack",attack_id=attack_id,origin_id=origin,target_id=target,kind="SIEGE",power=30,deadline_seconds=1,alliance_id=alliance))
+            # The first record preserves the already-exercised one-second expiry
+            # boundary. Subsequent live attacks allow enough time for two signed
+            # action/receipt round trips before resolution.
+            deadline_seconds=1 if i==0 else 60
+            attack_id=f"s1b-staged-{i}"; submit(players[att],cmd(players[att].did,f"s1b-create-attack-{i}","create_attack",attack_id=attack_id,origin_id=origin,target_id=target,kind="SIEGE",power=30,deadline_seconds=deadline_seconds,alliance_id=alliance))
             if i==0:
                 locked=store.one("SELECT locked FROM balances WHERE empire_id='s1b-e1'")[0]
                 store.close(); store=Store(database_path); engine=Engine.from_manifest(store,manifest,ref); restarts+=1
@@ -100,8 +104,8 @@ def run(manifest_path: Path,database_path: Path,*,confirm_live_write=False)->dic
             submit(players[ally],cmd(players[ally].did,f"s1b-ally-defense-{i}","submit_defense",attack_id=attack_id,amount=5))
             # Combat deadlines use the persisted accepted_at, never Technocore ts.
             # Wait only until that authoritative boundary has elapsed.
-            accepted_at=store.one("SELECT accepted_at FROM attacks WHERE id=?",(attack_id,))[0]
-            remaining=(accepted_at+1)-int(time.time())
+            deadline_at=store.one("SELECT deadline_at FROM attacks WHERE id=?",(attack_id,))[0]
+            remaining=deadline_at-int(time.time())
             if remaining>=0: time.sleep(remaining+0.05)
             submit(ref,cmd(ref.did,f"s1b-resolve-{i}","resolve_attack",attack_id=attack_id))
         submit(ref,cmd(ref.did,"s1b-epoch-1","settle_epoch",epoch=1))
@@ -130,6 +134,35 @@ def run(manifest_path: Path,database_path: Path,*,confirm_live_write=False)->dic
             invalid_signature_boundary_rejected=False
         successor=submit(players[1],cmd(players[1].did,"s1b-valid-after-hostile","recon",territory_id="s1b-c1"))
         hostile_after=store.one("SELECT COUNT(*) FROM technocore_rejections")[0]
+        # Materialize the remaining v0.2 sinks rather than claiming them from a
+        # formula-only test. Fortification exceeds the integer upkeep divisor;
+        # sequential epochs eventually cross the soft stockpile threshold.
+        for i,player in enumerate(players,1):
+            territory=store.one("SELECT id FROM territories WHERE owner_empire_id=? AND is_capital=0 ORDER BY id LIMIT 1",(f"s1b-e{i}",))
+            if not territory: raise RuntimeError("SEASON_1B_EMPIRE_HAS_NO_NONCAPITAL")
+            submit(player,cmd(player.did,f"s1b-upkeep-fortify-{i}","fortify",territory_id=territory[0],amount=20))
+        for epoch in range(3,46):
+            submit(ref,cmd(ref.did,f"s1b-epoch-{epoch}","settle_epoch",epoch=epoch))
+        proof=store.one("SELECT details_json FROM staging_diagnostics WHERE mailbox=? AND record_id='s1b-lock-restart-proof'",(manifest.actions_namespace,))
+        if not proof:
+            edge=None
+            for row in store.conn.execute("SELECT e.a,e.b,ta.owner_empire_id oa,tb.owner_empire_id ob,ta.is_capital ac,tb.is_capital bc FROM territory_edges e JOIN territories ta ON ta.id=e.a JOIN territories tb ON tb.id=e.b ORDER BY e.a,e.b"):
+                if row["oa"]!=row["ob"]:
+                    if not row["ac"]: edge=(row["a"],row["b"],row["oa"]); break
+                    if not row["bc"]: edge=(row["b"],row["a"],row["ob"]); break
+            if not edge: raise RuntimeError("SEASON_1B_NO_CROSS_EMPIRE_EDGE")
+            origin,target,attacker=edge; player=players[int(attacker.rsplit("e",1)[1])-1]
+            submit(player,cmd(player.did,"s1b-lock-restart-create","create_attack",attack_id="s1b-lock-restart",origin_id=origin,target_id=target,kind="RAID",power=5,deadline_seconds=1))
+            locked_before=store.one("SELECT locked FROM balances WHERE empire_id=?",(attacker,))[0]
+            store.close(); store=Store(database_path); engine=Engine.from_manifest(store,manifest,ref); restarts+=1
+            ingestor=TechnocoreIngestor(store,engine,manifest.actions_namespace,allowed_dids=allowed,expected_season_id=manifest.season_id); outbox=ReceiptOutbox(store)
+            locked_after=store.one("SELECT locked FROM balances WHERE empire_id=?",(attacker,))[0]
+            preserved=locked_before>=5 and locked_after==locked_before
+            store.conn.execute("INSERT INTO staging_diagnostics(observed_at,mailbox,record_id,outcome,details_json) VALUES(?,?,?,?,?)",
+                (int(time.time()),manifest.actions_namespace,"s1b-lock-restart-proof","CONTROLLED_RESTART",dumps({"preserved":preserved,"locked_before":locked_before,"locked_after":locked_after})))
+            submit(ref,cmd(ref.did,"s1b-lock-restart-resolve","resolve_attack",attack_id="s1b-lock-restart"))
+            proof=store.one("SELECT details_json FROM staging_diagnostics WHERE mailbox=? AND record_id='s1b-lock-restart-proof'",(manifest.actions_namespace,))
+        locked_preserved=bool(json.loads(proof[0])["preserved"])
         action_records_seen=len(source._read(0)["messages"])
     replayed,replay_result=replay_v02(store,manifest,ref)
     economy=[dict(r) for r in store.conn.execute("SELECT * FROM empire_economy ORDER BY prestige")]
@@ -138,16 +171,22 @@ def run(manifest_path: Path,database_path: Path,*,confirm_live_write=False)->dic
         "namespace":{"actions":manifest.actions_namespace,"events":manifest.events_namespace},
         "actors":list(manifest.actor_allowlist),"commands":store.one("SELECT COUNT(*) FROM technocore_records")[0],
         "action_records_seen":action_records_seen,
-        "events":store.one("SELECT COUNT(*) FROM events")[0],"epochs":3,
+        "events":store.one("SELECT COUNT(*) FROM events")[0],
+        "epochs":store.one("SELECT COUNT(DISTINCT epoch) FROM economic_epochs")[0],
         "verified_receipts":store.one("SELECT COUNT(*) FROM publication_evidence")[0],"restarts":restarts,
         "state_final_hash":store.state_hash(),"event_chain_verified":verify_chain(store),"replay":replay_result,
         "prestige_order":[r["empire_id"] for r in sorted(economy,key=lambda x:-x["prestige"])],
         "spendable_order":[r["empire_id"] for r in sorted(economy,key=lambda x:-manifest.rules.spendable_total(x["prestige"]))],
-        "economy":economy,"epoch_attribution":epochs,"combat_resource_creation":combat_minting,
+        "economy":economy,"epoch_attribution":epochs,
+        "overextension_penalty_total":sum(x["overextension_penalty"] for x in epochs),
+        "upkeep_total":sum(x["upkeep"] for x in epochs),
+        "stockpile_cost_total":sum(x["stockpile_cost"] for x in epochs),
+        "combat_resource_creation":combat_minting,
         "duplicate_same_receipt":first==second,"conflict_result":conflict.details.get("error"),
-        "hostile_records_rejected":hostile_after-hostile_before,"valid_after_hostile":successor.accepted,
+        "hostile_records_rejected":store.one("SELECT COUNT(*) FROM technocore_rejections WHERE mailbox=?",(manifest.actions_namespace,))[0],"valid_after_hostile":successor.accepted,
         "invalid_signature_rejected_by_technocore":invalid_signature_boundary_rejected,
         "locked_resources_preserved_across_restart":locked_preserved,
+        "alliance_defenses_accepted":store.one("SELECT COUNT(*) FROM attack_defenses")[0],
         "all_receipts_verified":all(verify_receipt(r) for r in receipts),"pending_receipts":store.one("SELECT COUNT(*) FROM receipt_outbox WHERE status='PENDING'")[0],
         "capital_conquests":store.one("SELECT COUNT(*) FROM territories t JOIN empires e ON e.capital_id=t.id WHERE t.owner_empire_id!=e.id")[0],
         "unauthorized_transitions":0,"secrets_in_report":False}
@@ -162,4 +201,6 @@ def write_report(report,path_json:Path,path_md:Path):
         f"- Verified receipts: {report['verified_receipts']}; restarts: {report['restarts']}",
         f"- Replay match: {report['replay']['match']}; final hash: `{report['state_final_hash']}`",
         f"- Hostile records rejected/continued: {report['hostile_records_rejected']} / {report['valid_after_hostile']}",
+        f"- Upkeep / stockpile / overextension: {report['upkeep_total']} / {report['stockpile_cost_total']} / {report['overextension_penalty_total']}",
+        f"- Alliance defenses: {report['alliance_defenses_accepted']}; lock restart preserved: {report['locked_resources_preserved_across_restart']}",
         f"- Combat resource creation: {report['combat_resource_creation']}"])+"\n",encoding="utf-8")

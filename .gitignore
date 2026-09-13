@@ -5,5 +5,7 @@ pytest-cache-files-*/
 .venv/
 *.egg-info/
 *.db
+*.db-shm
+*.db-wal
 *.sqlite*
 .env
