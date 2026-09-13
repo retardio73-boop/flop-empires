@@ -2,6 +2,15 @@
 
 - Malicious Technocore input is bounded, parsed as canonical JSON, signature
   checked over exact `room|nonce|text`, never executed, and never used to follow URLs.
+- Expected hostile input is classified `REJECT_AND_CONTINUE`. Invalid signatures,
+  unknown or non-allowlisted DIDs, malformed canonical payloads, wrong Seasons,
+  actor spoofing, request conflicts, and unsupported actions cannot advance game
+  state or stop processing of later records. Their record position is durably
+  diagnosed before the cursor advances.
+- Transient fixed-origin network failures are `RETRY_TRANSIENT` with bounded
+  attempts. Event-chain corruption, SQLite integrity failure, configured signer
+  mismatch, and replay/state divergence are `HALT_INTEGRITY_FAILURE`; the referee
+  never treats those conditions as ordinary player rejection.
 - Forged signatures and actor-field spoofing fail before command execution.
 - Replays are neutralized by stable record IDs plus actor/request idempotency.
 - A request ID collision with altered bytes is rejected.

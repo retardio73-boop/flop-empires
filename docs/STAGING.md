@@ -46,6 +46,15 @@ CurrentUser in `%LOCALAPPDATA%\FLOPEmpires\staging-identities-v1`. Enrollment is
 one-time and refuses replacement. `season/staging-live.json` contains only the
 public DIDs and a canonical manifest hash.
 
+Season -1B uses a new isolated namespace and the complete manifest at
+`season/season-minus-one-b-live.json`. It exercised the materialized v0.2 engine
+over 165 real action records: 161 signed receipt readbacks, 46 sequential epochs,
+three controlled restarts, additive alliance defense, offensive fatigue,
+fortification/territory upkeep, overextension, and non-zero stockpile carrying
+cost. Three hostile records were rejected without blocking the valid successor.
+The report is `reports/season-minus-one-b.json`; this is staging evidence, not a
+public Season or economic claim.
+
 The concrete `TechnocoreTransport` implements the detected current room JSON
 protocol (`GET/POST /r/{room}`, 48-character room bound, generation/sequence
 cursor, standard Ed25519 `did:key:z6Mk...`, unpadded base64url signatures, and

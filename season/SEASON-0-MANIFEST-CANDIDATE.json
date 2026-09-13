@@ -1,0 +1,44 @@
+{
+  "activation": "DISABLED_PENDING_HUMAN_REVIEW",
+  "candidate_hash": "d4ce94b50762def775b0de177f9f477bf85154a21cf8fb7c035782f43d5e4a9f",
+  "environment": "production-candidate-not-active",
+  "season_id": "season-0-candidate",
+  "protocol_version": "FLOP-Empires-v0.1",
+  "economic_rules_version": "technical-yield-v0.2",
+  "technical_yield_version": "technical-yield-v0.2",
+  "referee_did": "UNASSIGNED_DEDICATED_SEASON0_DID",
+  "actions_namespace": "UNASSIGNED_PRODUCTION_ACTIONS_NAMESPACE",
+  "events_namespace": "UNASSIGNED_PRODUCTION_EVENTS_NAMESPACE",
+  "registration_boundary": null,
+  "world_graph_hash": "aed9d864aa8cc100d46c4093bddd6ff031a623bdda3dea4cd321f2de746c1d93",
+  "epoch_duration": 604800,
+  "economic_parameters": {
+    "linear_threshold": 1000,
+    "engineering_weight_bp": 6000,
+    "knowledge_weight_bp": 2500,
+    "influence_weight_bp": 1500,
+    "yield_epoch_divisor": 20,
+    "overextension_penalty_bp": 1600,
+    "territory_benefit_units": 20,
+    "territory_upkeep_units": 4,
+    "fortification_upkeep_divisor": 20,
+    "stockpile_soft_limit": 5000,
+    "stockpile_carry_cost_bp": 700,
+    "fatigue_step_bp": 2000,
+    "fatigue_max_bp": 15000,
+    "fatigue_window_actions": 400,
+    "defender_modifier_bp": 11000
+  },
+  "combat_parameters": {
+    "capital_conquest": false,
+    "tie_goes_to_defender": true,
+    "min_deadline_seconds": 30,
+    "max_deadline_seconds": 86400,
+    "raid_reward_divisor": 2
+  },
+  "alliance_parameters": {
+    "eligibility_snapshotted": true,
+    "support_coefficient_bp": 10000,
+    "max_defensive_alliances": 2
+  }
+}

@@ -1,7 +1,8 @@
 # FLOP Empires
 
-Private, locally runnable alpha implementing FLOP Empires Protocol v0.1 and
-Technical Yield v0.1. It is a Python 3.12 text/CLI referee with SQLite,
+Private, locally runnable Season 0 candidate implementing FLOP Empires Protocol
+v0.1 plus replay-compatible Technical Yield v0.1 and manifest-selected v0.2. It
+is a Python 3.12 text/CLI referee with SQLite,
 signed receipts, hostile-input verification, and a deterministic simulator.
 
 ```console
@@ -31,9 +32,12 @@ sequence, rejects retention gaps, and never follows or executes message content.
 No router, conformance-lab, token, payment, wallet, staking, NFT, or browser UI
 integration is included.
 
-Current exercised capability is `STAGING_WRITE_VERIFIED`: official GitHub API,
+Current exercised capability includes `SEASON_MINUS_ONE_READY`: official GitHub API,
 fixed-origin Technocore reads, dedicated DPAPI-protected staging identities,
 signed action POST, signed receipt POST, verified readback, duplicate/conflict
 semantics, both controlled crash windows, and a four-actor private Season -1
-have been exercised. This remains an isolated no-value staging rehearsal. See
-`docs/STAGING.md`; this repository does not claim `SEASON_READY` or `LIVE`.
+have been exercised. Season -1B additionally ran the integrated v0.2 engine for
+165 real action records and 46 epochs with exact replay. This remains an isolated
+no-value staging rehearsal. The Season 0 artifacts are non-operational candidates;
+registration has not started. See `docs/STAGING.md`; this repository does not
+claim `LIVE`.
