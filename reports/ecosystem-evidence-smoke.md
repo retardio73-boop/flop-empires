@@ -14,5 +14,5 @@ Read-only; resources awarded: `0`.
   Eligible: `false`; self-owned repository.
 - `issue without deterministically linked merged resolution` — https://github.com/flop-labs/yellowpaper/issues/56
   Eligible: `false`; issues do not score and issue remains unresolved.
-- `open/unmerged PR inventory` — https://github.com/retardio73-boop/flop-conformance-lab/pulls
-  Eligible: `false`; no open PR existed at observation time; open PRs never score.
+- `open/unmerged PR inventory` — https://github.com/retardio73-boop/flop-conformance-lab/pull/23
+  Eligible: `false`; open PRs never score.

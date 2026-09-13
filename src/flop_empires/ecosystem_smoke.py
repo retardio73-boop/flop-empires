@@ -48,11 +48,17 @@ def run(provider: GitHubApiEvidenceProvider) -> dict:
         "confidence":"official issue state and no supported linked-resolution evidence",
         "yield_would_be_eligible":False,"reason":"issues do not score and issue remains unresolved"})
     open_prs = provider._get(f"https://api.github.com/repos/{REPOSITORY}/pulls?state=open&per_page=100")
-    cases.append({"source":f"https://github.com/{REPOSITORY}/pulls",
-        "observed_facts":{"open_pull_requests":len(open_prs) if isinstance(open_prs,list) else None},
+    first_open=open_prs[0] if isinstance(open_prs,list) and open_prs and isinstance(open_prs[0],dict) else None
+    open_source=(str(first_open.get("html_url")) if first_open else f"https://github.com/{REPOSITORY}/pulls")
+    observed={"open_pull_requests":len(open_prs) if isinstance(open_prs,list) else None}
+    if first_open:
+        observed.update({"number":first_open.get("number"),"state":first_open.get("state"),
+            "draft":first_open.get("draft"),"author":(first_open.get("user") or {}).get("login")})
+    cases.append({"source":open_source,
+        "observed_facts":observed,
         "classification":"open/unmerged PR inventory","confidence":"official API list",
         "yield_would_be_eligible":False,
-        "reason":"no open PR existed at observation time; open PRs never score"})
+        "reason":"open PRs never score" if first_open else "no open PR existed at observation time; open PRs never score"})
     return {"schema":"flop-empires-ecosystem-smoke-v1","repository":REPOSITORY,
         "authoritative_discovery":AUTHORITATIVE_DISCOVERY,"read_only":True,
         "resources_awarded":0,"cases":cases}
