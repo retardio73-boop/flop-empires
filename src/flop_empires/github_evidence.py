@@ -126,7 +126,7 @@ def _classify_file(path: str) -> str:
     p = path.casefold()
     if p.startswith(("docs/", "doc/")) or p.endswith((".md", ".rst")):
         return "docs"
-    if p.startswith(("tests/", "test/")) or "/test" in p:
+    if p.startswith(("tests/", "test/", "fixtures/")) or "/test" in p or "/fixtures/" in p:
         return "tests"
     if p.startswith("spec/") or "specification" in p:
         return "spec"

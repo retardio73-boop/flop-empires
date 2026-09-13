@@ -1,0 +1,189 @@
+{
+  "authoritative_discovery": [
+    "https://github.com/retardio73-boop/flop-conformance-lab/blob/main/PROVENANCE.md",
+    "https://github.com/flop-labs/yellowpaper"
+  ],
+  "cases": [
+    {
+      "classification": "documentation-only merge",
+      "confidence": "deterministic changed-file paths",
+      "observed_facts": {
+        "author": "retardio73-boop",
+        "changed_files": [
+          [
+            "CONTRIBUTING.md",
+            "docs"
+          ]
+        ],
+        "kind": "pull",
+        "labels": [],
+        "linked_issues": [],
+        "merge_commit": "155cb0a4f6b7b5865f614085e162e0b62eab54a1",
+        "merged_at": "2026-09-12T00:35:04Z",
+        "release_tags": [],
+        "repository": "retardio73-boop/flop-conformance-lab",
+        "state": "closed"
+      },
+      "reason": "repository owner equals contributor; self-owned upstream base yield is zero",
+      "source": "https://github.com/retardio73-boop/flop-conformance-lab/pull/7",
+      "yield_would_be_eligible": false
+    },
+    {
+      "classification": "merged code plus tests/fixtures",
+      "confidence": "deterministic changed-file paths",
+      "observed_facts": {
+        "author": "retardio73-boop",
+        "changed_files": [
+          [
+            ".github/workflows/ci.yml",
+            "code"
+          ],
+          [
+            "conformance/reproductions/noobna-sonnet-receipt-auth.py",
+            "code"
+          ],
+          [
+            "evidence/downstream/noobna-flop-sentinel/SONNET_RECEIPT_AUTH.md",
+            "docs"
+          ],
+          [
+            "fixtures/sonnet-referee-receipt-auth-v1.json",
+            "tests"
+          ]
+        ],
+        "kind": "pull",
+        "labels": [],
+        "linked_issues": [],
+        "merge_commit": "a3040380bb26e5fe3e01f5b506176fe6b63a22ee",
+        "merged_at": "2026-09-12T14:47:12Z",
+        "release_tags": [],
+        "repository": "retardio73-boop/flop-conformance-lab",
+        "state": "closed"
+      },
+      "reason": "repository owner equals contributor; self-owned upstream base yield is zero",
+      "source": "https://github.com/retardio73-boop/flop-conformance-lab/pull/14",
+      "yield_would_be_eligible": false
+    },
+    {
+      "classification": "merged code plus tests/fixtures",
+      "confidence": "deterministic changed-file paths",
+      "observed_facts": {
+        "author": "retardio73-boop",
+        "changed_files": [
+          [
+            "README.md",
+            "docs"
+          ],
+          [
+            "conformance/fixtures/adversarial-evidence-suite-v1.json",
+            "tests"
+          ],
+          [
+            "docs/adversarial-evidence-suite-v1.md",
+            "docs"
+          ],
+          [
+            "src/adversarial-evidence.ts",
+            "code"
+          ],
+          [
+            "src/index.ts",
+            "code"
+          ],
+          [
+            "test/adversarial-evidence.test.ts",
+            "tests"
+          ]
+        ],
+        "kind": "pull",
+        "labels": [],
+        "linked_issues": [],
+        "merge_commit": "a38fda54317409eb6118497445f331fe93cd05ae",
+        "merged_at": "2026-09-12T15:05:43Z",
+        "release_tags": [],
+        "repository": "retardio73-boop/flop-conformance-lab",
+        "state": "closed"
+      },
+      "reason": "repository owner equals contributor; self-owned upstream base yield is zero",
+      "source": "https://github.com/retardio73-boop/flop-conformance-lab/pull/15",
+      "yield_would_be_eligible": false
+    },
+    {
+      "classification": "merged code plus tests/fixtures",
+      "confidence": "deterministic changed-file paths",
+      "observed_facts": {
+        "author": "retardio73-boop",
+        "changed_files": [
+          [
+            "conformance/fixtures/yellowpaper-56-57-v0.5.0.json",
+            "tests"
+          ],
+          [
+            "src/yellowpaper-open-issues.ts",
+            "code"
+          ],
+          [
+            "test/yellowpaper-open-issues.test.ts",
+            "tests"
+          ]
+        ],
+        "kind": "pull",
+        "labels": [],
+        "linked_issues": [],
+        "merge_commit": "761965de8eca4f740836121c35ade4f6eddc37b4",
+        "merged_at": "2026-09-13T00:34:03Z",
+        "release_tags": [],
+        "repository": "retardio73-boop/flop-conformance-lab",
+        "state": "closed"
+      },
+      "reason": "repository owner equals contributor; self-owned upstream base yield is zero",
+      "source": "https://github.com/retardio73-boop/flop-conformance-lab/pull/19",
+      "yield_would_be_eligible": false
+    },
+    {
+      "classification": "published release",
+      "confidence": "deterministic published release response",
+      "observed_facts": {
+        "author": "retardio73-boop",
+        "changed_files": [],
+        "kind": "release",
+        "labels": [],
+        "linked_issues": [],
+        "merge_commit": null,
+        "merged_at": "2026-09-12T21:15:49Z",
+        "release_tags": [
+          "v0.1.4-alpha"
+        ],
+        "repository": "retardio73-boop/flop-conformance-lab",
+        "state": "published"
+      },
+      "reason": "self-owned repository",
+      "source": "https://github.com/retardio73-boop/flop-conformance-lab/releases/tag/v0.1.4-alpha",
+      "yield_would_be_eligible": false
+    },
+    {
+      "classification": "issue without deterministically linked merged resolution",
+      "confidence": "official issue state and no supported linked-resolution evidence",
+      "observed_facts": {
+        "state": "open"
+      },
+      "reason": "issues do not score and issue remains unresolved",
+      "source": "https://github.com/flop-labs/yellowpaper/issues/56",
+      "yield_would_be_eligible": false
+    },
+    {
+      "classification": "open/unmerged PR inventory",
+      "confidence": "official API list",
+      "observed_facts": {
+        "open_pull_requests": 0
+      },
+      "reason": "no open PR existed at observation time; open PRs never score",
+      "source": "https://github.com/retardio73-boop/flop-conformance-lab/pulls",
+      "yield_would_be_eligible": false
+    }
+  ],
+  "read_only": true,
+  "repository": "retardio73-boop/flop-conformance-lab",
+  "resources_awarded": 0,
+  "schema": "flop-empires-ecosystem-smoke-v1"
+}
