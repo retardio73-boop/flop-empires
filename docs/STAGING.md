@@ -28,6 +28,11 @@ is not `PUBLISHED` until readback verifies. Exact network delivery is not assume
 
 No production namespace, DID, mailbox, or signer is selected automatically.
 
+The dedicated Season -1 identities are stored outside Git under Windows DPAPI
+CurrentUser in `%LOCALAPPDATA%\FLOPEmpires\staging-identities-v1`. Enrollment is
+one-time and refuses replacement. `season/staging-live.json` contains only the
+public DIDs and a canonical manifest hash.
+
 The concrete `TechnocoreTransport` implements the detected current room JSON
 protocol (`GET/POST /r/{room}`, generation/sequence cursor, and Ed25519 over
 exact `room|nonce|text`). Publishing first searches for a semantically identical

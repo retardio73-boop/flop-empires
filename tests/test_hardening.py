@@ -231,7 +231,8 @@ def test_event_and_receipt_tampering_detected():
 def test_staging_manifest_namespace_guards(season, mailbox, events):
     did = EphemeralSigner(b"x"*32).did
     with pytest.raises(ValueError):
-        StagingManifest(season, mailbox, events, did, (did,), StagingMode.WRITE).validate()
+        StagingManifest(season, "staging", mailbox, events, did, (did,), StagingMode.WRITE,
+            "technical-yield-v0.2", "season/world-0.example.json", "0"*64).validate()
 
 
 def test_crash_after_commit_before_publish_recovers(tmp_path):

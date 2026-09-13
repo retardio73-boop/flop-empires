@@ -23,24 +23,36 @@ class StagingMode(StrEnum):
 @dataclass(frozen=True)
 class StagingManifest:
     season_id: str
+    environment: str
     mailbox: str
     events_room: str
     referee_did: str
     allowed_dids: tuple[str, ...]
     mode: StagingMode
+    economic_rules_version: str
+    world_fixture: str
+    manifest_hash: str
 
     @classmethod
     def load(cls, path: str | Path) -> "StagingManifest":
         value = loads(Path(path).read_text(encoding="utf-8"))
         if not isinstance(value, dict):
             raise ValueError("invalid staging manifest")
-        manifest = cls(value["season_id"], value["mailbox"], value["events_room"],
-            value["referee_did"], tuple(value["allowed_dids"]), StagingMode(value["mode"]))
+        required = {"season_id","environment","mailbox","events_room","referee_did",
+            "allowed_dids","mode","economic_rules_version","world_fixture","manifest_hash"}
+        if set(value) != required:
+            raise ValueError("staging manifest fields mismatch")
+        manifest = cls(value["season_id"], value["environment"], value["mailbox"], value["events_room"],
+            value["referee_did"], tuple(value["allowed_dids"]), StagingMode(value["mode"]),
+            value["economic_rules_version"], value["world_fixture"], value["manifest_hash"])
         manifest.validate()
+        unsigned = dict(value); unsigned.pop("manifest_hash")
+        if sha256(unsigned) != manifest.manifest_hash:
+            raise ValueError("staging manifest hash mismatch")
         return manifest
 
     def validate(self) -> None:
-        if not self.season_id.startswith("staging-"):
+        if self.environment != "staging" or not self.season_id.startswith("staging-"):
             raise ValueError("staging season namespace must start with staging-")
         if not self.mailbox.startswith("staging-") or not self.events_room.startswith("staging-"):
             raise ValueError("staging rooms require staging- namespace")
@@ -50,6 +62,8 @@ class StagingManifest:
             raise ValueError("invalid staging referee DID")
         if not self.allowed_dids or any(not x.startswith("did:key:") for x in self.allowed_dids):
             raise ValueError("staging DID allowlist required")
+        if self.economic_rules_version != "technical-yield-v0.2" or not self.world_fixture:
+            raise ValueError("staging economic rules/world fixture required")
 
 
 class ReadOnlyObserver:
