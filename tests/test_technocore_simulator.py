@@ -50,9 +50,10 @@ def test_poll_durably_advances_only_through_verified_records():
             assert cursor == "head"
             return [MailboxItem(good, "c1"), MailboxItem(bad, "c2")]
 
-    with pytest.raises(RuleViolation):
-        ingestor.poll(Source())
-    assert store.one("SELECT cursor FROM technocore_state WHERE mailbox='poll'")[0] == "c1"
+    receipts=ingestor.poll(Source())
+    assert len(receipts)==1 and receipts[0].accepted
+    assert store.one("SELECT cursor FROM technocore_state WHERE mailbox='poll'")[0] == "c2"
+    assert store.one("SELECT code FROM technocore_rejections WHERE record_id='two'")[0] == "INVALID_SIGNATURE"
     assert store.one("SELECT accepted_at FROM technocore_records WHERE record_id='one'")[0] == 101
 
 
@@ -67,7 +68,7 @@ def test_staging_ingestor_rejects_valid_but_non_allowlisted_signer():
     unsigned = SignedRecord("outside", outsider.did, payload, "", seq=1, ts=1)
     record = replace(unsigned, signature=outsider.sign(bytes_(signed_record_body(unsigned))))
     before = store.state_hash()
-    with pytest.raises(RuleViolation, match="not allowlisted"):
+    with pytest.raises(RuleViolation, match="DID_NOT_ALLOWLISTED"):
         ingestor.ingest(record, "next", 101)
     assert store.state_hash() == before
 

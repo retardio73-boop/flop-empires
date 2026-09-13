@@ -5,6 +5,7 @@ import re
 import time
 import unicodedata
 from dataclasses import asdict, dataclass
+from enum import StrEnum
 from typing import Protocol
 
 import httpx
@@ -14,6 +15,17 @@ from .engine import Engine, RuleViolation
 from .identity import verify
 from .models import Receipt, SignedRecord
 from .store import Store
+from .protocol import parse_command
+
+
+class ErrorDisposition(StrEnum):
+    REJECT_AND_CONTINUE="REJECT_AND_CONTINUE"
+    RETRY_TRANSIENT="RETRY_TRANSIENT"
+    HALT_INTEGRITY_FAILURE="HALT_INTEGRITY_FAILURE"
+
+
+class ExpectedHostileInput(RuleViolation):
+    def __init__(self,code: str): self.code=code; super().__init__(code)
 
 
 @dataclass(frozen=True)
@@ -244,9 +256,11 @@ class TechnocoreTransport(TechnocoreHttpMailbox):
 
 class TechnocoreIngestor:
     def __init__(self, store: Store, engine: Engine, mailbox: str,
-                 allowed_dids: tuple[str, ...] | None = None):
+                 allowed_dids: tuple[str, ...] | None = None,
+                 expected_season_id: str | None = None):
         self.store, self.engine, self.mailbox = store, engine, mailbox
         self.allowed_dids = frozenset(allowed_dids) if allowed_dids is not None else None
+        self.expected_season_id=expected_season_id
 
     def bootstrap(self, current_cursor: str, *, replay: bool = False) -> str:
         row = self.store.one("SELECT cursor FROM technocore_state WHERE mailbox=?", (self.mailbox,))
@@ -261,18 +275,25 @@ class TechnocoreIngestor:
         if old:
             return Receipt(**json.loads(old[0]))
         if not verify_signed_record(record):
-            raise RuleViolation("Technocore signed-record verification failed")
+            raise ExpectedHostileInput("INVALID_SIGNATURE")
         if self.allowed_dids is not None and record.signer_did not in self.allowed_dids:
-            raise RuleViolation("Technocore signer is not allowlisted for staging")
+            raise ExpectedHostileInput("DID_NOT_ALLOWLISTED")
         if record.raw_text is not None:
             try:
                 if loads(record.raw_text) != record.payload or record.raw_text != dumps(record.payload):
-                    raise RuleViolation("Technocore signed text/payload mismatch")
+                    raise ExpectedHostileInput("MALFORMED_CANONICAL_PAYLOAD")
             except ValueError as exc:
-                raise RuleViolation("Technocore signed text is not a canonical command") from exc
+                raise ExpectedHostileInput("MALFORMED_CANONICAL_PAYLOAD") from exc
         command = record.payload
+        if self.expected_season_id is not None:
+            if (not isinstance(command,dict) or set(command)!={"season_id","command"} or
+                    command.get("season_id")!=self.expected_season_id or not isinstance(command.get("command"),dict)):
+                raise ExpectedHostileInput("WRONG_SEASON")
+            command=command["command"]
         if not isinstance(command, dict) or command.get("actor_did") != record.signer_did:
-            raise RuleViolation("signed record actor mismatch")
+            raise ExpectedHostileInput("ACTOR_FIELD_SPOOFING")
+        try: parse_command(command)
+        except ValueError as exc: raise ExpectedHostileInput("MALFORMED_COMMAND") from exc
         # Remote seq/ts remain stored evidence; Engine persists its own accepted_at.
         receipt = self.engine.execute(command)
         with self.store.transaction():
@@ -292,7 +313,14 @@ class TechnocoreIngestor:
         for item in source.records_after(cursor):
             if not isinstance(item, MailboxItem) or not item.next_cursor:
                 raise RuleViolation("invalid Technocore mailbox item")
-            receipt = self.ingest(item.record, item.next_cursor, accepted_at=0)
-            receipts.append(receipt)
+            try:
+                receipt = self.ingest(item.record, item.next_cursor, accepted_at=0)
+                receipts.append(receipt)
+            except ExpectedHostileInput as exc:
+                with self.store.transaction():
+                    self.store.conn.execute("INSERT OR IGNORE INTO technocore_rejections VALUES(?,?,?,?,?,?)",
+                        (item.record.record_id,self.mailbox,item.record.seq,str(item.record.ts),exc.code,int(__import__('time').time())))
+                    self.store.conn.execute("UPDATE technocore_state SET cursor=? WHERE mailbox=?",
+                        (item.next_cursor,self.mailbox))
             cursor = item.next_cursor
         return receipts
