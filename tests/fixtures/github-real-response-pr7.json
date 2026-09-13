@@ -1,0 +1,20 @@
+{
+  "fixture_kind": "REAL_RESPONSE_FIXTURE",
+  "source": "https://github.com/retardio73-boop/flop-conformance-lab/pull/7",
+  "evidence_class": "accepted_documentation",
+  "observed_facts": {
+    "repository": "retardio73-boop/flop-conformance-lab",
+    "kind": "pull",
+    "state": "closed",
+    "merged_at": "2026-09-12T00:35:04Z",
+    "author": "retardio73-boop",
+    "merge_commit": "155cb0a4f6b7b5865f614085e162e0b62eab54a1",
+    "changed_files": [["CONTRIBUTING.md", "docs"]],
+    "labels": [],
+    "linked_issues": [],
+    "release_tags": []
+  },
+  "classification": "documentation-only merge",
+  "yield_would_be_eligible": false,
+  "reason": "self-owned community repository produces zero upstream base yield"
+}
