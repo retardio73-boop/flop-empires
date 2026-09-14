@@ -1,0 +1,24 @@
+{
+  "checked_at_utc_date": "2026-09-14",
+  "did": "did:key:z6MkkvjnHUEz5qmMHXZJiTg8BFSjm3KVqZtueNUMdp1FqMpx",
+  "algorithm": "Ed25519",
+  "storage": "Windows DPAPI CurrentUser outside repository",
+  "pass_1": {
+    "new_process": true,
+    "fresh_random_challenge": true,
+    "did_exact": true,
+    "local_signature_verified": true
+  },
+  "pass_2": {
+    "new_process": true,
+    "fresh_random_challenge": true,
+    "did_exact": true,
+    "local_signature_verified": true
+  },
+  "same_did_across_processes": true,
+  "fallback_used": false,
+  "identity_regenerated": false,
+  "private_material_printed": false,
+  "secret_exposure": false,
+  "network_writes": 0
+}

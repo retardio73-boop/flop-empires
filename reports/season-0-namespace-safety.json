@@ -1,0 +1,26 @@
+{
+  "checked_at_utc_date": "2026-09-14",
+  "protocol": "technocore-room-json-signed-v1",
+  "origin": "https://technocore.chat",
+  "rooms": [
+    {
+      "room": "mb-p-flop-empires-s0-1e24ce92-actions",
+      "generation": 0,
+      "seq": 0,
+      "messages": 0
+    },
+    {
+      "room": "mb-p-flop-empires-s0-1e24ce92-events",
+      "generation": 0,
+      "seq": 0,
+      "messages": 0
+    }
+  ],
+  "naming_valid": true,
+  "distinct_from_staging": true,
+  "collision_observed": false,
+  "ownership_claim_operation_available": false,
+  "reservation_status": "VERIFIED_EMPTY_UNRESERVED_PROTOCOL_HAS_NO_OWNERSHIP_CLAIM",
+  "writes_performed": 0,
+  "game_writes_performed": 0
+}

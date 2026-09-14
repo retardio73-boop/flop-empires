@@ -1,0 +1,91 @@
+{
+  "manifest_schema_version": "flop-empires-season-manifest-v1",
+  "manifest_hash": "eb8050d7eb010c5976adf6e6eeae244851467e6ee583d9cc31679fd2cb4f7f22",
+  "previous_candidate_hash": "3c8fdde863abccdf6a048f6af7ccb6ea29b83fdecd9846dda80354000c5224ef",
+  "activation": "FROZEN_NOT_ACTIVE",
+  "environment": "production-frozen",
+  "season_id": "season-0",
+  "protocol_version": "FLOP-Empires-v0.1",
+  "economic_rules_version": "technical-yield-v0.2",
+  "technical_yield_version": "technical-yield-v0.2",
+  "referee_did": "did:key:z6MkkvjnHUEz5qmMHXZJiTg8BFSjm3KVqZtueNUMdp1FqMpx",
+  "actions_namespace": "mb-p-flop-empires-s0-1e24ce92-actions",
+  "events_namespace": "mb-p-flop-empires-s0-1e24ce92-events",
+  "registration_boundary": null,
+  "season_start": null,
+  "season_end": null,
+  "epoch_duration": 21600,
+  "intended_duration_epochs": 56,
+  "intended_duration_seconds": 1209600,
+  "world_graph_hash": "aed9d864aa8cc100d46c4093bddd6ff031a623bdda3dea4cd321f2de746c1d93",
+  "world_fixture": "season/world-minus-one-b.json",
+  "initial_balances": {
+    "ENGINEERING": 100,
+    "KNOWLEDGE": 0,
+    "INFLUENCE": 0
+  },
+  "bootstrap_policy": {
+    "historical_spendable_yield": 0,
+    "historical_prestige": "full_verified_value",
+    "lookback_days": 0,
+    "historical_spendable_weight_bp": 0,
+    "prestige_retains_full_verified_value": true
+  },
+  "economic_parameters": {
+    "linear_threshold": 1000,
+    "engineering_weight_bp": 6000,
+    "knowledge_weight_bp": 2500,
+    "influence_weight_bp": 1500,
+    "yield_epoch_divisor": 20,
+    "overextension_penalty_bp": 1600,
+    "territory_benefit_units": 20,
+    "territory_upkeep_units": 4,
+    "fortification_upkeep_divisor": 20,
+    "stockpile_soft_limit": 5000,
+    "stockpile_carry_cost_bp": 700,
+    "fatigue_step_bp": 2000,
+    "fatigue_max_bp": 15000,
+    "fatigue_window_actions": 400,
+    "defender_modifier_bp": 11000
+  },
+  "combat_parameters": {
+    "capital_conquest": false,
+    "tie_goes_to_defender": true,
+    "min_deadline_seconds": 30,
+    "max_deadline_seconds": 86400,
+    "raid_defense_window_seconds": 1800,
+    "siege_defense_window_seconds": 21600,
+    "recon_ttl_seconds": 1800,
+    "raid_reward_divisor": 2
+  },
+  "alliance_parameters": {
+    "eligibility_snapshotted": true,
+    "support_coefficient_bp": 10000,
+    "max_defensive_alliances": 2
+  },
+  "github_allowlist": [
+    "flop-labs/yellowpaper",
+    "retardio73-boop/flop-conformance-lab"
+  ],
+  "monitoring_policy_version": "season-0-monitoring-v1",
+  "monitoring_thresholds": {
+    "whale_peak_resource_share_bp": {"comparison": "gte", "review": 5000, "pause_recommended": 7000},
+    "whale_territory_share_bp": {"comparison": "gte", "review": 5000, "pause_recommended": 7000},
+    "duration_over_50_resources_seconds": {"comparison": "gte", "review": 86400, "pause_recommended": 259200},
+    "duration_over_50_territory_seconds": {"comparison": "gte", "review": 86400, "pause_recommended": 259200},
+    "alliance_defense_success_bp": {"comparison": "gte", "review": 9000, "pause_recommended": 9800},
+    "raid_success_bp": {"comparison": "gte", "review": 7500, "pause_recommended": 9000},
+    "siege_success_bp": {"comparison": "gte", "review": 7500, "pause_recommended": 9000},
+    "combat_frequency_per_epoch": {"comparison": "gte", "review": 50, "pause_recommended": 200},
+    "resource_inflation_units": {"comparison": "gte", "review": 1, "pause_recommended": 1},
+    "upkeep_resource_ratio_bp": {"comparison": "gte", "review": 6000, "pause_recommended": 9000},
+    "carrying_cost_ratio_bp": {"comparison": "gte", "review": 3000, "pause_recommended": 6000},
+    "epochs_without_productive_comeback": {"comparison": "gte", "review": 8, "pause_recommended": 20},
+    "unauthorized_input_rate_bp": {"comparison": "gte", "review": 1000, "pause_recommended": 5000},
+    "technocore_rejection_rate_bp": {"comparison": "gte", "review": 2000, "pause_recommended": 5000},
+    "receipt_readback_failures": {"comparison": "gte", "review": 1, "pause_recommended": 3},
+    "referee_processing_lag_seconds": {"comparison": "gte", "review": 30, "pause_recommended": 300},
+    "cursor_lag_records": {"comparison": "gte", "review": 25, "pause_recommended": 100}
+  },
+  "pause_policy_version": "authoritative-clock-freeze-v1"
+}

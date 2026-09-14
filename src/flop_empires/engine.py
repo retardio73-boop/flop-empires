@@ -36,7 +36,9 @@ class Engine:
             epoch_duration=manifest.epoch_duration,environment=manifest.environment,
             combat_parameters=manifest.combat_parameters,
             alliance_parameters=manifest.alliance_parameters,
-            bootstrap_policy=manifest_value.get("bootstrap_policy") if isinstance(manifest_value,dict) else None)
+            bootstrap_policy=manifest_value.get("bootstrap_policy") if isinstance(manifest_value,dict) else None,
+            pause_policy=manifest_value.get("pause_policy_version") if isinstance(manifest_value,dict) else None,
+            activation_guard=manifest_value.get("activation") if isinstance(manifest_value,dict) else None)
 
     def __init__(self, store: Store, configured_referee_did: str, signer: Signer | None,
                  clock: Callable[[], int] | None = None, *,
@@ -46,7 +48,9 @@ class Engine:
                  epoch_duration: int = EPOCH_SECONDS,
                  environment: str = "local",combat_parameters: dict[str,Any] | None = None,
                  alliance_parameters: dict[str,Any] | None = None,
-                 bootstrap_policy: dict[str,Any] | None = None):
+                 bootstrap_policy: dict[str,Any] | None = None,
+                 pause_policy: str | None = None,
+                 activation_guard: str | None = None):
         self.store = store
         if store.one("SELECT 1 FROM events LIMIT 1"): require_valid_chain(store)
         self.signer = require_signer(configured_referee_did, signer)
@@ -60,6 +64,8 @@ class Engine:
         self.alliance_parameters=alliance_parameters or {"eligibility_snapshotted":True,
             "max_defensive_alliances":2,"support_coefficient_bp":10_000}
         self.bootstrap_policy=bootstrap_policy
+        self.pause_policy=pause_policy
+        self.activation_guard=activation_guard
         existing = store.one("SELECT value FROM config WHERE key='referee_did'")
         if existing and existing[0] != configured_referee_did:
             raise RuntimeError("database belongs to a different referee DID")
@@ -145,6 +151,16 @@ class Engine:
     def _status(self) -> str:
         return self.store.one("SELECT value FROM config WHERE key='season_status'")[0]
 
+    def _game_now(self,wall_now: int)->int:
+        if self.pause_policy is None: return wall_now
+        accumulated=self.store.one("SELECT value FROM config WHERE key='total_paused_seconds'")
+        paused=int(accumulated[0]) if accumulated else 0
+        if self._status()==SeasonStatus.PAUSED:
+            started=self.store.one("SELECT value FROM config WHERE key='pause_started_wall_at'")
+            if not started: raise RuntimeError("paused Season lacks persisted clock anchor")
+            paused+=max(0,wall_now-int(started[0]))
+        return wall_now-paused
+
     def _referee(self, did: str) -> None:
         if did != self.signer.did:
             raise RuleViolation("referee authorization required")
@@ -174,7 +190,11 @@ class Engine:
         fn = getattr(self, f"_do_{c.action}", None)
         if fn is None:
             raise RuleViolation("unsupported action")
-        return fn(c.actor_did, p, now)
+        if self._status()==SeasonStatus.PAUSED and c.action!="resume_season":
+            raise RuleViolation("season is paused")
+        if c.action in {"pause_season","resume_season"}:
+            return fn(c.actor_did,p,now)
+        return fn(c.actor_did, p, self._game_now(now))
 
     def _do_register_actor(self, did: str, p: dict[str, Any], now: int) -> dict[str, Any]:
         if p:
@@ -211,12 +231,43 @@ class Engine:
 
     def _do_activate_season(self, did: str, p: dict[str, Any], now: int) -> dict[str, Any]:
         self._referee(did)
+        if self.activation_guard in {"FROZEN_NOT_ACTIVE","DISABLED_PENDING_FINAL_REVIEW"}:
+            raise RuleViolation("manifest activation is disabled")
         if self._status() != SeasonStatus.REGISTRATION:
             raise RuleViolation("season cannot be activated")
         self.store.conn.execute("UPDATE config SET value=? WHERE key='season_status'", (SeasonStatus.ACTIVE,))
         self.store.conn.execute("INSERT OR REPLACE INTO config(key,value) VALUES('season_started_at',?)",
             (str(now),))
+        if self.pause_policy is not None:
+            self.store.conn.execute("INSERT OR REPLACE INTO config(key,value) VALUES('total_paused_seconds','0')")
         return {"status": SeasonStatus.ACTIVE}
+
+    def _do_pause_season(self,did: str,p: dict[str,Any],wall_now: int)->dict[str,Any]:
+        self._referee(did)
+        if self.pause_policy!="authoritative-clock-freeze-v1": raise RuleViolation("pause policy is not configured")
+        if p: raise RuleViolation("pause_season payload must be empty")
+        if self._status()!=SeasonStatus.ACTIVE: raise RuleViolation("only an active Season can pause")
+        game_now=self._game_now(wall_now)
+        self.store.conn.execute("UPDATE config SET value=? WHERE key='season_status'",(SeasonStatus.PAUSED,))
+        self.store.conn.execute("INSERT OR REPLACE INTO config(key,value) VALUES('pause_started_wall_at',?)",(str(wall_now),))
+        return {"event_type":"SEASON_PAUSED","status":SeasonStatus.PAUSED,
+            "authoritative_game_time":game_now,"policy":"authoritative-clock-freeze-v1"}
+
+    def _do_resume_season(self,did: str,p: dict[str,Any],wall_now: int)->dict[str,Any]:
+        self._referee(did)
+        if self.pause_policy!="authoritative-clock-freeze-v1": raise RuleViolation("pause policy is not configured")
+        if p: raise RuleViolation("resume_season payload must be empty")
+        if self._status()!=SeasonStatus.PAUSED: raise RuleViolation("Season is not paused")
+        started=self.store.one("SELECT value FROM config WHERE key='pause_started_wall_at'")
+        if not started or wall_now<int(started[0]): raise RuntimeError("invalid persisted pause clock")
+        prior=self.store.one("SELECT value FROM config WHERE key='total_paused_seconds'")
+        total=(int(prior[0]) if prior else 0)+(wall_now-int(started[0]))
+        self.store.conn.execute("INSERT OR REPLACE INTO config(key,value) VALUES('total_paused_seconds',?)",(str(total),))
+        self.store.conn.execute("DELETE FROM config WHERE key='pause_started_wall_at'")
+        self.store.conn.execute("UPDATE config SET value=? WHERE key='season_status'",(SeasonStatus.ACTIVE,))
+        return {"event_type":"SEASON_RESUMED","status":SeasonStatus.ACTIVE,
+            "authoritative_game_time":wall_now-total,"total_paused_seconds":total,
+            "policy":"authoritative-clock-freeze-v1"}
 
     def _do_bind_github(self, did: str, p: dict[str, Any], now: int) -> dict[str, Any]:
         if not self.store.one("SELECT 1 FROM actors WHERE did=?", (did,)):
@@ -401,13 +452,23 @@ class Engine:
         row = self.store.one("SELECT owner_empire_id,is_capital,fortification FROM territories WHERE id=?", (tid,))
         if not row:
             raise RuleViolation("unknown territory")
-        return {"territory_id": tid, "owner_empire_id": row[0], "is_capital": bool(row[1]), "fortification": row[2]}
+        result={"territory_id": tid, "owner_empire_id": row[0], "is_capital": bool(row[1]), "fortification": row[2]}
+        ttl=self.combat_parameters.get("recon_ttl_seconds")
+        if ttl is not None: result["expires_at"]=now+ttl
+        return result
 
     def _do_create_attack(self, did: str, p: dict[str, Any], now: int) -> dict[str, Any]:
         attacker = self._empire(did)
         attack_id, origin, target = self._text(p, "attack_id"), self._text(p, "origin_id"), self._text(p, "target_id")
         kind, power = self._text(p, "kind").upper(), self._amount(p, "power")
-        deadline_seconds = self._amount(p, "deadline_seconds")
+        configured=self.combat_parameters.get(
+            "raid_defense_window_seconds" if kind=="RAID" else "siege_defense_window_seconds")
+        if configured is None:
+            deadline_seconds=self._amount(p,"deadline_seconds")
+        else:
+            supplied=p.get("deadline_seconds",configured)
+            if supplied!=configured: raise RuleViolation("attack deadline differs from frozen manifest")
+            deadline_seconds=configured
         if (kind not in {"RAID", "SIEGE"} or
                 not self.combat_parameters.get("min_deadline_seconds",1)<=deadline_seconds<=self.combat_parameters["max_deadline_seconds"]):
             raise RuleViolation("invalid attack kind or deadline")
@@ -579,7 +640,11 @@ class Engine:
             self.store.conn.execute("INSERT INTO offensive_fatigue VALUES(?,?,?)",(attack_id,empire,next_seq))
 
     def _do_raid(self, did: str, p: dict[str, Any], now: int) -> dict[str, Any]:
+        if "raid_defense_window_seconds" in self.combat_parameters:
+            raise RuleViolation("frozen Season attacks require create_attack")
         return self._combat(did, p, now, "RAID")
 
     def _do_siege(self, did: str, p: dict[str, Any], now: int) -> dict[str, Any]:
+        if "siege_defense_window_seconds" in self.combat_parameters:
+            raise RuleViolation("frozen Season attacks require create_attack")
         return self._combat(did, p, now, "SIEGE")

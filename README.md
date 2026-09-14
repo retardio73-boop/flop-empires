@@ -1,6 +1,6 @@
 # FLOP Empires
 
-Private, locally runnable Season 0 freeze candidate implementing FLOP Empires Protocol
+Private, locally runnable Season 0 operational freeze implementing FLOP Empires Protocol
 v0.1 plus replay-compatible Technical Yield v0.1 and manifest-selected v0.2. It
 is a Python 3.12 text/CLI referee with SQLite,
 signed receipts, hostile-input verification, and a deterministic simulator.
@@ -38,8 +38,9 @@ signed action POST, signed receipt POST, verified readback, duplicate/conflict
 semantics, both controlled crash windows, and a four-actor private Season -1
 have been exercised. Season -1B additionally ran the integrated v0.2 engine for
 165 real action records and 46 epochs with exact replay. This remains an isolated
-no-value staging rehearsal. The Season 0 candidate uses 56 six-hour epochs over
-an intended 14 days, no historical spendable bootstrap, and a dedicated but
-inactive production referee identity. Its namespaces are prepare-only:
+no-value staging rehearsal. The immutable Season 0 frozen manifest uses 56
+six-hour epochs over an intended 14 days, no historical spendable bootstrap,
+30-minute Raid windows, six-hour Siege windows, and a dedicated but inactive
+production referee identity. Its namespaces are verified-empty and prepare-only:
 registration has not started and no production game records were written. See
-`docs/STAGING.md`; this repository does not claim `LIVE`.
+`docs/SEASON-0-OPERATIONS.md`; this repository does not claim `LIVE`.

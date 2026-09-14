@@ -129,3 +129,67 @@ class SeasonZeroCandidateManifest:
     def __getattr__(self,name):
         try: return self.value[name]
         except KeyError as exc: raise AttributeError(name) from exc
+
+
+@dataclass(frozen=True)
+class FrozenSeasonManifest:
+    """Immutable rule snapshot. Loading it never activates or contacts transport."""
+    value: dict[str,Any]
+
+    @classmethod
+    def load(cls,path: str|Path)->"FrozenSeasonManifest":
+        value=loads(Path(path).read_text(encoding="utf-8"))
+        if not isinstance(value,dict): raise ValueError("invalid frozen Season manifest")
+        required={"manifest_schema_version","manifest_hash","previous_candidate_hash","activation",
+            "environment","season_id","protocol_version","economic_rules_version",
+            "technical_yield_version","referee_did","actions_namespace","events_namespace",
+            "registration_boundary","season_start","season_end","epoch_duration",
+            "intended_duration_epochs","intended_duration_seconds","world_graph_hash","world_fixture",
+            "initial_balances","bootstrap_policy","economic_parameters","combat_parameters",
+            "alliance_parameters","github_allowlist","monitoring_policy_version",
+            "monitoring_thresholds","pause_policy_version"}
+        if set(value)!=required: raise ValueError("frozen Season manifest fields mismatch")
+        unsigned=dict(value); supplied=unsigned.pop("manifest_hash")
+        if sha256(unsigned)!=supplied: raise ValueError("frozen Season manifest hash mismatch")
+        result=cls(value); result.validate()
+        world_path=Path(path).resolve().parent.parent/value["world_fixture"]
+        if not world_path.is_file() or sha256(loads(world_path.read_text(encoding="utf-8")))!=value["world_graph_hash"]:
+            raise ValueError("world graph hash mismatch")
+        return result
+
+    def validate(self)->None:
+        v=self.value
+        if v["manifest_schema_version"]!="flop-empires-season-manifest-v1": raise ValueError("unsupported manifest schema")
+        if v["activation"]!="FROZEN_NOT_ACTIVE" or v["environment"]!="production-frozen" or v["season_id"]!="season-0":
+            raise ValueError("frozen manifest must remain inactive")
+        if any(v[key] is not None for key in ("registration_boundary","season_start","season_end")):
+            raise ValueError("frozen manifest cannot contain launch timestamps")
+        if (v["epoch_duration"]!=21_600 or v["intended_duration_epochs"]!=56 or
+                v["intended_duration_seconds"]!=1_209_600):
+            raise ValueError("invalid frozen cadence")
+        verify_key_from_did(v["referee_did"])
+        for room in (v["actions_namespace"],v["events_namespace"]):
+            if not ROOM_NAME.fullmatch(room) or "staging" in room: raise ValueError("invalid production namespace")
+        if v["actions_namespace"]==v["events_namespace"]: raise ValueError("rooms must differ")
+        combat=v["combat_parameters"]
+        expected={"min_deadline_seconds":30,"raid_defense_window_seconds":1800,
+            "siege_defense_window_seconds":21600,"recon_ttl_seconds":1800}
+        if any(combat.get(key)!=value for key,value in expected.items()): raise ValueError("unvalidated combat windows")
+        if (combat.get("capital_conquest") is not False or combat.get("tie_goes_to_defender") is not True or
+                combat.get("raid_reward_divisor")!=2): raise ValueError("invalid frozen combat rules")
+        if v["monitoring_policy_version"]!="season-0-monitoring-v1": raise ValueError("invalid monitoring policy")
+        if v["pause_policy_version"]!="authoritative-clock-freeze-v1": raise ValueError("invalid pause policy")
+        policy=v["bootstrap_policy"]
+        if policy!={"historical_spendable_yield":0,"historical_prestige":"full_verified_value",
+                "lookback_days":0,"historical_spendable_weight_bp":0,
+                "prestige_retains_full_verified_value":True}:
+            raise ValueError("invalid frozen bootstrap policy")
+        EconomicRulesV02.from_manifest(v)
+
+    @property
+    def manifest_hash(self): return self.value["manifest_hash"]
+    @property
+    def rules(self): return EconomicRulesV02.from_manifest(self.value)
+    def __getattr__(self,name):
+        try: return self.value[name]
+        except KeyError as exc: raise AttributeError(name) from exc

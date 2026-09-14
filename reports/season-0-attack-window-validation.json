@@ -1,0 +1,149 @@
+{
+  "conclusion": "30-minute Raid and six-hour Siege avoid instant wars while bounding locks; Recon expires after 30 minutes",
+  "epoch_seconds": 21600,
+  "protocol_minimum_seconds": 30,
+  "raid": {
+    "1800": {
+      "alliance_participation_profiles_at_or_above_50_percent": 3,
+      "concurrent_open_attacks_at_one_arrival_per_hour": 0.5,
+      "defender_sees_attack_opportunity": {
+        "ACTIVE_HUMAN": 1.0,
+        "ALLIANCE_COORDINATED": 1.0,
+        "AUTONOMOUS": 1.0,
+        "CASUAL_HUMAN": 0.25
+      },
+      "epoch_overlap_opportunity": 0.08333333333333333,
+      "lock_exposure_hours": 0.5,
+      "maximum_resolution_cycles_per_day": 48.0,
+      "model_note": "uniform phase against explicit check intervals; not a human-behavior estimate",
+      "seconds": 1800,
+      "stale_lock_pressure": "LOW"
+    },
+    "300": {
+      "alliance_participation_profiles_at_or_above_50_percent": 1,
+      "concurrent_open_attacks_at_one_arrival_per_hour": 0.08333333333333333,
+      "defender_sees_attack_opportunity": {
+        "ACTIVE_HUMAN": 0.16666666666666666,
+        "ALLIANCE_COORDINATED": 0.3333333333333333,
+        "AUTONOMOUS": 1.0,
+        "CASUAL_HUMAN": 0.041666666666666664
+      },
+      "epoch_overlap_opportunity": 0.013888888888888888,
+      "lock_exposure_hours": 0.08333333333333333,
+      "maximum_resolution_cycles_per_day": 288.0,
+      "model_note": "uniform phase against explicit check intervals; not a human-behavior estimate",
+      "seconds": 300,
+      "stale_lock_pressure": "LOW"
+    },
+    "3600": {
+      "alliance_participation_profiles_at_or_above_50_percent": 4,
+      "concurrent_open_attacks_at_one_arrival_per_hour": 1.0,
+      "defender_sees_attack_opportunity": {
+        "ACTIVE_HUMAN": 1.0,
+        "ALLIANCE_COORDINATED": 1.0,
+        "AUTONOMOUS": 1.0,
+        "CASUAL_HUMAN": 0.5
+      },
+      "epoch_overlap_opportunity": 0.16666666666666666,
+      "lock_exposure_hours": 1.0,
+      "maximum_resolution_cycles_per_day": 24.0,
+      "model_note": "uniform phase against explicit check intervals; not a human-behavior estimate",
+      "seconds": 3600,
+      "stale_lock_pressure": "LOW"
+    },
+    "900": {
+      "alliance_participation_profiles_at_or_above_50_percent": 3,
+      "concurrent_open_attacks_at_one_arrival_per_hour": 0.25,
+      "defender_sees_attack_opportunity": {
+        "ACTIVE_HUMAN": 0.5,
+        "ALLIANCE_COORDINATED": 1.0,
+        "AUTONOMOUS": 1.0,
+        "CASUAL_HUMAN": 0.125
+      },
+      "epoch_overlap_opportunity": 0.041666666666666664,
+      "lock_exposure_hours": 0.25,
+      "maximum_resolution_cycles_per_day": 96.0,
+      "model_note": "uniform phase against explicit check intervals; not a human-behavior estimate",
+      "seconds": 900,
+      "stale_lock_pressure": "LOW"
+    }
+  },
+  "reaction_model": {
+    "ACTIVE_HUMAN": 1800,
+    "ALLIANCE_COORDINATED": 900,
+    "AUTONOMOUS": 60,
+    "CASUAL_HUMAN": 7200
+  },
+  "schema": "season-0-attack-window-validation-v1",
+  "selected": {
+    "raid_defense_window_seconds": 1800,
+    "recon_ttl_seconds": 1800,
+    "siege_defense_window_seconds": 21600
+  },
+  "siege": {
+    "10800": {
+      "alliance_participation_profiles_at_or_above_50_percent": 4,
+      "concurrent_open_attacks_at_one_arrival_per_hour": 3.0,
+      "defender_sees_attack_opportunity": {
+        "ACTIVE_HUMAN": 1.0,
+        "ALLIANCE_COORDINATED": 1.0,
+        "AUTONOMOUS": 1.0,
+        "CASUAL_HUMAN": 1.0
+      },
+      "epoch_overlap_opportunity": 0.5,
+      "lock_exposure_hours": 3.0,
+      "maximum_resolution_cycles_per_day": 8.0,
+      "model_note": "uniform phase against explicit check intervals; not a human-behavior estimate",
+      "seconds": 10800,
+      "stale_lock_pressure": "LOW"
+    },
+    "21600": {
+      "alliance_participation_profiles_at_or_above_50_percent": 4,
+      "concurrent_open_attacks_at_one_arrival_per_hour": 6.0,
+      "defender_sees_attack_opportunity": {
+        "ACTIVE_HUMAN": 1.0,
+        "ALLIANCE_COORDINATED": 1.0,
+        "AUTONOMOUS": 1.0,
+        "CASUAL_HUMAN": 1.0
+      },
+      "epoch_overlap_opportunity": 1.0,
+      "lock_exposure_hours": 6.0,
+      "maximum_resolution_cycles_per_day": 4.0,
+      "model_note": "uniform phase against explicit check intervals; not a human-behavior estimate",
+      "seconds": 21600,
+      "stale_lock_pressure": "MODERATE"
+    },
+    "3600": {
+      "alliance_participation_profiles_at_or_above_50_percent": 4,
+      "concurrent_open_attacks_at_one_arrival_per_hour": 1.0,
+      "defender_sees_attack_opportunity": {
+        "ACTIVE_HUMAN": 1.0,
+        "ALLIANCE_COORDINATED": 1.0,
+        "AUTONOMOUS": 1.0,
+        "CASUAL_HUMAN": 0.5
+      },
+      "epoch_overlap_opportunity": 0.16666666666666666,
+      "lock_exposure_hours": 1.0,
+      "maximum_resolution_cycles_per_day": 24.0,
+      "model_note": "uniform phase against explicit check intervals; not a human-behavior estimate",
+      "seconds": 3600,
+      "stale_lock_pressure": "LOW"
+    },
+    "43200": {
+      "alliance_participation_profiles_at_or_above_50_percent": 4,
+      "concurrent_open_attacks_at_one_arrival_per_hour": 12.0,
+      "defender_sees_attack_opportunity": {
+        "ACTIVE_HUMAN": 1.0,
+        "ALLIANCE_COORDINATED": 1.0,
+        "AUTONOMOUS": 1.0,
+        "CASUAL_HUMAN": 1.0
+      },
+      "epoch_overlap_opportunity": 1.0,
+      "lock_exposure_hours": 12.0,
+      "maximum_resolution_cycles_per_day": 2.0,
+      "model_note": "uniform phase against explicit check intervals; not a human-behavior estimate",
+      "seconds": 43200,
+      "stale_lock_pressure": "HIGH"
+    }
+  }
+}

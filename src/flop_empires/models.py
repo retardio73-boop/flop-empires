@@ -8,6 +8,7 @@ from typing import Any
 class SeasonStatus(StrEnum):
     REGISTRATION = "REGISTRATION"
     ACTIVE = "ACTIVE"
+    PAUSED = "PAUSED"
     CLOSED = "CLOSED"
 
 
