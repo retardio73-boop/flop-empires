@@ -85,7 +85,7 @@ def run_live_write_smoke(manifest_path: Path, database_path: Path, *,
     player = WindowsDpapiSigner("player", manifest.allowed_dids[0])
     database_path.parent.mkdir(parents=True, exist_ok=True)
     store = Store(database_path)
-    engine = Engine(store, manifest.referee_did, referee)
+    engine = Engine.for_staging(store, manifest.referee_did, referee)
     ingestor = TechnocoreIngestor(store, engine, manifest.mailbox,
                                   allowed_dids=manifest.allowed_dids)
     outbox = ReceiptOutbox(store)
@@ -128,7 +128,7 @@ def run_live_write_smoke(manifest_path: Path, database_path: Path, *,
         receipt_a_text = dumps(asdict(receipt_a))
         before_a = _message_count(events, referee.did, receipt_a_text)
         store.close()
-        store = Store(database_path); engine = Engine(store, manifest.referee_did, referee)
+        store = Store(database_path); engine = Engine.for_staging(store, manifest.referee_did, referee)
         ingestor = TechnocoreIngestor(store, engine, manifest.mailbox,
                                       allowed_dids=manifest.allowed_dids)
         outbox = ReceiptOutbox(store); outbox.recover(); flushed_a = outbox.flush(events)
@@ -146,7 +146,7 @@ def run_live_write_smoke(manifest_path: Path, database_path: Path, *,
             raise RuntimeError("WINDOW_B_INITIAL_READBACK_FAILED")
         before_b = _message_count(events, referee.did, receipt_b_text)
         store.close()
-        store = Store(database_path); engine = Engine(store, manifest.referee_did, referee)
+        store = Store(database_path); engine = Engine.for_staging(store, manifest.referee_did, referee)
         outbox = ReceiptOutbox(store); outbox.recover(); flushed_b = outbox.flush(events)
         after_b = _message_count(events, referee.did, receipt_b_text)
         crash_results["window_b"] = {"initial_publish_ref":publish_ref,
@@ -186,7 +186,7 @@ def run_live_crash_a(manifest_path: Path, database_path: Path, *,
     manifest=StagingManifest.load(manifest_path)
     referee=WindowsDpapiSigner("referee",manifest.referee_did)
     player=WindowsDpapiSigner("player",manifest.allowed_dids[0])
-    store=Store(database_path); engine=Engine(store,manifest.referee_did,referee)
+    store=Store(database_path); engine=Engine.for_staging(store,manifest.referee_did,referee)
     ingestor=TechnocoreIngestor(store,engine,manifest.mailbox,allowed_dids=manifest.allowed_dids)
     outbox=ReceiptOutbox(store)
     command=_command(player.did,"smoke-crash-a-002","recon",territory_id="smoke-capital")
@@ -198,7 +198,7 @@ def run_live_crash_a(manifest_path: Path, database_path: Path, *,
         if before != 0:
             raise RuntimeError("WINDOW_A_NOT_FRESH")
         state_hash=store.state_hash(); store.close()
-        store=Store(database_path); engine=Engine(store,manifest.referee_did,referee)
+        store=Store(database_path); engine=Engine.for_staging(store,manifest.referee_did,referee)
         outbox=ReceiptOutbox(store); outbox.recover(); flushed=outbox.flush(events)
         after=_message_count(events,referee.did,text)
         result={"request_id":command["request_id"],"before_publish":before,

@@ -41,10 +41,12 @@ once per epoch; restart cannot repeat accrual or upkeep.
 
 ## Alliances and intelligence
 
-Alliances are explicit and may be activated or deactivated. Only an alliance
-that was active when an attack was created may defend. Defense contribution is
-locked at attack creation and cannot be double-spent. Recon reports deterministic
-public military values; it uses no random number generation.
+Alliances are explicit and may be activated or deactivated. Eligibility is
+snapshotted when an attack is created: only an alliance active at that moment
+may defend. Eligible defenders and allies may submit defense during the response
+window; their resources are locked immediately when each submission is accepted
+and cannot be double-spent. No defense is accepted after the deadline. Recon
+reports deterministic public military values; it uses no random number generation.
 
 ## Raid and Siege
 

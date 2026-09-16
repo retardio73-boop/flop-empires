@@ -157,7 +157,7 @@ def test_future_contribution_cannot_affect_previous_epoch():
 def make_game(clock):
     referee, a, b, c = [EphemeralSigner(bytes([n]) * 32) for n in range(1, 5)]
     store = Store()
-    engine = Engine(store, referee.did, referee, clock=clock)
+    engine = Engine.for_test(store, referee.did, referee, clock=clock)
     def cmd(actor, rid, action, **payload):
         return engine.execute({"actor_did":actor.did, "request_id":rid, "action":action, "payload":payload})
     for i, actor in enumerate((referee, a, b, c)): cmd(actor, f"reg{i}", "register_actor")
@@ -167,6 +167,7 @@ def make_game(clock):
     cmd(referee, "field", "add_territory", territory_id="field", owner_empire_id="b", capital=False)
     cmd(referee, "edge", "add_edge", a="ca", b="field")
     for x in "abc": cmd(referee, "mint"+x, "mint_resources", empire_id=x, amount=100)
+    cmd(referee, "active", "activate_season")
     return store, engine, cmd, referee, a, b, c
 
 
@@ -238,7 +239,7 @@ def test_staging_manifest_namespace_guards(season, mailbox, events):
 def test_crash_after_commit_before_publish_recovers(tmp_path):
     path = tmp_path / "crash.db"
     signer = EphemeralSigner(b"r"*32)
-    store = Store(path); engine = Engine(store, signer.did, signer, clock=lambda:1)
+    store = Store(path); engine = Engine.for_test(store, signer.did, signer, clock=lambda:1)
     engine.execute({"action":"register_actor","actor_did":signer.did,"request_id":"x","payload":{}})
     store.close()
     reopened = Store(path)
@@ -249,7 +250,7 @@ def test_crash_after_commit_before_publish_recovers(tmp_path):
 def test_crash_after_network_publish_reconciles_without_reexecution(tmp_path):
     path = tmp_path / "publish.db"
     signer = EphemeralSigner(b"r"*32)
-    store = Store(path); engine = Engine(store, signer.did, signer, clock=lambda:1)
+    store = Store(path); engine = Engine.for_test(store, signer.did, signer, clock=lambda:1)
     engine.execute({"action":"register_actor","actor_did":signer.did,"request_id":"x","payload":{}})
     outbox = ReceiptOutbox(store); outbox.recover()
     seen = set()

@@ -87,6 +87,7 @@ def test_v02_pending_lock_restart_and_fatigue_survive():
         engine.execute(command(actor.did,"reg"+e,"register_actor")); engine.execute(command(actor.did,"emp"+e,"create_empire",empire_id=e,name=e,capital_id=c))
     engine.execute(command(ref.did,"t","add_territory",territory_id="tb",owner_empire_id="b"))
     engine.execute(command(ref.did,"edge","add_edge",a="ca",b="tb"))
+    engine.execute(command(ref.did,"active-lock","activate_season"))
     created=engine.execute(command(a.did,"attack","create_attack",attack_id="x",origin_id="ca",target_id="tb",kind="SIEGE",power=20,deadline_seconds=5))
     assert created.accepted and store.one("SELECT locked FROM balances WHERE empire_id='a'")[0]==20
     engine=Engine.from_manifest(store,manifest(ref,r),ref,clock=lambda:now[0])
@@ -145,7 +146,24 @@ def test_v02_no_historical_bootstrap_preserves_prestige_but_excludes_spendable_y
 
 
 def test_v01_state_projection_excludes_v02_migration_tables():
-    ref=EphemeralSigner(b"r"*32); store=Store(); engine=Engine(store,ref.did,ref,clock=lambda:100)
+    ref=EphemeralSigner(b"r"*32); store=Store(); engine=Engine.for_test(store,ref.did,ref,clock=lambda:100)
     before=store.state_hash(); assert engine.execute(command(ref.did,"bad","unsupported")).accepted is False
     assert "empire_economy" not in store.state() and "economic_epochs" not in store.state()
     assert before == store.state_hash()
+
+
+def test_v02_frozen_attack_minimum_power_is_enforced():
+    r=rules(); ref=EphemeralSigner(b"r"*32); a=EphemeralSigner(b"a"*32); b=EphemeralSigner(b"b"*32)
+    m=manifest(ref,r)
+    m.combat_parameters={**m.combat_parameters,"raid_min_power":14,"siege_min_power":24}
+    store=Store(); engine=Engine.from_manifest(store,m,ref,clock=lambda:100)
+    for actor,e,c in ((a,"a","ca"),(b,"b","cb")):
+        assert engine.execute(command(actor.did,"reg"+e,"register_actor")).accepted
+        assert engine.execute(command(actor.did,"emp"+e,"create_empire",empire_id=e,name=e,capital_id=c)).accepted
+    assert engine.execute(command(ref.did,"t-min","add_territory",territory_id="tb",owner_empire_id="b")).accepted
+    assert engine.execute(command(ref.did,"edge-min","add_edge",a="ca",b="tb")).accepted
+    assert engine.execute(command(ref.did,"active-min","activate_season")).accepted
+    too_small=engine.execute(command(a.did,"small","create_attack",attack_id="small",origin_id="ca",target_id="tb",kind="SIEGE",power=23,deadline_seconds=5))
+    assert not too_small.accepted
+    valid=engine.execute(command(a.did,"valid","create_attack",attack_id="valid",origin_id="ca",target_id="tb",kind="SIEGE",power=24,deadline_seconds=5))
+    assert valid.accepted

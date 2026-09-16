@@ -10,6 +10,7 @@ from .economics_v02 import EconomicRulesV02
 from .identity import verify_key_from_did
 
 ROOM_NAME=re.compile(r"^[a-z0-9][a-z0-9_-]{0,47}$")
+PRODUCTION_NAMESPACE_TOKEN=re.compile(r"^[0-9a-f]{16}$")
 
 
 @dataclass(frozen=True)
@@ -193,3 +194,91 @@ class FrozenSeasonManifest:
     def __getattr__(self,name):
         try: return self.value[name]
         except KeyError as exc: raise AttributeError(name) from exc
+
+
+@dataclass(frozen=True)
+class SeasonZeroFreezeV2CandidateManifest:
+    """Rules-only candidate. Operational rooms and times belong to Activation Record v1."""
+    value: dict[str,Any]
+
+    @classmethod
+    def load(cls,path: str|Path)->"SeasonZeroFreezeV2CandidateManifest":
+        value=loads(Path(path).read_text(encoding="utf-8"))
+        if not isinstance(value,dict): raise ValueError("invalid freeze v2 candidate")
+        required={"manifest_schema_version","manifest_hash","previous_failed_freeze_manifest_hash",
+            "activation","environment","season_id","protocol_version","economic_rules_version",
+            "technical_yield_version","referee_did","namespace_policy","registration_open",
+            "registration_close","season_start","season_end","epoch_duration",
+            "intended_duration_epochs","intended_duration_seconds","world_graph_hash","world_fixture",
+            "initial_balances","bootstrap_policy","economic_parameters","combat_parameters",
+            "alliance_parameters","github_allowlist","monitoring_policy_version",
+            "monitoring_thresholds","pause_policy_version","gate_b_parameters"}
+        if set(value)!=required: raise ValueError("freeze v2 candidate fields mismatch")
+        unsigned=dict(value);supplied=unsigned.pop("manifest_hash")
+        if sha256(unsigned)!=supplied: raise ValueError("freeze v2 candidate hash mismatch")
+        result=cls(value);result.validate()
+        world_path=Path(path).resolve().parent.parent/value["world_fixture"]
+        if not world_path.is_file() or sha256(loads(world_path.read_text(encoding="utf-8")))!=value["world_graph_hash"]:
+            raise ValueError("world graph hash mismatch")
+        return result
+
+    def validate(self)->None:
+        v=self.value
+        if v["manifest_schema_version"]!="flop-empires-season-freeze-v2-candidate-v2":
+            raise ValueError("unsupported freeze v2 schema")
+        if (v["activation"]!="FROZEN_NOT_ACTIVE" or v["environment"]!="production-freeze-v2-candidate"
+                or v["season_id"]!="season-0"):
+            raise ValueError("freeze v2 candidate must remain inactive")
+        if any(v[key] is not None for key in ("registration_open","registration_close","season_start","season_end")):
+            raise ValueError("freeze v2 candidate cannot contain launch timestamps")
+        if v["economic_rules_version"]!="technical-yield-v0.2" or v["technical_yield_version"]!="technical-yield-v0.2":
+            raise ValueError("freeze v2 must select technical-yield-v0.2")
+        verify_key_from_did(v["referee_did"])
+        policy=v["namespace_policy"]
+        if policy!={"transport":"technocore-room-json-signed-v1","namespace_environment":"production",
+                "namespace_prefix":"mb-p-flop-empires-s0-","namespace_token_hex_length":16,
+                "require_empty_namespace":True}:
+            raise ValueError("invalid production namespace policy")
+        if (v["epoch_duration"]!=21600 or v["intended_duration_epochs"]!=56 or
+                v["intended_duration_seconds"]!=1209600): raise ValueError("invalid frozen cadence")
+        combat=v["combat_parameters"]
+        expected={"min_deadline_seconds":30,"raid_defense_window_seconds":1800,
+            "siege_defense_window_seconds":21600,"recon_ttl_seconds":1800,
+            "raid_min_power":14,"siege_min_power":24}
+        if any(combat.get(key)!=value for key,value in expected.items()): raise ValueError("unvalidated combat parameters")
+        if combat.get("capital_conquest") is not False or combat.get("tie_goes_to_defender") is not True:
+            raise ValueError("invalid frozen combat rules")
+        if v["pause_policy_version"]!="authoritative-clock-freeze-v1": raise ValueError("invalid pause policy")
+        gate=v["gate_b_parameters"]
+        if gate.get("version")!="gate-b-v0.2-engine-aligned-candidate" or gate.get("status")!="SIMULATION_CANDIDATE_NOT_FROZEN":
+            raise ValueError("invalid Gate B candidate")
+        if gate.get("world",{}).get("empires")!=16 or gate.get("world",{}).get("territories")!=64:
+            raise ValueError("invalid Gate B world")
+        if gate.get("combat",{}).get("raid_min_power")!=14 or gate.get("combat",{}).get("siege_min_power")!=24:
+            raise ValueError("invalid Gate B combat")
+        if gate.get("late_join",{})!={"production_boost_bp":18750,"protection_epochs":4}:
+            raise ValueError("invalid Gate B catch-up")
+        EconomicRulesV02.from_manifest(v)
+
+    @property
+    def manifest_hash(self): return self.value["manifest_hash"]
+    @property
+    def rules(self): return EconomicRulesV02.from_manifest(self.value)
+    def __getattr__(self,name):
+        try:return self.value[name]
+        except KeyError as exc:raise AttributeError(name) from exc
+
+
+def validate_production_namespace(policy: dict[str,Any],room: str,kind: str)->None:
+    if kind not in {"actions","events"}: raise ValueError("invalid namespace kind")
+    prefix=policy.get("namespace_prefix")
+    token_length=policy.get("namespace_token_hex_length")
+    if not isinstance(prefix,str) or token_length!=16 or not isinstance(room,str):
+        raise ValueError("NAMESPACE_BINDING_MISMATCH")
+    expected_prefix=prefix
+    suffix=f"-{kind}"
+    if not room.startswith(expected_prefix) or not room.endswith(suffix) or not ROOM_NAME.fullmatch(room):
+        raise ValueError("NAMESPACE_BINDING_MISMATCH")
+    token=room[len(expected_prefix):-len(suffix)]
+    if not PRODUCTION_NAMESPACE_TOKEN.fullmatch(token):
+        raise ValueError("NAMESPACE_BINDING_MISMATCH")

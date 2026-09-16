@@ -19,7 +19,7 @@ from flop_empires.technocore import (MailboxItem, TechnocoreHttpMailbox,
 def test_signed_mailbox_bootstrap_verification_and_duplicates():
     referee, actor = EphemeralSigner(b"r" * 32), EphemeralSigner(b"a" * 32)
     store = Store()
-    engine = Engine(store, referee.did, referee, clock=lambda: 99)
+    engine = Engine.for_test(store, referee.did, referee, clock=lambda: 99)
     ingestor = TechnocoreIngestor(store, engine, "main")
     assert ingestor.bootstrap("cursor-now") == "cursor-now"
     payload = {"action":"register_actor", "actor_did":actor.did, "request_id":"r", "payload":{}}
@@ -37,7 +37,7 @@ def test_signed_mailbox_bootstrap_verification_and_duplicates():
 def test_poll_durably_advances_only_through_verified_records():
     referee, actor = EphemeralSigner(b"r" * 32), EphemeralSigner(b"a" * 32)
     store = Store()
-    engine = Engine(store, referee.did, referee, clock=lambda: 101)
+    engine = Engine.for_test(store, referee.did, referee, clock=lambda: 101)
     ingestor = TechnocoreIngestor(store, engine, "poll")
     payload = {"action":"register_actor", "actor_did":actor.did, "request_id":"one", "payload":{}}
     unsigned = SignedRecord("one", actor.did, payload, "", seq=1, ts=999999)
@@ -60,7 +60,7 @@ def test_poll_durably_advances_only_through_verified_records():
 def test_staging_ingestor_rejects_valid_but_non_allowlisted_signer():
     referee, allowed, outsider = (EphemeralSigner(b"r" * 32), EphemeralSigner(b"a" * 32),
                                   EphemeralSigner(b"o" * 32))
-    store = Store(); engine = Engine(store, referee.did, referee, clock=lambda: 101)
+    store = Store(); engine = Engine.for_test(store, referee.did, referee, clock=lambda: 101)
     ingestor = TechnocoreIngestor(store, engine, "mb-p-staging-flop-empires-test",
                                   allowed_dids=(allowed.did,))
     payload = {"action":"register_actor", "actor_did":outsider.did,

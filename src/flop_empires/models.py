@@ -6,10 +6,19 @@ from typing import Any
 
 
 class SeasonStatus(StrEnum):
+    FROZEN_NOT_ACTIVE = "FROZEN_NOT_ACTIVE"
     REGISTRATION = "REGISTRATION"
     ACTIVE = "ACTIVE"
     PAUSED = "PAUSED"
+    FINALIZED = "FINALIZED"
     CLOSED = "CLOSED"
+
+
+class RuntimeMode(StrEnum):
+    LOCAL_TEST = "LOCAL_TEST"
+    STAGING = "STAGING"
+    PRODUCTION_FROZEN = "PRODUCTION_FROZEN"
+    PRODUCTION = "PRODUCTION"
 
 
 class AttackKind(StrEnum):

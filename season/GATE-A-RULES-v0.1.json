@@ -1,0 +1,34 @@
+{
+  "version": "gate-a-v0.1",
+  "status": "NORMATIVE_CANDIDATE",
+  "resources": ["ENGINEERING", "KNOWLEDGE", "INFLUENCE"],
+  "power": {
+    "kind": "derived",
+    "formula": "ENGINEERING+KNOWLEDGE+INFLUENCE",
+    "stored": false,
+    "transferable": false,
+    "spendable": false,
+    "future_compute": "DEFERRED_TO_TESTNET"
+  },
+  "territory": {
+    "world_model": "DETERMINISTIC_GRAPH",
+    "capital_conquest": false,
+    "raid_transfers_territory": false,
+    "siege_is_only_transfer_action": true,
+    "map_seed_required": true
+  },
+  "combat": {
+    "rng": false,
+    "ties_favor_defender": true,
+    "alliance_eligibility_snapshot_at_attack_creation": true,
+    "defense_resources_lock_on_accepted_submit_defense": true,
+    "late_defense_rejected": true
+  },
+  "treaties": ["NAP", "DEFENSIVE_ALLIANCE", "MUTUAL_ALLIANCE", "TRADE_PACT", "COALITION"],
+  "trade": {"atomic": true, "mints_resources": false, "power_trade": false, "scores_directly": false},
+  "fog": {"states": ["FRESH", "AGING", "STALE"], "false_canonical_intel": false},
+  "standing": ["Domain", "Regional", "Major", "Great", "Dominant", "Hegemon"],
+  "momentum": ["Ascending", "Stable", "Declining"],
+  "hegemon": {"optional": true, "max_count": 1, "automatic_victory": false},
+  "contributor_roles_affect_game_power": false
+}

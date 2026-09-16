@@ -19,7 +19,7 @@ def record(record_id,signer,payload,seq,valid=True):
 
 def test_expected_hostile_batch_advances_and_valid_next_action_executes():
     ref=EphemeralSigner(b"r"*32); allowed=EphemeralSigner(b"a"*32); outsider=EphemeralSigner(b"o"*32)
-    store=Store(); engine=Engine(store,ref.did,ref,clock=lambda:100)
+    store=Store(); engine=Engine.for_test(store,ref.did,ref,clock=lambda:100)
     ingestor=TechnocoreIngestor(store,engine,"room",allowed_dids=(allowed.did,),expected_season_id="season-b")
     good={"action":"register_actor","actor_did":allowed.did,"request_id":"good","payload":{}}
     items=[
@@ -48,8 +48,8 @@ def test_error_taxonomy_is_explicit():
 
 def test_event_chain_corruption_halts_new_engine():
     ref=EphemeralSigner(b"r"*32); actor=EphemeralSigner(b"a"*32); store=Store()
-    engine=Engine(store,ref.did,ref,clock=lambda:100)
+    engine=Engine.for_test(store,ref.did,ref,clock=lambda:100)
     engine.execute({"action":"register_actor","actor_did":actor.did,"request_id":"r","payload":{}})
     store.conn.execute("UPDATE events SET details_json='{}' WHERE seq=1")
     with pytest.raises(RuntimeError,match="invalid historical event chain"):
-        Engine(store,ref.did,ref)
+        Engine.for_test(store,ref.did,ref)

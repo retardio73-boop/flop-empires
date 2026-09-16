@@ -7,7 +7,7 @@ import pytest
 
 from flop_empires.canonical import dumps,loads,sha256
 from flop_empires.economics_v02 import EconomicRulesV02
-from flop_empires.engine import Engine
+from flop_empires.engine import Engine,LifecycleViolation
 from flop_empires.identity import EphemeralSigner
 from flop_empires.manifest import FrozenSeasonManifest
 from flop_empires.operations import AlertLevel,evaluate_monitoring
@@ -80,8 +80,10 @@ def test_frozen_attack_windows_and_recon_ttl_are_manifest_driven():
 def test_frozen_manifest_cannot_activate_engine():
     ref=EphemeralSigner(b"r"*32);manifest=operational_manifest(ref,activation="FROZEN_NOT_ACTIVE")
     engine=Engine.from_manifest(Store(),manifest,ref,clock=lambda:100)
-    receipt=engine.execute(command(ref.did,"activate","activate_season"))
-    assert not receipt.accepted and receipt.details["error"]=="manifest activation is disabled"
+    before=engine.store.state_hash()
+    with pytest.raises(LifecycleViolation,match="SEASON_NOT_ACTIVATED"):
+        engine.execute(command(ref.did,"activate","activate_season"))
+    assert engine.store.state_hash()==before and engine.store.one("SELECT COUNT(*) FROM events")[0]==0
 
 
 def test_frozen_manifest_hash_and_inactive_fields_are_tamper_evident(tmp_path):

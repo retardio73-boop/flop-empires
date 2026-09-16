@@ -40,10 +40,11 @@ def test_real_response_fixture_flows_through_typed_engine_boundary_only():
         tuple(facts["labels"]),tuple(facts["linked_issues"]),tuple(facts["release_tags"]))
     provider=StaticGitHubEvidenceProvider({(fixture["source"],fixture["evidence_class"]):evidence})
     verified=verify_provider_evidence(provider,fixture["source"],fixture["evidence_class"],facts["author"])
-    ref=EphemeralSigner(b"r"*32); actor=EphemeralSigner(b"a"*32); store=Store(); engine=Engine(store,ref.did,ref,clock=lambda:100)
+    ref=EphemeralSigner(b"r"*32); actor=EphemeralSigner(b"a"*32); store=Store(); engine=Engine.for_test(store,ref.did,ref,clock=lambda:100)
     def command(rid,action,**payload): return {"actor_did":actor.did,"request_id":rid,"action":action,"payload":payload}
     assert engine.execute(command("reg","register_actor")).accepted
     assert engine.execute(command("emp","create_empire",empire_id="e",name="E",capital_id="c")).accepted
     assert engine.execute(command("bind","bind_github",login=facts["author"],verified=True)).accepted
+    assert engine.execute({"actor_did":ref.did,"request_id":"activate","action":"activate_season","payload":{}}).accepted
     receipt=engine.record_verified_contribution(verified,actor.did,"real-response-fixture")
     assert receipt.accepted and receipt.details["base_units"]==40

@@ -13,7 +13,7 @@ from .events import append_event, require_valid_chain
 from .github_evidence import validate_evidence_url
 from .github_evidence import VerifiedEvidence
 from .identity import Signer, require_signer
-from .models import Command, Receipt, SeasonStatus
+from .models import Command, Receipt, RuntimeMode, SeasonStatus
 from .protocol import parse_command
 from .receipts import issue_receipt
 from .store import Store
@@ -27,18 +27,70 @@ class RuleViolation(ValueError):
     pass
 
 
+class LifecycleViolation(RuntimeError):
+    """A lifecycle refusal happens before a command transaction or receipt exists."""
+
+    def __init__(self, code: str):
+        self.code = code
+        super().__init__(code)
+
+
+_ENGINE_FACTORY_TOKEN = object()
+
+REGISTRATION_ACTIONS = frozenset({"register_actor", "create_empire", "join_empire", "bind_github"})
+ACTIVE_ACTIONS = frozenset({"add_contribution", "claim_yield", "settle_epoch", "create_alliance",
+    "set_alliance_active", "fortify", "recon", "create_attack", "submit_defense",
+    "resolve_attack", "raid", "siege", "pause_season"})
+LOCAL_OPERATOR_ACTIONS = frozenset({"add_territory", "add_edge", "mint_resources"})
+STAGING_ACTIONS = frozenset({"add_synthetic_contribution","add_contribution"})
+
+
 class Engine:
+    @classmethod
+    def for_test(cls, store: Store, configured_referee_did: str, signer: Signer,
+                 clock=None, **kwargs) -> "Engine":
+        return cls(store, configured_referee_did, signer, clock=clock,
+            runtime_mode=RuntimeMode.LOCAL_TEST, _factory_token=_ENGINE_FACTORY_TOKEN, **kwargs)
+
+    @classmethod
+    def for_staging(cls, store: Store, configured_referee_did: str, signer: Signer,
+                    clock=None, **kwargs) -> "Engine":
+        return cls(store, configured_referee_did, signer, clock=clock,
+            runtime_mode=RuntimeMode.STAGING, _factory_token=_ENGINE_FACTORY_TOKEN, **kwargs)
+
     @classmethod
     def from_manifest(cls,store: Store,manifest,signer: Signer,clock=None)->"Engine":
         manifest_value=getattr(manifest,"value",{})
+        activation=manifest_value.get("activation") if isinstance(manifest_value,dict) else None
+        environment=manifest.environment
+        if activation=="LOCAL_DRY_RUN": mode=RuntimeMode.LOCAL_TEST
+        elif environment=="staging": mode=RuntimeMode.STAGING
+        elif activation=="FROZEN_NOT_ACTIVE": mode=RuntimeMode.PRODUCTION_FROZEN
+        else: mode=RuntimeMode.LOCAL_TEST
         return cls(store,manifest.referee_did,signer,clock=clock,economic_rules=manifest.rules,
             manifest_hash=manifest.manifest_hash,initial_balances=manifest.initial_balances,
-            epoch_duration=manifest.epoch_duration,environment=manifest.environment,
+            epoch_duration=manifest.epoch_duration,environment=environment,
             combat_parameters=manifest.combat_parameters,
             alliance_parameters=manifest.alliance_parameters,
             bootstrap_policy=manifest_value.get("bootstrap_policy") if isinstance(manifest_value,dict) else None,
             pause_policy=manifest_value.get("pause_policy_version") if isinstance(manifest_value,dict) else None,
-            activation_guard=manifest_value.get("activation") if isinstance(manifest_value,dict) else None)
+            activation_guard=activation,runtime_mode=mode,_factory_token=_ENGINE_FACTORY_TOKEN)
+
+    @classmethod
+    def _for_verified_production(cls,store: Store,manifest,signer: Signer,activation_context,
+                                 clock=None)->"Engine":
+        from .activation import is_verified_activation_context
+        if not is_verified_activation_context(activation_context):
+            raise RuntimeError("VERIFIED_ACTIVATION_REQUIRED")
+        if activation_context.frozen_manifest_hash != manifest.manifest_hash:
+            raise RuntimeError("ACTIVATION_MANIFEST_MISMATCH")
+        return cls(store,manifest.referee_did,signer,clock=clock,economic_rules=manifest.rules,
+            manifest_hash=manifest.manifest_hash,initial_balances=manifest.initial_balances,
+            epoch_duration=manifest.epoch_duration,environment="production",
+            combat_parameters=manifest.combat_parameters,alliance_parameters=manifest.alliance_parameters,
+            bootstrap_policy=manifest.bootstrap_policy,pause_policy=manifest.pause_policy_version,
+            activation_guard="VERIFIED_ACTIVATION",runtime_mode=RuntimeMode.PRODUCTION,
+            activation_context=activation_context,_factory_token=_ENGINE_FACTORY_TOKEN)
 
     def __init__(self, store: Store, configured_referee_did: str, signer: Signer | None,
                  clock: Callable[[], int] | None = None, *,
@@ -50,7 +102,12 @@ class Engine:
                  alliance_parameters: dict[str,Any] | None = None,
                  bootstrap_policy: dict[str,Any] | None = None,
                  pause_policy: str | None = None,
-                 activation_guard: str | None = None):
+                 activation_guard: str | None = None,
+                 runtime_mode: RuntimeMode | None = None,
+                 activation_context=None,
+                 _factory_token=None):
+        if _factory_token is not _ENGINE_FACTORY_TOKEN or runtime_mode is None:
+            raise RuntimeError("direct Engine construction is disabled; use an explicit runtime factory")
         self.store = store
         if store.one("SELECT 1 FROM events LIMIT 1"): require_valid_chain(store)
         self.signer = require_signer(configured_referee_did, signer)
@@ -66,11 +123,18 @@ class Engine:
         self.bootstrap_policy=bootstrap_policy
         self.pause_policy=pause_policy
         self.activation_guard=activation_guard
+        self.runtime_mode=RuntimeMode(runtime_mode)
+        self.activation_context=activation_context
         existing = store.one("SELECT value FROM config WHERE key='referee_did'")
         if existing and existing[0] != configured_referee_did:
             raise RuntimeError("database belongs to a different referee DID")
         store.conn.execute("INSERT OR IGNORE INTO config(key,value) VALUES('referee_did',?)", (configured_referee_did,))
-        store.conn.execute("INSERT OR IGNORE INTO config(key,value) VALUES('season_status',?)", (SeasonStatus.REGISTRATION,))
+        initial_status=(SeasonStatus.FROZEN_NOT_ACTIVE if self.runtime_mode==RuntimeMode.PRODUCTION_FROZEN
+            else SeasonStatus.REGISTRATION)
+        store.conn.execute("INSERT OR IGNORE INTO config(key,value) VALUES('season_status',?)", (initial_status,))
+        actual_status=store.one("SELECT value FROM config WHERE key='season_status'")[0]
+        if self.runtime_mode==RuntimeMode.PRODUCTION_FROZEN and actual_status!=SeasonStatus.FROZEN_NOT_ACTIVE:
+            raise RuntimeError("frozen manifest cannot open a non-frozen database")
         version=economic_rules.version if economic_rules else "technical-yield-v0.1"
         prior=store.one("SELECT value FROM config WHERE key='economic_rules_version'")
         if prior and prior[0]!=version: raise RuntimeError("database economic rules mismatch")
@@ -81,9 +145,20 @@ class Engine:
             last=store.one("SELECT state_after_hash FROM events ORDER BY seq DESC LIMIT 1")
             if last and last[0]!=store.state_hash():
                 raise RuntimeError("impossible replay divergence")
+        if self.runtime_mode==RuntimeMode.PRODUCTION:
+            if activation_context is None: raise RuntimeError("VERIFIED_ACTIVATION_REQUIRED")
+            bindings={"activation_id":activation_context.activation_id,
+                "activation_manifest_hash":activation_context.frozen_manifest_hash,
+                "actions_namespace":activation_context.actions_namespace,
+                "events_namespace":activation_context.events_namespace}
+            for key,value in bindings.items():
+                prior=store.one("SELECT value FROM config WHERE key=?",(key,))
+                if prior and prior[0]!=value: raise RuntimeError("persisted activation binding mismatch")
+                store.conn.execute("INSERT OR IGNORE INTO config(key,value) VALUES(?,?)",(key,value))
 
     def execute(self, raw: str | bytes | dict[str, Any] | Command) -> Receipt:
         command = raw if isinstance(raw, Command) else parse_command(raw)
+        self._require_lifecycle(command,hard_only=True)
         obj = asdict(command)
         command_hash = sha256(obj)
         with self.store.transaction():
@@ -116,6 +191,7 @@ class Engine:
             self.store.conn.execute("SAVEPOINT command_effect")
             accepted = True
             try:
+                self._require_lifecycle(command)
                 details = self._dispatch(command, accepted_at)
                 self.store.conn.execute("RELEASE command_effect")
             except (RuleViolation, sqlite3.IntegrityError, ValueError) as exc:
@@ -137,6 +213,64 @@ class Engine:
             receipt = issue_receipt(self.signer, unsigned)
             self.store.conn.execute("INSERT INTO requests VALUES(?,?,?,?)", (command.actor_did, command.request_id, command_hash, dumps(asdict(receipt))))
             return receipt
+
+    def _require_lifecycle(self, command: Command,*,hard_only: bool=False) -> None:
+        status=self._status()
+        if status==SeasonStatus.FROZEN_NOT_ACTIVE:
+            raise LifecycleViolation("SEASON_NOT_ACTIVATED")
+        if status in {SeasonStatus.FINALIZED,SeasonStatus.CLOSED}:
+            raise LifecycleViolation("SEASON_FINALIZED")
+        if hard_only:return
+        action=command.action
+        if status==SeasonStatus.PAUSED:
+            if action!="resume_season": raise RuleViolation("SEASON_PAUSED")
+            return
+        if status==SeasonStatus.REGISTRATION:
+            allowed=set(REGISTRATION_ACTIONS)
+            if self.runtime_mode in {RuntimeMode.LOCAL_TEST,RuntimeMode.STAGING}:
+                allowed.update(LOCAL_OPERATOR_ACTIONS);allowed.add("activate_season")
+                if self.runtime_mode==RuntimeMode.STAGING: allowed.update(STAGING_ACTIONS)
+            if action not in allowed: raise RuleViolation("ACTION_NOT_ALLOWED_DURING_REGISTRATION")
+            if self.runtime_mode==RuntimeMode.PRODUCTION and self.activation_context is not None:
+                now=int(self.clock())
+                if now<self.activation_context.registration_open or now>=self.activation_context.registration_close:
+                    raise RuleViolation("REGISTRATION_CLOSED")
+            return
+        if status==SeasonStatus.ACTIVE:
+            allowed=set(ACTIVE_ACTIONS)
+            if self.runtime_mode in {RuntimeMode.LOCAL_TEST,RuntimeMode.STAGING}:
+                allowed.update(LOCAL_OPERATOR_ACTIONS)
+                if self.runtime_mode==RuntimeMode.STAGING: allowed.update(STAGING_ACTIONS)
+            if action not in allowed: raise RuleViolation("ACTION_NOT_ALLOWED_DURING_ACTIVE")
+            return
+        raise RuntimeError("unknown persisted lifecycle state")
+
+    def advance_production_lifecycle(self, now: int | None=None) -> str:
+        if self.runtime_mode!=RuntimeMode.PRODUCTION or self.activation_context is None:
+            raise RuntimeError("VERIFIED_PRODUCTION_RUNTIME_REQUIRED")
+        wall=int(self.clock()) if now is None else int(now);ctx=self.activation_context
+        status=self._status()
+        if wall>=ctx.season_end:
+            target=SeasonStatus.FINALIZED
+        elif wall>=ctx.season_start:
+            target=SeasonStatus.ACTIVE
+        elif wall>=ctx.registration_open:
+            target=SeasonStatus.REGISTRATION
+        else:
+            raise LifecycleViolation("ACTIVATION_NOT_YET_EFFECTIVE")
+        if status==SeasonStatus.PAUSED and target==SeasonStatus.ACTIVE: return status
+        allowed={(SeasonStatus.FROZEN_NOT_ACTIVE,SeasonStatus.REGISTRATION),
+            (SeasonStatus.REGISTRATION,SeasonStatus.ACTIVE),(SeasonStatus.ACTIVE,SeasonStatus.FINALIZED),
+            (SeasonStatus.REGISTRATION,SeasonStatus.FINALIZED)}
+        if status!=target and (status,target) not in allowed:
+            raise RuntimeError("invalid production lifecycle transition")
+        if status!=target:
+            self.store.conn.execute("UPDATE config SET value=? WHERE key='season_status'",(target,))
+            if target==SeasonStatus.ACTIVE:
+                self.store.conn.execute("INSERT OR REPLACE INTO config(key,value) VALUES('season_started_at',?)",
+                    (str(ctx.season_start),))
+                self.store.conn.execute("INSERT OR IGNORE INTO config(key,value) VALUES('total_paused_seconds','0')")
+        return target
 
     def record_verified_contribution(self, evidence: VerifiedEvidence, contributor_did: str,
                                      request_id: str) -> Receipt:
@@ -230,6 +364,8 @@ class Engine:
         return {"empire_id": empire}
 
     def _do_activate_season(self, did: str, p: dict[str, Any], now: int) -> dict[str, Any]:
+        if self.runtime_mode not in {RuntimeMode.LOCAL_TEST,RuntimeMode.STAGING}:
+            raise RuleViolation("activation is external to production game commands")
         self._referee(did)
         if self.activation_guard in {"FROZEN_NOT_ACTIVE","DISABLED_PENDING_FINAL_REVIEW"}:
             raise RuleViolation("manifest activation is disabled")
@@ -461,6 +597,9 @@ class Engine:
         attacker = self._empire(did)
         attack_id, origin, target = self._text(p, "attack_id"), self._text(p, "origin_id"), self._text(p, "target_id")
         kind, power = self._text(p, "kind").upper(), self._amount(p, "power")
+        minimum_power=self.combat_parameters.get("raid_min_power" if kind=="RAID" else "siege_min_power")
+        if minimum_power is not None and power < minimum_power:
+            raise RuleViolation("attack power below frozen minimum")
         configured=self.combat_parameters.get(
             "raid_defense_window_seconds" if kind=="RAID" else "siege_defense_window_seconds")
         if configured is None:
@@ -570,6 +709,9 @@ class Engine:
         attacker = self._empire(did)
         attack_id, origin, target = self._text(p, "attack_id"), self._text(p, "origin_id"), self._text(p, "target_id")
         power = self._amount(p, "power")
+        minimum_power=self.combat_parameters.get("raid_min_power" if kind=="RAID" else "siege_min_power")
+        if minimum_power is not None and power < minimum_power:
+            raise RuleViolation("attack power below frozen minimum")
         o = self.store.one("SELECT owner_empire_id FROM territories WHERE id=?", (origin,))
         t = self.store.one("SELECT owner_empire_id,is_capital,fortification FROM territories WHERE id=?", (target,))
         if not o or not t or o[0] != attacker or t[0] == attacker or not adjacent(self.store, origin, target):

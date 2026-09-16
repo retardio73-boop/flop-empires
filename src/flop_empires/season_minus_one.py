@@ -87,7 +87,7 @@ def run_season_minus_one(manifest_path: Path, database_path: Path, *,
     players=[WindowsDpapiSigner(f"season1-player-{i}",did)
              for i,did in enumerate(manifest.allowed_dids,1)]
     database_path.parent.mkdir(parents=True,exist_ok=True)
-    store=Store(database_path); engine=Engine(store,manifest.referee_did,referee)
+    store=Store(database_path); engine=Engine.for_staging(store,manifest.referee_did,referee)
     ingestor=TechnocoreIngestor(store,engine,manifest.mailbox,
         allowed_dids=(manifest.referee_did,*manifest.allowed_dids)); outbox=ReceiptOutbox(store)
     plan=_plan(referee,players); receipts=[]
@@ -104,7 +104,7 @@ def run_season_minus_one(manifest_path: Path, database_path: Path, *,
             if flushed["pending"]: raise RuntimeError("SEASON_MINUS_ONE_RECEIPT_PENDING")
         # Explicit process restart and replay-free cursor recovery.
         cursor_before=store.one("SELECT cursor FROM technocore_state WHERE mailbox=?",(manifest.mailbox,))[0]
-        store.close(); store=Store(database_path); engine=Engine(store,manifest.referee_did,referee)
+        store.close(); store=Store(database_path); engine=Engine.for_staging(store,manifest.referee_did,referee)
         ingestor=TechnocoreIngestor(store,engine,manifest.mailbox,
             allowed_dids=(manifest.referee_did,*manifest.allowed_dids))
         restart_receipts=ingestor.poll(source)

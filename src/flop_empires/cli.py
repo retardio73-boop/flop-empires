@@ -16,6 +16,7 @@ from .season_minus_one import run_season_minus_one, write_season_report
 from .season_minus_one_b import run as run_season_minus_one_b, write_report as write_season_minus_one_b_report
 from .store import Store
 from .technocore import TechnocoreHttpMailbox
+from .production_cli import preflight as production_preflight, run_once as production_run_once, verify_activation as production_verify_activation
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -58,6 +59,16 @@ def main(argv: list[str] | None = None) -> int:
     rehearsal_b.add_argument("database",type=Path); rehearsal_b.add_argument("--manifest",type=Path,required=True)
     rehearsal_b.add_argument("--confirm-live-write",action="store_true")
     rehearsal_b.add_argument("--report-prefix",type=Path,default=Path("reports/season-minus-one-b"))
+    production=sub.add_parser("production",help="strict Season 0 production operations")
+    production_sub=production.add_subparsers(dest="production_command",required=True)
+    verify_p=production_sub.add_parser("verify-activation",help="verify signed activation without network writes")
+    verify_p.add_argument("--manifest",type=Path,required=True); verify_p.add_argument("--activation",type=Path,required=True)
+    preflight_p=production_sub.add_parser("preflight",help="read-only pristine namespace verification")
+    preflight_p.add_argument("--manifest",type=Path,required=True); preflight_p.add_argument("--activation",type=Path,required=True)
+    run_p=production_sub.add_parser("run",help="one explicit production processing cycle")
+    run_p.add_argument("database",type=Path); run_p.add_argument("--manifest",type=Path,required=True)
+    run_p.add_argument("--activation",type=Path,required=True); run_p.add_argument("--signer-backend",required=True)
+    run_p.add_argument("--confirm-production-run",action="store_true")
     args = parser.parse_args(argv)
     if args.command == "init":
         if not args.referee_did.startswith("did:key:"):
@@ -82,6 +93,17 @@ def main(argv: list[str] | None = None) -> int:
         store = Store(args.database)
         print(json.dumps(health_summary(store, mode=args.mode), indent=2, sort_keys=True))
         return 0
+    if args.command == "production":
+        if args.production_command == "verify-activation":
+            print(json.dumps(production_verify_activation(args.manifest,args.activation),indent=2,sort_keys=True)); return 0
+        headers={"User-Agent":"flop-empires/0.1 production-read-only"}
+        with httpx.Client(headers=headers) as client:
+            if args.production_command == "preflight":
+                print(json.dumps(production_preflight(args.manifest,args.activation,client),indent=2,sort_keys=True)); return 0
+            if not args.confirm_production_run:
+                parser.error("production run requires --confirm-production-run")
+            result=production_run_once(args.manifest,args.activation,args.database,args.signer_backend,client)
+            print(json.dumps(result,indent=2,sort_keys=True)); return 0
     if args.command == "staging":
         if args.staging_command == "season-minus-one-b":
             result=run_season_minus_one_b(args.manifest,args.database,confirm_live_write=args.confirm_live_write)

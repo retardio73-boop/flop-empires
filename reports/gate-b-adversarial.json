@@ -1,0 +1,114 @@
+{
+  "capital_failures": 0,
+  "max_strategy_win_rate": 0.345,
+  "multi_hegemon_failures": 0,
+  "negative_balance_failures": 0,
+  "params": {
+    "base_territory_production": 6,
+    "defense_base": 6,
+    "empires": 16,
+    "endgame_epochs": 8,
+    "epochs": 56,
+    "fortify_cost": 12,
+    "hegemon_lead_over_second_bp": 3000,
+    "hegemon_min_share_bp": 1800,
+    "hegemon_sustain_epochs": 4,
+    "late_join_boost_bp": 15000,
+    "late_join_protection_epochs": 2,
+    "momentum_deadband_bp": 500,
+    "nap_exit_cooldown_epochs": 2,
+    "nap_min_epochs": 4,
+    "overextension_cost_per_territory": 2,
+    "overextension_free_territories": 5,
+    "raid_cost": 14,
+    "raid_fraction_bp": 1200,
+    "recon_aging_epochs": 2,
+    "recon_cost": 8,
+    "recon_fresh_epochs": 1,
+    "siege_cost": 26,
+    "strategic_territory_bonus": 5,
+    "territories": 64,
+    "trade_cooldown_epochs": 1,
+    "trade_max_stockpile_bp": 2500,
+    "upkeep_per_noncapital": 3
+  },
+  "runs": 200,
+  "schema": "gate-b-adversarial-v0.1",
+  "summary": {
+    "BALANCED": {
+      "mean_alliance_support": 4.005,
+      "mean_power": 1145.18,
+      "mean_rank": 8.4175,
+      "mean_territories": 4.0375,
+      "mean_trade_volume": 101.16,
+      "win_rate": 0.105
+    },
+    "COALITION": {
+      "mean_alliance_support": 6.26,
+      "mean_power": 1222.9975,
+      "mean_rank": 7.01,
+      "mean_territories": 4.4275,
+      "mean_trade_volume": 88.56,
+      "win_rate": 0.245
+    },
+    "DIPLOMATIC": {
+      "mean_alliance_support": 5.105,
+      "mean_power": 1199.125,
+      "mean_rank": 7.3725,
+      "mean_territories": 4.22,
+      "mean_trade_volume": 167.8,
+      "win_rate": 0.155
+    },
+    "ECONOMIC": {
+      "mean_alliance_support": 3.665,
+      "mean_power": 1103.88,
+      "mean_rank": 9.8525,
+      "mean_territories": 3.6175,
+      "mean_trade_volume": 319.82,
+      "win_rate": 0.05
+    },
+    "RAIDER": {
+      "mean_alliance_support": 2.355,
+      "mean_power": 1019.575,
+      "mean_rank": 10.555,
+      "mean_territories": 3.565,
+      "mean_trade_volume": 32.71,
+      "win_rate": 0.025
+    },
+    "TERRITORIAL": {
+      "mean_alliance_support": 4.185,
+      "mean_power": 1282.6875,
+      "mean_rank": 6.58,
+      "mean_territories": 4.7475,
+      "mean_trade_volume": 19.5,
+      "win_rate": 0.345
+    },
+    "TRADER": {
+      "mean_alliance_support": 4.3,
+      "mean_power": 1099.73,
+      "mean_rank": 9.97,
+      "mean_territories": 3.385,
+      "mean_trade_volume": 451.8,
+      "win_rate": 0.02
+    },
+    "TURTLE": {
+      "mean_alliance_support": 4.04,
+      "mean_power": 1126.4675,
+      "mean_rank": 8.2425,
+      "mean_territories": 4.0,
+      "mean_trade_volume": 62.9,
+      "win_rate": 0.055
+    }
+  },
+  "unique_winning_strategies": 8,
+  "winner_counts": {
+    "BALANCED": 21,
+    "COALITION": 49,
+    "DIPLOMATIC": 31,
+    "ECONOMIC": 10,
+    "RAIDER": 5,
+    "TERRITORIAL": 69,
+    "TRADER": 4,
+    "TURTLE": 11
+  }
+}

@@ -21,7 +21,7 @@ def game():
     bob = EphemeralSigner(b"b" * 32)
     carol = EphemeralSigner(b"c" * 32)
     store = Store()
-    engine = Engine(store, referee.did, referee, clock=lambda: 1_000)
+    engine = Engine.for_test(store, referee.did, referee, clock=lambda: 1_000)
     for i, actor in enumerate((referee, alice, bob, carol)):
         assert engine.execute(command(actor.did, f"reg-{i}", "register_actor")).accepted
     engine.execute(command(alice.did, "ea", "create_empire", empire_id="a", name="A", capital_id="ca"))
@@ -49,6 +49,7 @@ def test_idempotency_hashes_receipts_and_membership_freeze(game):
 def test_yield_cluster_decay_and_failed_verification(game):
     store, engine, referee, alice, *_ = game
     engine.execute(command(alice.did, "gh", "bind_github", login="alice", verified=True))
+    engine.execute(command(referee.did, "active-yield", "activate_season"))
     base = dict(contributor_did=alice.did, cluster_id="cluster-1", evidence_class="merged_pull_request", verified=True, self_owned=False)
     assert engine.execute(command(referee.did, "e1", "add_contribution", url="https://github.com/org/repo/pull/1", **base)).accepted
     assert engine.execute(command(referee.did, "e2", "add_contribution", url="https://api.github.com/repos/org/repo/pulls/1", **base)).accepted
@@ -67,6 +68,7 @@ def test_combat_alliance_and_capital(game):
     engine.execute(command(referee.did, "t", "add_territory", territory_id="field", owner_empire_id="b", capital=False))
     engine.execute(command(referee.did, "e1", "add_edge", a="ca", b="field"))
     engine.execute(command(referee.did, "e2", "add_edge", a="ca", b="cb"))
+    engine.execute(command(referee.did, "active-combat", "activate_season"))
     engine.execute(command(bob.did, "al", "create_alliance", alliance_id="bc", members=["b", "c"]))
     inactive = engine.execute(command(alice.did, "r0", "raid", attack_id="r0", origin_id="ca", target_id="field", power=20, alliance_id="bc", allied_defense={"c": 5}))
     assert not inactive.accepted
@@ -89,9 +91,10 @@ def test_multi_did_membership_fortification_tie_and_fail_closed(game):
     assert engine.execute(command(extra.did, "join", "join_empire", empire_id="a")).accepted
     assert store.one("SELECT COUNT(*) FROM memberships WHERE empire_id='a'")[0] == 2
     engine.execute(command(referee.did, "mint-a", "mint_resources", empire_id="a", amount=20))
-    assert engine.execute(command(extra.did, "fort", "fortify", territory_id="ca", amount=10)).accepted
     engine.execute(command(referee.did, "mint-b", "mint_resources", empire_id="b", amount=20))
     engine.execute(command(referee.did, "edge-cap", "add_edge", a="cb", b="ca"))
+    engine.execute(command(referee.did, "active-multi", "activate_season"))
+    assert engine.execute(command(extra.did, "fort", "fortify", territory_id="ca", amount=10)).accepted
     tied = engine.execute(command(bob.did, "tie", "raid", attack_id="tie", origin_id="cb", target_id="ca", power=10, allied_defense={}))
     assert tied.accepted and not tied.details["success"]
-    with pytest.raises(RuntimeError): Engine(Store(), referee.did, None)
+    with pytest.raises(RuntimeError): Engine.for_test(Store(), referee.did, None)

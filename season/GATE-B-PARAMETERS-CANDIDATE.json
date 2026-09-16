@@ -1,0 +1,74 @@
+{
+  "combat": {
+    "fortify_cost": 12,
+    "raid_min_power": 14,
+    "raid_window_seconds": 1800,
+    "siege_min_power": 24,
+    "siege_window_seconds": 21600
+  },
+  "diplomacy": {
+    "nap_exit_cooldown_epochs": 2,
+    "nap_min_epochs": 4
+  },
+  "endgame": {
+    "epochs": 8
+  },
+  "hegemon": {
+    "automatic_victory": false,
+    "lead_over_second_bp": 3000,
+    "max_count": 1,
+    "min_composite_share_bp": 1800,
+    "sustain_epochs": 4
+  },
+  "intel": {
+    "aging_epochs": 2,
+    "fresh_epochs": 1,
+    "recon_cost": 8,
+    "recon_window_seconds": 1800
+  },
+  "late_join": {
+    "production_boost_bp": 18750,
+    "protection_epochs": 4
+  },
+  "power": {
+    "formula": "ENGINEERING+KNOWLEDGE+INFLUENCE",
+    "stored": false,
+    "transferable": false
+  },
+  "standing": {
+    "levels": [
+      "Domain",
+      "Regional",
+      "Major",
+      "Great",
+      "Dominant",
+      "Hegemon"
+    ],
+    "mode": "relative_rank",
+    "momentum_deadband_bp": 500
+  },
+  "status": "SIMULATION_CANDIDATE_NOT_FROZEN",
+  "trade": {
+    "direct_score": false,
+    "max_stockpile_bp_per_offer": 2500,
+    "pair_cooldown_epochs": 1,
+    "resource_minting": false
+  },
+  "version": "gate-b-v0.2-engine-aligned-candidate",
+  "victory": {
+    "scoring": "world-share-normalized",
+    "weights_bp": {
+      "hegemon_epochs": 1000,
+      "objective_points": 2000,
+      "power": 2500,
+      "production": 1500,
+      "territory_value": 3000
+    }
+  },
+  "world": {
+    "empires": 16,
+    "strategic_value_mode": "victory_only",
+    "territories": 64,
+    "topology": "deterministic_ring_plus_second_neighbor"
+  }
+}
