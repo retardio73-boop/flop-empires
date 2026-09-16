@@ -45,9 +45,15 @@ class NamespacePreflight:
         try:
             validate_production_namespace(self.manifest.namespace_policy,room,kind)
             value=TechnocoreHttpMailbox(self.client,room,limit=1)._read(0)
-            if set(value)!={"generation","messages"}:
+            minimal={"generation","messages"}
+            detailed={"room","generation","first_seq","last_seq","count","messages"}
+            if set(value) not in {frozenset(minimal),frozenset(detailed)}:
                 raise NamespaceAbort("ABORT_NAMESPACE: ambiguous response")
             generation=value["generation"];messages=value["messages"]
+            if set(value)==detailed:
+                if (value["room"]!=room or value["count"]!=0 or value["first_seq"] is not None or
+                        value["last_seq"]!=0):
+                    raise NamespaceAbort("ABORT_NAMESPACE: namespace metadata is not pristine")
             if generation!=0 or messages!=[]:
                 raise NamespaceAbort("ABORT_NAMESPACE: namespace is not pristine")
             return (room,generation,0,0)
@@ -207,7 +213,7 @@ class ProductionRuntime:
             raise RuntimeError("PRODUCTION_BINDING_MISMATCH")
         engine=Engine._for_verified_production(store,manifest,signer,context,clock=clock)
         now=int(engine.clock())
-        if now<context.registration_open or now>=context.season_end:
+        if now<context.registration_open:
             raise LifecycleViolation("ACTIVATION_NOT_EFFECTIVE")
         engine.advance_production_lifecycle(now)
         action_transport=TechnocoreTransport(client,context.actions_namespace)

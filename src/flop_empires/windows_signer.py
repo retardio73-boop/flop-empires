@@ -39,10 +39,20 @@ def default_directory() -> Path:
 
 
 def production_directory() -> Path:
-    root = os.environ.get("LOCALAPPDATA")
+    override=os.environ.get("FLOP_EMPIRES_SEASON0_IDENTITY_DIR")
+    if override:
+        return Path(override)
+    root=os.environ.get("LOCALAPPDATA")
     if not root:
         raise SecureSignerError("LOCAL_APP_DATA_UNAVAILABLE")
-    return Path(root) / "FLOPEmpires" / "season0-identities-v1"
+    local=Path(root) / "FLOPEmpires" / "season0-identities-v1"
+    if (local/"season0-referee.dpapi").is_file():
+        return local
+    packages=Path(root)/"Packages"
+    for candidate in sorted(packages.glob("OpenAI.Codex_*/LocalCache/Local/FLOPEmpires/season0-identities-v1")):
+        if (candidate/"season0-referee.dpapi").is_file():
+            return candidate
+    return local
 
 
 def directory_for_role(role: str) -> Path:
@@ -154,6 +164,10 @@ class WindowsDpapiSigner:
         nonce=self._nonce(room); payload=f"{room}|{nonce}|{canonical_text}".encode("utf-8")
         return RoomEnvelope(self.did,nonce,self.sign(payload),canonical_text)
 
+    def status(self) -> dict:
+        self._verify_identity()
+        return {"ready":True,"did":self.did,"provider":"windows_dpapi_current_user"}
+
 
 def public_status(role: str, directory: Path | None = None) -> dict:
     directory=directory or directory_for_role(role); path=directory/f"{role}.public.json"
@@ -189,3 +203,16 @@ def main(argv=None) -> int:
 
 
 if __name__ == "__main__": raise SystemExit(main())
+
+
+def season0_referee_backend() -> WindowsDpapiSigner:
+    directory=production_directory()
+    public_path=directory/"season0-referee.public.json"
+    try:
+        value=json.loads(public_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        raise SecureSignerError("SEASON0_REFEREE_PUBLIC_METADATA_UNAVAILABLE") from exc
+    did=value.get("did") if isinstance(value,dict) else None
+    if not isinstance(did,str) or not did.startswith("did:key:"):
+        raise SecureSignerError("SEASON0_REFEREE_PUBLIC_METADATA_INVALID")
+    return WindowsDpapiSigner("season0-referee",did,directory)

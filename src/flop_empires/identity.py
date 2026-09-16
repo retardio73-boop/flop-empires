@@ -94,6 +94,7 @@ class EphemeralSigner:
 class ExternalSigningBackend(Protocol):
     def status(self) -> dict: ...
     def sign(self, message: bytes) -> str: ...
+    def sign_room(self, room: str, canonical_text: str): ...
 
 
 class ExternalRefereeSigner:
@@ -129,6 +130,16 @@ class ExternalRefereeSigner:
         if not isinstance(signature, str) or not verify(self._did, message, signature):
             raise RuntimeError("external referee signer returned invalid signature")
         return signature
+
+    def sign_room(self, room: str, canonical_text: str):
+        envelope=self._call(self.backend.sign_room,room,canonical_text)
+        did=getattr(envelope,"did",None);nonce=getattr(envelope,"nonce",None)
+        text=getattr(envelope,"text",None);signature=getattr(envelope,"signature",None)
+        if (did!=self._did or text!=canonical_text or not isinstance(nonce,str) or not nonce or
+                not isinstance(signature,str) or not verify(self._did,
+                    f"{room}|{nonce}|{canonical_text}".encode("utf-8"),signature)):
+            raise RuntimeError("external referee signer returned invalid room envelope")
+        return envelope
 
 
 def require_signer(configured_did: str, signer: Signer | None) -> Signer:

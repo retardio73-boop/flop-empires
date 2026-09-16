@@ -1,0 +1,29 @@
+{
+  "actions_namespace": "mb-p-flop-empires-s0-ba02b3dadb3962c9-actions",
+  "activation_id": "season0-34d667ce770dd92d",
+  "events_namespace": "mb-p-flop-empires-s0-ba02b3dadb3962c9-events",
+  "issued_at": 1789577171,
+  "manifest_hash": "273974947f7f56c4d9ccf3028d81a780ad05650f99c46cbbb71062c05a319d80",
+  "network_writes": 0,
+  "preflight_observations": [
+    [
+      "mb-p-flop-empires-s0-ba02b3dadb3962c9-actions",
+      0,
+      0,
+      0
+    ],
+    [
+      "mb-p-flop-empires-s0-ba02b3dadb3962c9-events",
+      0,
+      0,
+      0
+    ]
+  ],
+  "private_material_exported": false,
+  "referee_did": "did:key:z6MkkvjnHUEz5qmMHXZJiTg8BFSjm3KVqZtueNUMdp1FqMpx",
+  "registration_close": 1789663571,
+  "registration_open": 1789577171,
+  "season_end": 1790873171,
+  "season_start": 1789663571,
+  "status": "SIGNED_ACTIVATION_PREPARED"
+}
