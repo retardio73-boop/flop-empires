@@ -1,8 +1,10 @@
 # Season 0 operations runbook
 
-This runbook is prepare-only. The frozen manifest is `FROZEN_NOT_ACTIVE`; none of
-these procedures authorizes registration, activation, public polling, or game
-writes.
+This runbook began as the prepare-only Season 0 launch runbook. Season 0 is now
+operating under signed `Recovery v1`; the frozen manifest remains unchanged. The
+original failed launch is preserved rather than rewritten. For the current recovery
+binding, timeline, hashes, public receipts, and health evidence, see
+`reports/season-0-recovery-evidence-v1.md`.
 
 ## Pre-flight
 

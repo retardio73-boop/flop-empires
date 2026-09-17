@@ -36,13 +36,16 @@ fixed-origin Technocore reads, dedicated DPAPI-protected staging identities,
 signed action POST, signed receipt POST, verified readback, duplicate/conflict
 semantics, both controlled crash windows, and a four-actor private Season -1
 have been exercised. Season -1B additionally ran the integrated v0.2 engine for
-165 real action records and 46 epochs with exact replay. This remains an isolated
-no-value staging rehearsal. The immutable Season 0 frozen manifest uses 56
-six-hour epochs over an intended 14 days, no historical spendable bootstrap,
-30-minute Raid windows, six-hour Siege windows, and a dedicated but inactive
-production referee identity. Its namespaces are verified-empty and prepare-only:
-registration has not started and no production game records were written. See
-`docs/SEASON-0-OPERATIONS.md`; this repository does not claim `LIVE`.
+165 real action records and 46 epochs with exact replay.
+
+Season 0 is now operating under signed `Recovery v1` after the original activation
+reached season start with zero players and an unmaterialized actions namespace while
+Technocore was at its global room cap. The failed runtime is preserved separately;
+the original activation is unchanged. Recovery v1 binds the frozen manifest to an
+existing Season 0 room used as explicit duplex transport. Registration is live, the
+recovered runtime has accepted a signed player registration and empire join, and both
+receipts have verified public readback. See `reports/season-0-recovery-evidence-v1.md`
+and `reports/season-0-recovery-evidence-v1.json` for the evidence chain.
 
 ## Public Season 0 surface
 
