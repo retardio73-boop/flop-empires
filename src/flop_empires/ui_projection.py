@@ -41,9 +41,10 @@ def _layout(index: int) -> tuple[float, float]:
 def build_public_state(db_path: str | Path, world_path: str | Path, activation_path: str | Path, viewer_did: str | None = None) -> dict[str, Any]:
     world = _read_json(world_path)
     activation = _read_json(activation_path)
+    recovery=None
     recovery_path=Path(activation_path).with_name("SEASON-0-RECOVERY-v1.json")
     if recovery_path.is_file():
-        r=_read_json(recovery_path)
+        r=_read_json(recovery_path); recovery=r
         activation={**activation,"activation_id":r["recovery_id"],"registration_open":r["registration_open"],
             "registration_close":r["registration_close"],"season_start":r["season_start"],"season_end":r["season_end"],
             "actions_namespace":r["duplex_namespace"],"events_namespace":r["duplex_namespace"]}
@@ -151,6 +152,16 @@ def build_public_state(db_path: str | Path, world_path: str | Path, activation_p
             "manifest_hash": activation["frozen_manifest_hash"],
             "actions_namespace": activation["actions_namespace"],
             "events_namespace": activation["events_namespace"],
+            "recovery": ({
+                "active": True,
+                "version": recovery["version"],
+                "recovery_id": recovery["recovery_id"],
+                "original_activation_id": recovery["original_activation_id"],
+                "reason_codes": recovery["reason_codes"],
+                "failed_state_hash": recovery["failed_state_hash"],
+                "duplex_namespace": recovery["duplex_namespace"],
+                "evidence_url": "https://github.com/retardio73-boop/flop-empires/blob/main/reports/season-0-recovery-evidence-v1.md",
+            } if recovery else None),
         },
         "world": {
             "schema": world["schema"],
