@@ -339,6 +339,8 @@ class Engine:
     def _do_create_empire(self, did: str, p: dict[str, Any], now: int) -> dict[str, Any]:
         if self._status() != SeasonStatus.REGISTRATION:
             raise RuleViolation("membership is frozen")
+        if self.runtime_mode==RuntimeMode.PRODUCTION:
+            raise RuleViolation("Season 0 empire slots are pre-provisioned; use join_empire")
         if not self.store.one("SELECT 1 FROM actors WHERE did=?", (did,)):
             raise RuleViolation("actor not registered")
         empire_id, name, capital = self._text(p, "empire_id"), self._text(p, "name"), self._text(p, "capital_id")
