@@ -41,6 +41,12 @@ def _layout(index: int) -> tuple[float, float]:
 def build_public_state(db_path: str | Path, world_path: str | Path, activation_path: str | Path, viewer_did: str | None = None) -> dict[str, Any]:
     world = _read_json(world_path)
     activation = _read_json(activation_path)
+    recovery_path=Path(activation_path).with_name("SEASON-0-RECOVERY-v1.json")
+    if recovery_path.is_file():
+        r=_read_json(recovery_path)
+        activation={**activation,"activation_id":r["recovery_id"],"registration_open":r["registration_open"],
+            "registration_close":r["registration_close"],"season_start":r["season_start"],"season_end":r["season_end"],
+            "actions_namespace":r["duplex_namespace"],"events_namespace":r["duplex_namespace"]}
     conn = sqlite3.connect(str(db_path))
     conn.row_factory = sqlite3.Row
     try:

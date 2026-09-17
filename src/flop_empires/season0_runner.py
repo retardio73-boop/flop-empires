@@ -10,6 +10,8 @@ import httpx
 
 from .identity import ExternalRefereeSigner
 from .manifest import SeasonZeroFreezeV2CandidateManifest
+from .recovery import RecoveryRecord
+from .world_bootstrap import bootstrap_frozen_world
 from .models import SeasonStatus
 from .production import ProductionRuntime
 from .production_cli import load_external_backend, load_verified
@@ -24,6 +26,8 @@ STATUS_PATH=RUNTIME_DIR/"runner-status.json"
 LOCK_PATH=RUNTIME_DIR/"runner.lock"
 MANIFEST_PATH=ROOT/"season/SEASON-0-MANIFEST-FREEZE-V2-CANDIDATE.json"
 ACTIVATION_PATH=ROOT/"season/SEASON-0-ACTIVATION-v1.json"
+RECOVERY_PATH=ROOT/"season/SEASON-0-RECOVERY-v1.json"
+WORLD_PATH=ROOT/"season/world-season-0-v1.json"
 BACKEND="flop_empires.windows_signer:season0_referee_backend"
 FINAL_ARTIFACT_PATH=RUNTIME_DIR/"season0-final-state-v1.json"
 WORLD_PATH=ROOT/"season/world-season-0-v1.json"
@@ -78,11 +82,19 @@ def _autonomous_referee(runtime: ProductionRuntime) -> dict:
     return {"status":status,"settled_epochs":settled,"resolved_attacks":resolved}
 
 def _cycle(client: httpx.Client) -> dict:
-    manifest,activation=load_verified(MANIFEST_PATH,ACTIVATION_PATH)
+    manifest=SeasonZeroFreezeV2CandidateManifest.load(MANIFEST_PATH)
     backend=load_external_backend(BACKEND)
     signer=ExternalRefereeSigner(manifest.referee_did,backend)
     store=Store(DB_PATH)
-    runtime=ProductionRuntime.from_verified_activation(manifest,activation,None,store,signer,client)
+    if store.one("SELECT COUNT(*) FROM territories")[0]==0:
+        bootstrap_frozen_world(store,WORLD_PATH,expected_hash=manifest.world_graph_hash,
+            initial_balances=manifest.initial_balances,now=int(time.time()))
+    if RECOVERY_PATH.is_file():
+        recovery=RecoveryRecord.load(RECOVERY_PATH,manifest)
+        runtime=ProductionRuntime.from_verified_recovery(manifest,recovery,store,signer,client)
+    else:
+        activation=__import__('flop_empires.activation',fromlist=['ActivationRecord']).ActivationRecord.load(ACTIVATION_PATH,manifest)
+        runtime=ProductionRuntime.from_verified_activation(manifest,activation,None,store,signer,client)
     status=runtime.engine.advance_production_lifecycle()
     receipts=[]
     if status!=SeasonStatus.FINALIZED:

@@ -8,6 +8,7 @@ import secrets
 import httpx
 
 from .activation import ActivationContext,ActivationRecord,is_verified_activation_context
+from .recovery import RecoveryRecord
 from .engine import Engine,LifecycleViolation
 from .identity import Signer,require_signer
 from .manifest import SeasonZeroFreezeV2CandidateManifest,validate_production_namespace
@@ -223,3 +224,27 @@ class ProductionRuntime:
         ingestor=ProductionIngestor(store,engine,binding,manifest)
         outbox=ProductionReceiptOutbox(store,engine,binding,manifest)
         return cls(manifest,activation,binding,store,engine,actions,events,ingestor,outbox)
+
+    @classmethod
+    def from_verified_recovery(cls,manifest: SeasonZeroFreezeV2CandidateManifest, recovery: RecoveryRecord,
+            store: Store, signer: Signer, client: httpx.Client, clock=None)->"ProductionRuntime":
+        context=recovery.context(); require_signer(manifest.referee_did,signer)
+        binding=ProductionBinding(manifest.manifest_hash,"production",context); binding.validate(manifest)
+        persisted=_read_persisted_binding(store)
+        action_transport=TechnocoreTransport(client,context.actions_namespace)
+        if persisted is None:
+            values=_binding_values(binding)
+            with store.transaction():
+                for key,value in values.items(): store.conn.execute("INSERT INTO config(key,value) VALUES(?,?)",(key,value))
+                store.conn.execute("INSERT INTO technocore_state(mailbox,cursor,bootstrapped) VALUES(?,?,1)",
+                    (context.actions_namespace,action_transport.current_cursor()))
+        elif persisted!=_binding_values(binding):
+            raise RuntimeError("PRODUCTION_BINDING_MISMATCH")
+        engine=Engine._for_verified_production(store,manifest,signer,context,clock=clock)
+        now=int(engine.clock())
+        if now<context.registration_open: raise LifecycleViolation("ACTIVATION_NOT_EFFECTIVE")
+        engine.advance_production_lifecycle(now)
+        event_transport=TechnocoreTransport(client,context.events_namespace,signer=signer)
+        actions=BoundActionsMailbox(action_transport,binding); events=BoundEventsTransport(event_transport,binding)
+        ingestor=ProductionIngestor(store,engine,binding,manifest); outbox=ProductionReceiptOutbox(store,engine,binding,manifest)
+        return cls(manifest,recovery,binding,store,engine,actions,events,ingestor,outbox)

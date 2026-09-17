@@ -72,7 +72,8 @@ def test_action_proxy_requires_session_did_and_valid_signature(tmp_path, monkeyp
     ch = auth.issue(signer.did); token, _ = auth.verify_challenge(ch["challenge_id"], signer.did, signer.sign(ch["message"].encode()))
     activation = json.loads(ui_server.ACTIVATION.read_text(encoding="utf-8"))
     text = dumps({"season_id": activation["season_id"], "command": {"action": "register_actor", "actor_did": signer.did, "payload": {}, "request_id": "r1"}})
-    nonce = "1000-1"; sig = signer.sign(f"{activation['actions_namespace']}|{nonce}|{text}".encode())
+    room = json.loads(ui_server.RECOVERY.read_text(encoding='utf-8'))['duplex_namespace'] if ui_server.RECOVERY.is_file() else activation['actions_namespace']
+    nonce = "1000-1"; sig = signer.sign(f"{room}|{nonce}|{text}".encode())
     calls = []
     class FakeResponse:
         status_code = 200

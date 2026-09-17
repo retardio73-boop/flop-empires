@@ -140,7 +140,22 @@ class ReceiptOutbox:
         for row in self.store.conn.execute("SELECT * FROM receipt_outbox WHERE status='PENDING' ORDER BY receipt_hash"):
             self.store.conn.execute("UPDATE receipt_outbox SET attempts=attempts+1 WHERE receipt_hash=?",
                 (row["receipt_hash"],))
-            ref, verified = transport.publish_and_verify(row["receipt_hash"], row["receipt_json"])
+            publication = row["receipt_json"]
+            publication_hash = row["receipt_hash"]
+            if len(publication) > 4096:
+                receipt = loads(publication)
+                commitment = {
+                    "schema":"flop-empires-receipt-commitment-v1",
+                    "receipt_hash":row["receipt_hash"],
+                    "actor_did":receipt["actor_did"],
+                    "request_id":receipt["request_id"],
+                    "accepted":receipt["accepted"],
+                    "event_seq":receipt["event_seq"],
+                    "state_after_hash":receipt["state_after_hash"],
+                }
+                publication = dumps(commitment)
+                publication_hash = sha256(commitment)
+            ref, verified = transport.publish_and_verify(publication_hash, publication)
             if not verified:
                 continue
             with self.store.transaction():

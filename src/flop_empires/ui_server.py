@@ -27,6 +27,7 @@ DEFAULT_DB = Path(os.environ.get(
 ))
 WORLD = ROOT / "season" / "world-season-0-v1.json"
 ACTIVATION = ROOT / "season" / "SEASON-0-ACTIVATION-v1.json"
+RECOVERY = ROOT / "season" / "SEASON-0-RECOVERY-v1.json"
 MANIFEST = ROOT / "season" / "SEASON-0-MANIFEST-FREEZE-V2-CANDIDATE.json"
 RUNNER_STATUS = Path(os.environ.get("LOCALAPPDATA", ROOT)) / "FLOPEmpires" / "season0-runtime-v1" / "runner-status.json"
 AUTH = AuthManager()
@@ -36,6 +37,10 @@ TECHNOCORE_ORIGIN = "https://technocore.chat"
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(UI_DIR), **kwargs)
+
+    def log_message(self, format: str, *args) -> None:
+        # pythonw has no stderr; hidden service requests must not depend on console logging.
+        return
 
     def _json(self, status: int, payload: dict, *, cookie: str | None = None) -> None:
         body = json.dumps(payload, separators=(",", ":")).encode("utf-8")
@@ -143,7 +148,10 @@ class Handler(SimpleHTTPRequestHandler):
         if body["did"] != did:
             raise ValueError("SESSION_DID_MISMATCH")
         activation = json.loads(ACTIVATION.read_text(encoding="utf-8"))
-        room = activation["actions_namespace"]
+        if RECOVERY.is_file():
+            recovery=json.loads(RECOVERY.read_text(encoding="utf-8")); room=recovery["duplex_namespace"]
+        else:
+            recovery=None; room=activation["actions_namespace"]
         text = body["text"]
         if len(text) > 12_000 or len(body["nonce"]) > 128:
             raise ValueError("SIGNED_ENVELOPE_TOO_LARGE")
