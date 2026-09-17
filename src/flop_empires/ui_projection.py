@@ -38,7 +38,7 @@ def _layout(index: int) -> tuple[float, float]:
     return round(x, 2), round(y, 2)
 
 
-def build_public_state(db_path: str | Path, world_path: str | Path, activation_path: str | Path) -> dict[str, Any]:
+def build_public_state(db_path: str | Path, world_path: str | Path, activation_path: str | Path, viewer_did: str | None = None) -> dict[str, Any]:
     world = _read_json(world_path)
     activation = _read_json(activation_path)
     conn = sqlite3.connect(str(db_path))
@@ -56,6 +56,10 @@ def build_public_state(db_path: str | Path, world_path: str | Path, activation_p
         event_head = conn.execute("SELECT seq,event_hash,state_after_hash FROM events ORDER BY seq DESC LIMIT 1").fetchone()
         alliances = _rows(conn, "SELECT * FROM alliances WHERE active=1 ORDER BY id")
         alliance_members = _rows(conn, "SELECT * FROM alliance_members ORDER BY alliance_id,empire_id")
+        viewer_empire_row = conn.execute("SELECT empire_id FROM memberships WHERE actor_did=?", (viewer_did,)).fetchone() if viewer_did else None
+        viewer_empire = viewer_empire_row[0] if viewer_empire_row else None
+        viewer_economy_row = conn.execute("SELECT * FROM empire_economy WHERE empire_id=?", (viewer_empire,)).fetchone() if viewer_empire else None
+        viewer_economy = dict(viewer_economy_row) if viewer_economy_row else None
     finally:
         conn.close()
 
@@ -86,7 +90,7 @@ def build_public_state(db_path: str | Path, world_path: str | Path, activation_p
         live = live_territories.get(frozen["id"])
         owner = live["owner_empire_id"] if live else frozen["owner"]
         x, y = _layout(index)
-        territories.append({
+        item = {
             "id": frozen["id"],
             "index": index,
             "region": frozen["region"],
@@ -99,7 +103,10 @@ def build_public_state(db_path: str | Path, world_path: str | Path, activation_p
             "x": x,
             "y": y,
             "live": live is not None,
-        })
+        }
+        if viewer_empire and owner == viewer_empire and live:
+            item["private"] = {"fortification": int(live["fortification"]), "production": frozen.get("base_production", {})}
+        territories.append(item)
 
     public_events = [{
         "seq": e["seq"],
@@ -123,6 +130,8 @@ def build_public_state(db_path: str | Path, world_path: str | Path, activation_p
             "season_end": activation["season_end"],
             "activation_id": activation["activation_id"],
             "manifest_hash": activation["frozen_manifest_hash"],
+            "actions_namespace": activation["actions_namespace"],
+            "events_namespace": activation["events_namespace"],
         },
         "world": {
             "schema": world["schema"],
@@ -141,13 +150,18 @@ def build_public_state(db_path: str | Path, world_path: str | Path, activation_p
         },
         "registration": {
             "actors": actor_count,
-            "memberships": memberships,
             "memberships_by_empire": member_count,
+        },
+        "viewer": {
+            "authenticated": bool(viewer_did),
+            "did": viewer_did,
+            "empire_id": viewer_empire,
+            "economy": viewer_economy,
         },
         "capabilities": {
             "fog_safe_public_projection": True,
             "viewer_highlight_without_private_reveal": True,
-            "signed_private_view": False,
+            "signed_private_view": True,
             "raid_siege": True,
             "recon": True,
             "alliances_runtime": True,

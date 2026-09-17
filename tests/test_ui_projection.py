@@ -75,4 +75,4 @@ def test_public_projection_uses_regional_layout_and_keeps_private_view_locked(tm
     second_region = [t for t in state["world"]["territories"] if t["region"] == "r2"]
     assert max(t["x"] for t in first_region) < max(t["x"] for t in second_region)
     assert state["capabilities"]["viewer_highlight_without_private_reveal"] is True
-    assert state["capabilities"]["signed_private_view"] is False
+    assert state["capabilities"]["signed_private_view"] is True

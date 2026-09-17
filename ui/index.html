@@ -43,10 +43,13 @@
   <section id="identitySheet" class="command-sheet" aria-hidden="true">
     <div class="sheet-handle"></div>
     <div class="sheet-head"><div><span class="eyebrow">PLAYER CONTEXT</span><h2>Identity & onboarding</h2></div><button class="icon-btn" data-close-sheet aria-label="Close">×</button></div>
-    <p class="muted">A DID here only personalizes the public view and builds commands. It never unlocks private fog data without a signed challenge.</p>
-    <label class="field"><span>Your DID</span><input id="viewerDid" placeholder="did:key:..." autocomplete="off" /></label>
+    <p class="muted">Your private key never leaves this browser. Authenticate by signing a short-lived challenge; every game action is signed again over the exact Technocore room payload.</p>
+    <div class="auth-actions"><button id="recoverPasskey" class="primary-btn">Recover FLOP passkey</button><button id="createPasskey" class="ghost-btn">Create FLOP passkey</button></div>
+    <details class="seed-import"><summary>Use an existing Technocore seed</summary><label class="field"><span>64-hex seed</span><input id="seedInput" type="password" inputmode="text" autocomplete="off" placeholder="64 hex characters" /></label><button id="useSeed" class="ghost-btn">Use seed in memory</button></details>
     <div id="identityStatus" class="identity-status"></div>
+    <div id="privateSummary" class="private-summary"></div>
     <div id="claimGrid" class="claim-grid"></div>
+    <div class="auth-actions"><button id="copyIdentitySeed" class="ghost-btn" hidden>Copy recovery seed</button><button id="logoutIdentity" class="ghost-btn" hidden>Sign out</button></div>
   </section>
 
   <section id="commandSheet" class="command-sheet" aria-hidden="true">
@@ -55,7 +58,7 @@
     <p id="commandHint" class="muted"></p>
     <div id="commandForm" class="command-form"></div>
     <pre id="commandPreview"></pre>
-    <button id="copyCommand" class="primary-btn">Copy canonical JSON</button>
+    <div class="command-actions"><button id="copyCommand" class="ghost-btn">Copy JSON</button><button id="signSendCommand" class="primary-btn">Sign & send</button></div><div id="sendStatus" class="identity-status"></div>
   </section>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
