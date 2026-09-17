@@ -13,20 +13,29 @@ EMPIRE_PALETTE = [
     "#0d9488", "#16a34a", "#84cc16", "#d97706",
 ]
 
+REGION_CENTERS = [
+    (175, 215), (365, 160), (565, 170), (735, 245),
+    (725, 600), (540, 720), (325, 715), (155, 610),
+]
+
 
 def _read_json(path: str | Path) -> dict[str, Any]:
     return json.loads(Path(path).read_text(encoding="utf-8"))
-
 
 def _rows(conn: sqlite3.Connection, sql: str, args: tuple[Any, ...] = ()) -> list[dict[str, Any]]:
     conn.row_factory = sqlite3.Row
     return [dict(r) for r in conn.execute(sql, args)]
 
 
-def _layout(index: int, total: int = 64) -> tuple[float, float]:
-    angle = -math.pi / 2 + (2 * math.pi * index / total)
-    radius = 322 + ((index % 4) - 1.5) * 24
-    return round(450 + math.cos(angle) * radius, 2), round(450 + math.sin(angle) * radius, 2)
+def _layout(index: int) -> tuple[float, float]:
+    region = index // 8
+    local = index % 8
+    cx, cy = REGION_CENTERS[region]
+    angle = -math.pi / 2 + local * math.pi / 4
+    radius = 58 + (12 if local % 2 else 0)
+    x = cx + math.cos(angle) * radius
+    y = cy + math.sin(angle) * radius
+    return round(x, 2), round(y, 2)
 
 
 def build_public_state(db_path: str | Path, world_path: str | Path, activation_path: str | Path) -> dict[str, Any]:
@@ -40,7 +49,7 @@ def build_public_state(db_path: str | Path, world_path: str | Path, activation_p
         empires = _rows(conn, "SELECT * FROM empires ORDER BY id")
         economy = {r["empire_id"]: dict(r) for r in conn.execute("SELECT empire_id,prestige FROM empire_economy")}
         attacks = _rows(conn, "SELECT * FROM attacks ORDER BY created_at DESC")
-        events = _rows(conn, "SELECT seq,event_type,actor_did,request_id,accepted_at,accepted,details_json FROM events ORDER BY seq DESC LIMIT 40")
+        events = _rows(conn, "SELECT seq,event_type,request_id,accepted_at,accepted FROM events ORDER BY seq DESC LIMIT 40")
         memberships = _rows(conn, "SELECT * FROM memberships ORDER BY empire_id,actor_did")
         actor_count = conn.execute("SELECT COUNT(*) FROM actors").fetchone()[0]
         event_count = conn.execute("SELECT COUNT(*) FROM events").fetchone()[0]
@@ -76,7 +85,7 @@ def build_public_state(db_path: str | Path, world_path: str | Path, activation_p
     for index, frozen in enumerate(world["territories"]):
         live = live_territories.get(frozen["id"])
         owner = live["owner_empire_id"] if live else frozen["owner"]
-        x, y = _layout(index, len(world["territories"]))
+        x, y = _layout(index)
         territories.append({
             "id": frozen["id"],
             "index": index,
@@ -93,13 +102,17 @@ def build_public_state(db_path: str | Path, world_path: str | Path, activation_p
         })
 
     public_events = [{
-        "seq": e["seq"], "event_type": e["event_type"], "request_id": e["request_id"],
-        "accepted_at": e["accepted_at"], "accepted": bool(e["accepted"]),
+        "seq": e["seq"],
+        "event_type": e["event_type"],
+        "request_id": e["request_id"],
+        "accepted_at": e["accepted_at"],
+        "accepted": bool(e["accepted"]),
     } for e in events]
     active_attacks = [{k: a.get(k) for k in (
         "id", "kind", "attacker_empire_id", "defender_empire_id", "origin_id",
         "target_id", "alliance_id", "created_at", "deadline_at", "resolved", "success"
     )} for a in attacks if not a["resolved"]]
+
     return {
         "season": {
             "id": activation["season_id"],
@@ -114,6 +127,7 @@ def build_public_state(db_path: str | Path, world_path: str | Path, activation_p
         "world": {
             "schema": world["schema"],
             "seed": world["seed"],
+            "layout": "regional-v2",
             "empires": empire_view,
             "territories": territories,
             "edges": world["edges"],
@@ -127,10 +141,13 @@ def build_public_state(db_path: str | Path, world_path: str | Path, activation_p
         },
         "registration": {
             "actors": actor_count,
+            "memberships": memberships,
             "memberships_by_empire": member_count,
         },
         "capabilities": {
             "fog_safe_public_projection": True,
+            "viewer_highlight_without_private_reveal": True,
+            "signed_private_view": False,
             "raid_siege": True,
             "recon": True,
             "alliances_runtime": True,

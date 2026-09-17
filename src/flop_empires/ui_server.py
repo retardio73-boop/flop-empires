@@ -38,7 +38,7 @@ class Handler(SimpleHTTPRequestHandler):
 
 def main() -> None:
     host = os.environ.get("FLOP_EMPIRES_UI_HOST", "127.0.0.1")
-    port = int(os.environ.get("FLOP_EMPIRES_UI_PORT", "8765"))
+    port = int(os.environ.get("FLOP_EMPIRES_UI_PORT", "8876"))
     server = ThreadingHTTPServer((host, port), Handler)
     print(f"FLOP Empires UI: http://{host}:{port}")
     try:

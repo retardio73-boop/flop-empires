@@ -61,3 +61,18 @@ def test_public_projection_redacts_combat_force_and_event_details(tmp_path):
     assert "attacker_cost_locked" not in attack
     assert "details" not in event and "details_json" not in event and "actor_did" not in event
     assert state["evidence"]["event_head_hash"] == "e"
+
+
+def test_public_projection_uses_regional_layout_and_keeps_private_view_locked(tmp_path):
+    db = tmp_path / "layout.db"
+    store = Store(db)
+    store.conn.execute("INSERT INTO config(key,value) VALUES('season_status','REGISTRATION')")
+    store.close()
+    state = build_public_state(db, WORLD, ACTIVATION)
+    assert state["world"]["layout"] == "regional-v2"
+    assert len({t["region"] for t in state["world"]["territories"]}) == 8
+    first_region = [t for t in state["world"]["territories"] if t["region"] == "r1"]
+    second_region = [t for t in state["world"]["territories"] if t["region"] == "r2"]
+    assert max(t["x"] for t in first_region) < max(t["x"] for t in second_region)
+    assert state["capabilities"]["viewer_highlight_without_private_reveal"] is True
+    assert state["capabilities"]["signed_private_view"] is False
