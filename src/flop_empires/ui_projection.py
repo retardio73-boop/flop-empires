@@ -54,12 +54,18 @@ def build_public_state(db_path: str | Path, world_path: str | Path, activation_p
         actor_count = conn.execute("SELECT COUNT(*) FROM actors").fetchone()[0]
         event_count = conn.execute("SELECT COUNT(*) FROM events").fetchone()[0]
         event_head = conn.execute("SELECT seq,event_hash,state_after_hash FROM events ORDER BY seq DESC LIMIT 1").fetchone()
-        alliances = _rows(conn, "SELECT * FROM alliances WHERE active=1 ORDER BY id")
+        alliances = _rows(conn, "SELECT * FROM alliances ORDER BY id")
         alliance_members = _rows(conn, "SELECT * FROM alliance_members ORDER BY alliance_id,empire_id")
+        defenses = _rows(conn, "SELECT * FROM attack_defenses ORDER BY attack_id,empire_id")
+        balances = {r["empire_id"]: dict(r) for r in conn.execute("SELECT * FROM balances")}
+        viewer_registered = bool(conn.execute("SELECT 1 FROM actors WHERE did=?", (viewer_did,)).fetchone()) if viewer_did else False
+        viewer_registered = bool(conn.execute("SELECT 1 FROM actors WHERE did=?", (viewer_did,)).fetchone()) if viewer_did else False
         viewer_empire_row = conn.execute("SELECT empire_id FROM memberships WHERE actor_did=?", (viewer_did,)).fetchone() if viewer_did else None
         viewer_empire = viewer_empire_row[0] if viewer_empire_row else None
         viewer_economy_row = conn.execute("SELECT * FROM empire_economy WHERE empire_id=?", (viewer_empire,)).fetchone() if viewer_empire else None
         viewer_economy = dict(viewer_economy_row) if viewer_economy_row else None
+        viewer_balance = balances.get(viewer_empire) if viewer_empire else None
+        viewer_events = _rows(conn, "SELECT seq,event_type,accepted_at,details_json FROM events WHERE actor_did=? AND accepted=1 ORDER BY seq DESC LIMIT 80", (viewer_did,)) if viewer_did else []
     finally:
         conn.close()
 
@@ -115,10 +121,17 @@ def build_public_state(db_path: str | Path, world_path: str | Path, activation_p
         "accepted_at": e["accepted_at"],
         "accepted": bool(e["accepted"]),
     } for e in events]
+    defense_by_attack = {}
+    for row in defenses: defense_by_attack.setdefault(row["attack_id"], []).append(row)
     active_attacks = [{k: a.get(k) for k in (
         "id", "kind", "attacker_empire_id", "defender_empire_id", "origin_id",
         "target_id", "alliance_id", "created_at", "deadline_at", "resolved", "success"
-    )} for a in attacks if not a["resolved"]]
+    )} | {"defense_submissions": len(defense_by_attack.get(a["id"], []))} for a in attacks if not a["resolved"]]
+    recon_intel = []
+    for e in viewer_events:
+        if e["event_type"] != "recon": continue
+        d=json.loads(e["details_json"]); expires=d.get("expires_at")
+        if expires and expires >= int(__import__("time").time()): recon_intel.append({k:d.get(k) for k in ("territory_id","owner_empire_id","is_capital","fortification","expires_at")})
 
     return {
         "season": {
@@ -145,7 +158,8 @@ def build_public_state(db_path: str | Path, world_path: str | Path, activation_p
         "activity": {
             "active_attacks": active_attacks,
             "recent_events": public_events,
-            "active_alliances": alliances,
+            "active_alliances": [a for a in alliances if a["active"]],
+            "alliances": alliances,
             "alliance_members": alliance_members,
         },
         "registration": {
@@ -154,9 +168,17 @@ def build_public_state(db_path: str | Path, world_path: str | Path, activation_p
         },
         "viewer": {
             "authenticated": bool(viewer_did),
+            "registered": viewer_registered,
             "did": viewer_did,
+            "registered": viewer_registered,
             "empire_id": viewer_empire,
             "economy": viewer_economy,
+            "balance": viewer_balance,
+            "recon_intel": recon_intel,
+            "incoming_attacks": [a for a in active_attacks if viewer_empire and a["defender_empire_id"] == viewer_empire],
+            "outgoing_attacks": [a for a in active_attacks if viewer_empire and a["attacker_empire_id"] == viewer_empire],
+            "alliances": [a for a in alliances if viewer_empire and any(m["alliance_id"]==a["id"] and m["empire_id"]==viewer_empire for m in alliance_members)],
+            "action_context": {"season_active": config.get("season_status") == "ACTIVE", "unlocked_engineering": int(viewer_balance["available"]) if viewer_balance else 0},
         },
         "capabilities": {
             "fog_safe_public_projection": True,

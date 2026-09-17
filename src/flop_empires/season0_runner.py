@@ -14,6 +14,7 @@ from .models import SeasonStatus
 from .production import ProductionRuntime
 from .production_cli import load_external_backend, load_verified
 from .store import Store
+from .final_artifact import build_final_artifact, write_final_artifact
 
 POLL_SECONDS=15
 ROOT=Path(__file__).resolve().parents[2]
@@ -24,6 +25,8 @@ LOCK_PATH=RUNTIME_DIR/"runner.lock"
 MANIFEST_PATH=ROOT/"season/SEASON-0-MANIFEST-FREEZE-V2-CANDIDATE.json"
 ACTIVATION_PATH=ROOT/"season/SEASON-0-ACTIVATION-v1.json"
 BACKEND="flop_empires.windows_signer:season0_referee_backend"
+FINAL_ARTIFACT_PATH=RUNTIME_DIR/"season0-final-state-v1.json"
+WORLD_PATH=ROOT/"season/world-season-0-v1.json"
 
 
 def _priority() -> None:
@@ -87,9 +90,13 @@ def _cycle(client: httpx.Client) -> dict:
     auto=_autonomous_referee(runtime)
     recovered=runtime.outbox.recover()
     flushed=runtime.outbox.flush(runtime.events)
+    final_artifact=False
+    if auto["status"]==SeasonStatus.FINALIZED:
+        write_final_artifact(build_final_artifact(store,MANIFEST_PATH,ACTIVATION_PATH,WORLD_PATH),FINAL_ARTIFACT_PATH); final_artifact=True
     return {"status":auto["status"],"receipts":len(receipts),"recovered":recovered,
         "published":flushed["published"],"pending":flushed["pending"],
-        "settled_epochs":auto["settled_epochs"],"resolved_attacks":auto["resolved_attacks"]}
+        "settled_epochs":auto["settled_epochs"],"resolved_attacks":auto["resolved_attacks"],
+        "final_artifact":final_artifact}
 
 
 def main() -> int:

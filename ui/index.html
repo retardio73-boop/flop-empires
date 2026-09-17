@@ -20,6 +20,10 @@
       <button class="tab" data-tab="empires">Empires</button>
       <button class="tab" data-tab="war">War</button>
       <button class="tab" data-tab="activity">Activity</button>
+      <button class="tab" data-tab="player">Player</button>
+      <button class="tab" data-tab="alliances">Alliances</button>
+      <button class="tab" data-tab="replay">Replay</button>
+      <button class="tab" data-tab="ops">Operations</button>
       <button class="tab" data-tab="rules">Rules & proof</button>
     </nav>
     <section class="workspace tab-panel active" data-panel="map">
@@ -38,6 +42,10 @@
     <section class="tab-panel" data-panel="empires"><div class="section-head"><div><span class="eyebrow">POWERS</span><h2>Empire standings</h2></div><p>Season 0 slots are fixed by the frozen world. Claiming is a signed registration action.</p></div><div id="empireGrid" class="empire-grid"></div></section>
     <section class="tab-panel" data-panel="war"><div class="section-head"><div><span class="eyebrow">CONFLICT</span><h2>Open fronts</h2></div><p>Raid and Siege windows are taken from the frozen Season 0 rules.</p></div><div id="warList" class="list-stack"></div></section>
     <section class="tab-panel" data-panel="activity"><div class="section-head"><div><span class="eyebrow">LEDGER</span><h2>Recent activity</h2></div><p>Accepted and rejected referee events from canonical SQLite state.</p></div><div id="activityList" class="list-stack"></div></section>
+    <section class="tab-panel" data-panel="player"><div class="section-head"><div><span class="eyebrow">COMMAND CENTER</span><h2>Player dashboard</h2></div><p>Private resources, intel, incoming attacks and only actions your authenticated empire can take.</p></div><div id="playerDashboard" class="dashboard-grid"></div></section>
+    <section class="tab-panel" data-panel="alliances"><div class="section-head"><div><span class="eyebrow">DIPLOMACY</span><h2>Alliances</h2></div><p>Only the frozen defensive-alliance runtime is exposed. NAPs and trade remain unavailable.</p></div><div id="allianceDashboard" class="dashboard-grid"></div></section>
+    <section class="tab-panel" data-panel="replay"><div class="section-head"><div><span class="eyebrow">REPRODUCIBILITY</span><h2>Season replay</h2></div><p>Event-by-event canonical hashes and map-relevant actions.</p></div><div class="replay-controls"><input id="replaySlider" type="range" min="0" max="0" value="0"><span id="replayLabel" class="muted"></span></div><div id="replayDashboard" class="list-stack"></div></section>
+    <section class="tab-panel" data-panel="ops"><div class="section-head"><div><span class="eyebrow">OPERATIONS</span><h2>Readiness & verifier</h2></div><p>Independent checks of artifacts, event chain, runner heartbeat and receipt publication.</p></div><div id="opsDashboard" class="dashboard-grid"></div></section>
     <section class="tab-panel" data-panel="rules"><div class="section-head"><div><span class="eyebrow">CONTRACT</span><h2>Rules & public proof</h2></div><p>Public fog-safe capabilities and evidence anchors.</p></div><div id="capabilityGrid" class="empire-grid"></div><div id="proofCard" class="proof-card"></div></section>
   </main>
   <section id="identitySheet" class="command-sheet" aria-hidden="true">

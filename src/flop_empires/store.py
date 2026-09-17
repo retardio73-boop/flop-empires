@@ -129,12 +129,17 @@ CREATE TABLE IF NOT EXISTS technocore_rejections(
 
 
 class Store:
-    def __init__(self, path: str | Path = ":memory:"):
-        self.conn = sqlite3.connect(str(path), isolation_level=None)
+    def __init__(self, path: str | Path = ":memory:", *, readonly: bool = False):
+        if readonly and str(path) != ":memory:":
+            uri = Path(path).resolve().as_uri() + "?mode=ro"
+            self.conn = sqlite3.connect(uri, uri=True, isolation_level=None)
+        else:
+            self.conn = sqlite3.connect(str(path), isolation_level=None)
         self.conn.row_factory = sqlite3.Row
         self.conn.execute("PRAGMA foreign_keys=ON")
-        self.conn.execute("PRAGMA journal_mode=WAL")
-        self.migrate()
+        if not readonly:
+            self.conn.execute("PRAGMA journal_mode=WAL")
+            self.migrate()
         if self.conn.execute("PRAGMA quick_check").fetchone()[0] != "ok":
             raise RuntimeError("database integrity failure")
 

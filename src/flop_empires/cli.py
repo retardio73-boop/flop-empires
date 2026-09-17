@@ -17,6 +17,7 @@ from .season_minus_one_b import run as run_season_minus_one_b, write_report as w
 from .store import Store
 from .technocore import TechnocoreHttpMailbox
 from .production_cli import preflight as production_preflight, run_once as production_run_once, verify_activation as production_verify_activation
+from .season_verifier import verify_season_artifacts
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -69,6 +70,9 @@ def main(argv: list[str] | None = None) -> int:
     run_p.add_argument("database",type=Path); run_p.add_argument("--manifest",type=Path,required=True)
     run_p.add_argument("--activation",type=Path,required=True); run_p.add_argument("--signer-backend",required=True)
     run_p.add_argument("--confirm-production-run",action="store_true")
+    verify_season=sub.add_parser("verify-season",help="verify Season 0 artifacts, bindings and event chain")
+    verify_season.add_argument("database",type=Path); verify_season.add_argument("--manifest",type=Path,required=True)
+    verify_season.add_argument("--activation",type=Path,required=True); verify_season.add_argument("--world",type=Path,required=True)
     args = parser.parse_args(argv)
     if args.command == "init":
         if not args.referee_did.startswith("did:key:"):
@@ -93,6 +97,11 @@ def main(argv: list[str] | None = None) -> int:
         store = Store(args.database)
         print(json.dumps(health_summary(store, mode=args.mode), indent=2, sort_keys=True))
         return 0
+    if args.command == "verify-season":
+        store=Store(args.database,readonly=True)
+        try: result=verify_season_artifacts(store,args.manifest,args.activation,args.world)
+        finally: store.close()
+        print(json.dumps(result,indent=2,sort_keys=True)); return 0 if result["ok"] else 2
     if args.command == "production":
         if args.production_command == "verify-activation":
             print(json.dumps(production_verify_activation(args.manifest,args.activation),indent=2,sort_keys=True)); return 0
