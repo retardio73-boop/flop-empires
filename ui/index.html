@@ -16,21 +16,28 @@
   <main class="shell">
     <section class="hero-stats" id="heroStats"></section>
     <section id="recoveryBanner" class="recovery-banner" hidden></section>
+    <section id="prelaunchPanel" class="prelaunch-panel" hidden></section>
     <nav class="tabs" aria-label="Views">
       <button class="tab active" data-tab="map">Map</button>
       <button class="tab" data-tab="empires">Empires</button>
       <button class="tab" data-tab="war">War</button>
       <button class="tab" data-tab="activity">Activity</button>
       <button class="tab" data-tab="player">Player</button>
-      <button class="tab" data-tab="alliances">Alliances</button>
-      <button class="tab" data-tab="replay">Replay</button>
-      <button class="tab" data-tab="ops">Operations</button>
-      <button class="tab" data-tab="rules">Rules & proof</button>
+      <button class="tab secondary-tab" data-tab="alliances">Alliances</button>
+      <button class="tab secondary-tab" data-tab="replay">Replay</button>
+      <button class="tab secondary-tab" data-tab="ops">Operations</button>
+      <button class="tab secondary-tab" data-tab="rules">Rules & proof</button>
+      <details class="more-tabs"><summary>More</summary><div class="more-tabs-menu">
+        <button class="tab" data-tab="alliances">Alliances</button>
+        <button class="tab" data-tab="replay">Replay</button>
+        <button class="tab" data-tab="ops">Operations</button>
+        <button class="tab" data-tab="rules">Rules & proof</button>
+      </div></details>
     </nav>
     <section class="workspace tab-panel active" data-panel="map">
       <div class="map-card">
         <div class="map-head">
-          <div><span class="eyebrow">THEATER</span><h1>Season 0 world</h1><p class="muted">Eight strategic regions · canonical ring + second-neighbor topology</p></div>
+          <div><span class="eyebrow">THEATER</span><h1>Season 0 world</h1><p class="muted">Eight strategic regions · canonical ring + second-neighbor topology</p><span id="gameplayLock" class="gameplay-lock"></span></div>
           <div class="map-tools"><button id="zoomOut" class="icon-btn" aria-label="Zoom out">−</button><button id="resetView" class="ghost-btn">Reset</button><button id="zoomIn" class="icon-btn" aria-label="Zoom in">+</button></div>
         </div>
         <div class="map-filters"><button class="filter active" data-layer="ownership">Ownership</button><button class="filter" data-layer="regions">Regions</button><button class="filter" data-layer="strategic">Strategic</button><button class="filter" data-layer="conflict">Conflict</button></div>
