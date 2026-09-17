@@ -14,6 +14,7 @@ test = ["pytest==9.1.1"]
 
 [project.scripts]
 flop-empires = "flop_empires.cli:main"
+flop-empires-ui = "flop_empires.ui_server:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -29,8 +29,7 @@ JSON commands carried in room messages, verifies the exact Ed25519
 `room|nonce|text` signature again inside the ingestor, tracks generation and
 sequence, rejects retention gaps, and never follows or executes message content.
 
-No router, conformance-lab, token, payment, wallet, staking, NFT, or browser UI
-integration is included.
+No router, conformance-lab, token, payment, wallet, staking, or NFT integration is included. The browser surface is read-only and consumes canonical local state.
 
 Current exercised capability includes `SEASON_MINUS_ONE_READY`: official GitHub API,
 fixed-origin Technocore reads, dedicated DPAPI-protected staging identities,
@@ -44,3 +43,17 @@ six-hour epochs over an intended 14 days, no historical spendable bootstrap,
 production referee identity. Its namespaces are verified-empty and prepare-only:
 registration has not started and no production game records were written. See
 `docs/SEASON-0-OPERATIONS.md`; this repository does not claim `LIVE`.
+
+## Public Season 0 surface
+
+A read-only browser surface is available through:
+
+```console
+flop-empires-ui
+```
+
+By default it binds to `127.0.0.1:8765` and reads the canonical Season 0 SQLite runtime plus the frozen world/activation artifacts. Set `FLOP_EMPIRES_UI_HOST`, `FLOP_EMPIRES_UI_PORT`, or `FLOP_EMPIRES_DB` to override those defaults.
+
+The public projection is deliberately fog-safe. It exposes territory identity, owner, capital status, adjacency, strategic value, public conflicts, active alliances, registration counts, bounded event metadata, and replay/provenance hashes. It does not expose exact stockpiles, POWER inputs, exact fortification, sensitive production, committed attack force, allied defense amounts, event payload details, or actor DIDs from the event feed.
+
+Treaty, trade, Standing and victory semantics are reported separately as rule capabilities. They are never presented as live runtime state until corresponding canonical runtime materialization exists. The browser UI is a projection only and does not mutate the referee database.

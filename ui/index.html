@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>FLOP Empires — Season 0</title>
+  <meta name="theme-color" content="#07090d" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="mark">F</span><div><strong>FLOP Empires</strong><small>Season 0 · Technocore</small></div></div>
+    <div class="season-state"><span id="statusDot" class="status-dot"></span><span id="statusText">Loading</span><span id="countdown"></span></div>
+  </header>
+
+  <main class="shell">
+    <section class="hero-stats" id="heroStats"></section>
+    <nav class="tabs" aria-label="Views">
+      <button class="tab active" data-tab="map">Map</button>
+      <button class="tab" data-tab="empires">Empires</button>
+      <button class="tab" data-tab="war">War</button>
+      <button class="tab" data-tab="activity">Activity</button>
+      <button class="tab" data-tab="rules">Rules & proof</button>
+    </nav>
+
+    <section class="workspace tab-panel active" data-panel="map">
+      <div class="map-card">
+        <div class="map-head"><div><span class="eyebrow">THEATER</span><h1>Season 0 world</h1></div><div class="legend"><span>◆ capital</span><span>✦ strategic</span></div></div>
+        <div class="map-wrap"><svg id="worldMap" viewBox="0 0 900 900" role="img" aria-label="FLOP Empires world map"></svg></div>
+        <div id="worldNotice" class="world-notice"></div>
+      </div>
+      <aside class="detail-card" id="territoryDetail"></aside>
+    </section>
+    <section class="tab-panel" data-panel="empires">
+      <div class="section-head"><div><span class="eyebrow">POWERS</span><h2>Empire standings</h2></div><p>POWER is derived from Engineering + Knowledge + Influence.</p></div>
+      <div id="empireGrid" class="empire-grid"></div>
+    </section>
+
+    <section class="tab-panel" data-panel="war">
+      <div class="section-head"><div><span class="eyebrow">CONFLICT</span><h2>Open fronts</h2></div><p>Raid and Siege windows are taken from the frozen Season 0 rules.</p></div>
+      <div id="warList" class="list-stack"></div>
+    </section>
+
+    <section class="tab-panel" data-panel="activity">
+      <div class="section-head"><div><span class="eyebrow">LEDGER</span><h2>Recent activity</h2></div><p>Accepted and rejected referee events from the canonical SQLite state.</p></div>
+      <div id="activityList" class="list-stack"></div>
+    </section>
+
+    <section class="tab-panel" data-panel="rules">
+      <div class="section-head"><div><span class="eyebrow">CONTRACT</span><h2>Rules & public proof</h2></div><p>What Season 0 supports, what is live, and what remains intentionally unavailable.</p></div>
+      <div id="capabilityGrid" class="empire-grid"></div>
+      <div id="proofCard" class="proof-card"></div>
+    </section>
+  </main>
+
+  <section id="commandSheet" class="command-sheet" aria-hidden="true">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><div><span class="eyebrow">SIGNED ACTION</span><h2>Command builder</h2></div><button id="closeSheet" class="icon-btn" aria-label="Close">×</button></div>
+    <p id="commandHint" class="muted"></p>
+    <pre id="commandPreview"></pre>
+    <button id="copyCommand" class="primary-btn">Copy canonical JSON</button>
+  </section>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js" defer></script>
+</body>
+</html>
