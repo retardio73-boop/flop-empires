@@ -8,6 +8,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      LOCALAPPDATA: /tmp/flop-empires-localappdata
     strategy:
       matrix:
         python-version: ['3.12']

@@ -3,11 +3,18 @@ import threading
 import urllib.request
 from http.server import ThreadingHTTPServer
 
-from flop_empires.ui_server import Handler
+from flop_empires.store import Store
+from flop_empires import ui_server
 
 
-def test_public_ui_state_endpoint_serves_fog_safe_projection():
-    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+def test_public_ui_state_endpoint_serves_fog_safe_projection(tmp_path, monkeypatch):
+    db = tmp_path / "ui-http.db"
+    store = Store(db)
+    store.conn.execute("INSERT INTO config(key,value) VALUES('season_status','FROZEN_NOT_ACTIVE')")
+    store.close()
+    monkeypatch.setattr(ui_server, "DEFAULT_DB", db)
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), ui_server.Handler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     try:
