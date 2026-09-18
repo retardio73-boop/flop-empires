@@ -108,3 +108,43 @@ def test_restart_rejects_different_activation_binding():
     with pytest.raises(RuntimeError,match='PRODUCTION_BINDING_MISMATCH'):
         ProductionRuntime.from_verified_activation(manifest,other,None,store,signer,client,clock=lambda:100)
     client.close()
+
+from flop_empires.launch import LaunchAuthorization, LaunchAuthorizationError, sign_launch_payload
+
+def launch_for(manifest, signer, binding, *, effective_start=130):
+    payload={
+        'version':'flop-empires-launch-authorization-v1','launch_id':'launch-test',
+        'season_id':binding.season_id,'binding_id':binding.activation_id,
+        'frozen_manifest_hash':manifest.manifest_hash,'referee_did':signer.did,
+        'authorized_at':125,'effective_start':effective_start,
+        'effective_end':effective_start+manifest.intended_duration_seconds,
+        'launch_status':'AUTHORIZE_LAUNCH'}
+    return LaunchAuthorization.verify(sign_launch_payload(payload,signer),manifest,binding)
+
+def test_clock_cannot_start_production_without_launch_authorization():
+    signer=EphemeralSigner(b'h'*32); manifest=manifest_for(signer); record=activation_for(manifest,signer)
+    client,_=pristine_client(); ctx=record.context()
+    evidence=NamespacePreflight(client,manifest).check_pair(ctx.actions_namespace,ctx.events_namespace)
+    store=Store()
+    runtime=ProductionRuntime.from_verified_activation(manifest,record,evidence,store,signer,client,clock=lambda:999)
+    assert runtime.engine._status()=='REGISTRATION'
+    assert store.one("SELECT value FROM config WHERE key='season_started_at'") is None
+    client.close()
+
+def test_signed_launch_authorization_is_required_for_active():
+    signer=EphemeralSigner(b'i'*32); manifest=manifest_for(signer); record=activation_for(manifest,signer)
+    client,_=pristine_client(); ctx=record.context()
+    evidence=NamespacePreflight(client,manifest).check_pair(ctx.actions_namespace,ctx.events_namespace)
+    launch=launch_for(manifest,signer,ctx,effective_start=130)
+    store=Store()
+    runtime=ProductionRuntime.from_verified_activation(manifest,record,evidence,store,signer,client,clock=lambda:130,launch=launch)
+    assert runtime.engine._status()=='ACTIVE'
+    assert store.one("SELECT value FROM config WHERE key='season_started_at'")[0]=='130'
+    client.close()
+
+def test_launch_authorization_rejects_wrong_binding():
+    signer=EphemeralSigner(b'j'*32); manifest=manifest_for(signer); record=activation_for(manifest,signer)
+    payload=launch_for(manifest,signer,record.context()).value
+    bad=dict(payload); bad['binding_id']='other'; bad.pop('signature')
+    with pytest.raises(LaunchAuthorizationError):
+        LaunchAuthorization.verify(sign_launch_payload(bad,signer),manifest,record.context())

@@ -53,3 +53,29 @@ def test_event_chain_corruption_halts_new_engine():
     store.conn.execute("UPDATE events SET details_json='{}' WHERE seq=1")
     with pytest.raises(RuntimeError,match="invalid historical event chain"):
         Engine.for_test(store,ref.did,ref)
+
+
+def test_valid_referee_frames_are_silently_skipped_in_duplex_room():
+    ref=EphemeralSigner(b"q"*32); player=EphemeralSigner(b"p"*32)
+    store=Store(); engine=Engine.for_test(store,ref.did,ref,clock=lambda:100)
+    ingestor=TechnocoreIngestor(store,engine,"room",expected_season_id="season-b")
+    referee_output=record("ref-output",ref,{"receipt":"not-a-command"},1)
+    command={"action":"register_actor","actor_did":player.did,"request_id":"player","payload":{}}
+    player_record=record("player",player,{"season_id":"season-b","command":command},2)
+    class Source:
+        def current_cursor(self): return "c0"
+        def records_after(self,cursor): return [MailboxItem(referee_output,"c1"),MailboxItem(player_record,"c2")]
+    receipts=ingestor.poll(Source())
+    assert len(receipts)==1 and receipts[0].accepted
+    assert store.one("SELECT COUNT(*) FROM technocore_rejections")[0]==0
+    assert store.one("SELECT cursor FROM technocore_state")[0]=="c2"
+
+def test_forged_referee_frame_is_not_silently_skipped():
+    ref=EphemeralSigner(b"w"*32); store=Store(); engine=Engine.for_test(store,ref.did,ref,clock=lambda:100)
+    ingestor=TechnocoreIngestor(store,engine,"room",expected_season_id="season-b")
+    forged=record("forged",ref,{"receipt":"fake"},1,False)
+    class Source:
+        def current_cursor(self): return "c0"
+        def records_after(self,cursor): return [MailboxItem(forged,"c1")]
+    assert ingestor.poll(Source())==[]
+    assert store.one("SELECT code FROM technocore_rejections WHERE record_id='forged'")[0]=="INVALID_SIGNATURE"

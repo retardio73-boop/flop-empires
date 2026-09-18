@@ -9,6 +9,7 @@ import httpx
 
 from .activation import ActivationContext,ActivationRecord,is_verified_activation_context
 from .recovery import RecoveryRecord
+from .launch import LaunchAuthorization
 from .engine import Engine,LifecycleViolation
 from .identity import Signer,require_signer
 from .manifest import SeasonZeroFreezeV2CandidateManifest,validate_production_namespace
@@ -197,7 +198,7 @@ class ProductionRuntime:
     @classmethod
     def from_verified_activation(cls,manifest: SeasonZeroFreezeV2CandidateManifest,
             activation: ActivationRecord,preflight: NamespacePreflightEvidence | None,store: Store,
-            signer: Signer,client: httpx.Client,clock=None)->"ProductionRuntime":
+            signer: Signer,client: httpx.Client,clock=None,launch: LaunchAuthorization | None=None)->"ProductionRuntime":
         context=activation.context()
         require_signer(manifest.referee_did,signer)
         binding=ProductionBinding(manifest.manifest_hash,"production",context);binding.validate(manifest)
@@ -212,7 +213,7 @@ class ProductionRuntime:
             _persist_initial_binding(store,binding)
         elif persisted!=_binding_values(binding):
             raise RuntimeError("PRODUCTION_BINDING_MISMATCH")
-        engine=Engine._for_verified_production(store,manifest,signer,context,clock=clock)
+        engine=Engine._for_verified_production(store,manifest,signer,context,clock=clock,launch_context=launch.context() if launch else None)
         now=int(engine.clock())
         if now<context.registration_open:
             raise LifecycleViolation("ACTIVATION_NOT_EFFECTIVE")
@@ -227,7 +228,7 @@ class ProductionRuntime:
 
     @classmethod
     def from_verified_recovery(cls,manifest: SeasonZeroFreezeV2CandidateManifest, recovery: RecoveryRecord,
-            store: Store, signer: Signer, client: httpx.Client, clock=None)->"ProductionRuntime":
+            store: Store, signer: Signer, client: httpx.Client, clock=None, launch: LaunchAuthorization | None=None)->"ProductionRuntime":
         context=recovery.context(); require_signer(manifest.referee_did,signer)
         binding=ProductionBinding(manifest.manifest_hash,"production",context); binding.validate(manifest)
         persisted=_read_persisted_binding(store)
@@ -240,7 +241,7 @@ class ProductionRuntime:
                     (context.actions_namespace,action_transport.current_cursor()))
         elif persisted!=_binding_values(binding):
             raise RuntimeError("PRODUCTION_BINDING_MISMATCH")
-        engine=Engine._for_verified_production(store,manifest,signer,context,clock=clock)
+        engine=Engine._for_verified_production(store,manifest,signer,context,clock=clock,launch_context=launch.context() if launch else None)
         now=int(engine.clock())
         if now<context.registration_open: raise LifecycleViolation("ACTIVATION_NOT_EFFECTIVE")
         engine.advance_production_lifecycle(now)

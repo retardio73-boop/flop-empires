@@ -78,19 +78,23 @@ class Engine:
 
     @classmethod
     def _for_verified_production(cls,store: Store,manifest,signer: Signer,activation_context,
-                                 clock=None)->"Engine":
+                                 clock=None,launch_context=None)->"Engine":
         from .activation import is_verified_activation_context
         if not is_verified_activation_context(activation_context):
             raise RuntimeError("VERIFIED_ACTIVATION_REQUIRED")
         if activation_context.frozen_manifest_hash != manifest.manifest_hash:
             raise RuntimeError("ACTIVATION_MANIFEST_MISMATCH")
+        if launch_context is not None:
+            from .launch import is_verified_launch_context
+            if not is_verified_launch_context(launch_context) or launch_context.binding_id!=activation_context.activation_id:
+                raise RuntimeError("VERIFIED_LAUNCH_AUTHORIZATION_REQUIRED")
         return cls(store,manifest.referee_did,signer,clock=clock,economic_rules=manifest.rules,
             manifest_hash=manifest.manifest_hash,initial_balances=manifest.initial_balances,
             epoch_duration=manifest.epoch_duration,environment="production",
             combat_parameters=manifest.combat_parameters,alliance_parameters=manifest.alliance_parameters,
             bootstrap_policy=manifest.bootstrap_policy,pause_policy=manifest.pause_policy_version,
             activation_guard="VERIFIED_ACTIVATION",runtime_mode=RuntimeMode.PRODUCTION,
-            activation_context=activation_context,_factory_token=_ENGINE_FACTORY_TOKEN)
+            activation_context=activation_context,launch_context=launch_context,_factory_token=_ENGINE_FACTORY_TOKEN)
 
     def __init__(self, store: Store, configured_referee_did: str, signer: Signer | None,
                  clock: Callable[[], int] | None = None, *,
@@ -105,6 +109,7 @@ class Engine:
                  activation_guard: str | None = None,
                  runtime_mode: RuntimeMode | None = None,
                  activation_context=None,
+                 launch_context=None,
                  _factory_token=None):
         if _factory_token is not _ENGINE_FACTORY_TOKEN or runtime_mode is None:
             raise RuntimeError("direct Engine construction is disabled; use an explicit runtime factory")
@@ -125,6 +130,7 @@ class Engine:
         self.activation_guard=activation_guard
         self.runtime_mode=RuntimeMode(runtime_mode)
         self.activation_context=activation_context
+        self.launch_context=launch_context
         existing = store.one("SELECT value FROM config WHERE key='referee_did'")
         if existing and existing[0] != configured_referee_did:
             raise RuntimeError("database belongs to a different referee DID")
@@ -233,7 +239,8 @@ class Engine:
             if action not in allowed: raise RuleViolation("ACTION_NOT_ALLOWED_DURING_REGISTRATION")
             if self.runtime_mode==RuntimeMode.PRODUCTION and self.activation_context is not None:
                 now=int(self.clock())
-                if now<self.activation_context.registration_open or now>=self.activation_context.registration_close:
+                closes_at=self.launch_context.effective_start if self.launch_context is not None else None
+                if now<self.activation_context.registration_open or (closes_at is not None and now>=closes_at):
                     raise RuleViolation("REGISTRATION_CLOSED")
             return
         if status==SeasonStatus.ACTIVE:
@@ -249,10 +256,16 @@ class Engine:
         if self.runtime_mode!=RuntimeMode.PRODUCTION or self.activation_context is None:
             raise RuntimeError("VERIFIED_PRODUCTION_RUNTIME_REQUIRED")
         wall=int(self.clock()) if now is None else int(now);ctx=self.activation_context
-        status=self._status()
-        if wall>=ctx.season_end:
+        status=self._status(); launch=self.launch_context
+        if launch is None:
+            if status in {SeasonStatus.ACTIVE,SeasonStatus.PAUSED,SeasonStatus.FINALIZED}:
+                raise RuntimeError("LAUNCH_AUTHORIZATION_REQUIRED_FOR_LIVE_STATE")
+            if wall<ctx.registration_open:
+                raise LifecycleViolation("ACTIVATION_NOT_YET_EFFECTIVE")
+            target=SeasonStatus.REGISTRATION
+        elif wall>=launch.effective_end:
             target=SeasonStatus.FINALIZED
-        elif wall>=ctx.season_start:
+        elif wall>=launch.effective_start:
             target=SeasonStatus.ACTIVE
         elif wall>=ctx.registration_open:
             target=SeasonStatus.REGISTRATION
@@ -268,7 +281,7 @@ class Engine:
             self.store.conn.execute("UPDATE config SET value=? WHERE key='season_status'",(target,))
             if target==SeasonStatus.ACTIVE:
                 self.store.conn.execute("INSERT OR REPLACE INTO config(key,value) VALUES('season_started_at',?)",
-                    (str(ctx.season_start),))
+                    (str(launch.effective_start),))
                 self.store.conn.execute("INSERT OR IGNORE INTO config(key,value) VALUES('total_paused_seconds','0')")
         return target
 

@@ -11,9 +11,10 @@ from .store import Store
 
 def readiness_report(store: Store, manifest_path: str | Path, activation_path: str | Path,
                      world_path: str | Path, runner_status_path: str | Path | None = None,
+                     recovery_path: str | Path | None = None, launch_path: str | Path | None = None,
                      *, now: int | None = None) -> dict[str, Any]:
     wall = int(time.time()) if now is None else int(now)
-    verification = verify_season_artifacts(store, manifest_path, activation_path, world_path)
+    verification = verify_season_artifacts(store, manifest_path, activation_path, world_path, recovery_path, launch_path)
     status = store.one("SELECT value FROM config WHERE key='season_status'")
     pending = store.one("SELECT COUNT(*) FROM receipt_outbox WHERE status='PENDING'")[0]
     unverified = store.one("SELECT COUNT(*) FROM receipt_outbox WHERE status='PUBLISHED' AND readback_verified=0")[0]

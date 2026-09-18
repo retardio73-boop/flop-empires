@@ -9,7 +9,7 @@ import httpx
 
 from .readiness import readiness_report
 from .recovery import RecoveryRecord
-from .season0_runner import ACTIVATION_PATH, DB_PATH, MANIFEST_PATH, RECOVERY_PATH, RUNTIME_DIR, STATUS_PATH, ROOT
+from .season0_runner import ACTIVATION_PATH, DB_PATH, MANIFEST_PATH, RECOVERY_PATH, LAUNCH_PATH, RUNTIME_DIR, STATUS_PATH, ROOT
 from .manifest import SeasonZeroFreezeV2CandidateManifest
 from .store import Store
 from .windows_signer import season0_referee_backend
@@ -56,6 +56,7 @@ def _recovery_checks(store: Store, client: httpx.Client) -> tuple[dict, dict]:
         "ui_recovery_binding": ui_season.get("activation_id") == recovery.value["recovery_id"],
         "ui_duplex_binding": ui_season.get("actions_namespace") == recovery.value["duplex_namespace"] == ui_season.get("events_namespace"),
         "no_stuck_receipts": high_retry_pending == 0,
+        "launch_gate_fail_closed": (not LAUNCH_PATH.is_file()) or bool(__import__('flop_empires.launch',fromlist=['LaunchAuthorization']).LaunchAuthorization.load(LAUNCH_PATH,manifest,recovery.context())),
     }
     detail = {
         "recovery_id": recovery.value["recovery_id"],
@@ -64,6 +65,7 @@ def _recovery_checks(store: Store, client: httpx.Client) -> tuple[dict, dict]:
         "technocore_status": room.status_code,
         "ui_status": ui.status_code,
         "high_retry_pending": high_retry_pending,
+        "launch_authorized": LAUNCH_PATH.is_file(),
     }
     return checks, detail
 
@@ -73,7 +75,7 @@ def main() -> int:
     try:
         store = Store(DB_PATH, readonly=True)
         try:
-            report = readiness_report(store, MANIFEST_PATH, ACTIVATION_PATH, WORLD_PATH, STATUS_PATH)
+            report = readiness_report(store, MANIFEST_PATH, ACTIVATION_PATH, WORLD_PATH, STATUS_PATH, RECOVERY_PATH, LAUNCH_PATH)
             with httpx.Client(timeout=5.0) as client:
                 recovery_checks, recovery_detail = _recovery_checks(store, client)
         finally:

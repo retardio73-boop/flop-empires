@@ -52,3 +52,17 @@ def test_scoreboard_replay_and_final_artifact_are_explicitly_non_authoritative(t
     assert final['authoritative_winner'] is None
     assert final['verification']['ok'] is True
     s.close()
+
+RECOVERY=ROOT/'season'/'SEASON-0-RECOVERY-v1.json'
+LAUNCH=ROOT/'season'/'SEASON-0-LAUNCH-AUTHORIZATION-v1.json'
+
+def test_final_artifact_reports_recovery_lineage_without_implying_launch(tmp_path):
+    s=prepared_store(tmp_path/'season.sqlite3')
+    final=build_final_artifact(s,MANIFEST,ACTIVATION,WORLD,RECOVERY,LAUNCH)
+    assert final['verification']['recovery_active'] is True
+    assert final['verification']['launch_authorized'] is False
+    assert final['effective_binding_id']==json.loads(RECOVERY.read_text())['recovery_id']
+    assert final['lineage']['activation_id']==json.loads(ACTIVATION.read_text())['activation_id']
+    assert final['lineage']['recovery_id']==json.loads(RECOVERY.read_text())['recovery_id']
+    assert final['lineage']['launch_id'] is None
+    s.close()

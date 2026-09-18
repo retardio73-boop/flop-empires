@@ -11,6 +11,7 @@ import httpx
 from .identity import ExternalRefereeSigner
 from .manifest import SeasonZeroFreezeV2CandidateManifest
 from .recovery import RecoveryRecord
+from .launch import LaunchAuthorization
 from .world_bootstrap import bootstrap_frozen_world
 from .models import SeasonStatus
 from .production import ProductionRuntime
@@ -27,6 +28,7 @@ LOCK_PATH=RUNTIME_DIR/"runner.lock"
 MANIFEST_PATH=ROOT/"season/SEASON-0-MANIFEST-FREEZE-V2-CANDIDATE.json"
 ACTIVATION_PATH=ROOT/"season/SEASON-0-ACTIVATION-v1.json"
 RECOVERY_PATH=ROOT/"season/SEASON-0-RECOVERY-v1.json"
+LAUNCH_PATH=ROOT/"season/SEASON-0-LAUNCH-AUTHORIZATION-v1.json"
 WORLD_PATH=ROOT/"season/world-season-0-v1.json"
 BACKEND="flop_empires.windows_signer:season0_referee_backend"
 FINAL_ARTIFACT_PATH=RUNTIME_DIR/"season0-final-state-v1.json"
@@ -89,12 +91,15 @@ def _cycle(client: httpx.Client) -> dict:
     if store.one("SELECT COUNT(*) FROM territories")[0]==0:
         bootstrap_frozen_world(store,WORLD_PATH,expected_hash=manifest.world_graph_hash,
             initial_balances=manifest.initial_balances,now=int(time.time()))
+    launch=None
     if RECOVERY_PATH.is_file():
         recovery=RecoveryRecord.load(RECOVERY_PATH,manifest)
-        runtime=ProductionRuntime.from_verified_recovery(manifest,recovery,store,signer,client)
+        if LAUNCH_PATH.is_file(): launch=LaunchAuthorization.load(LAUNCH_PATH,manifest,recovery.context())
+        runtime=ProductionRuntime.from_verified_recovery(manifest,recovery,store,signer,client,launch=launch)
     else:
         activation=__import__('flop_empires.activation',fromlist=['ActivationRecord']).ActivationRecord.load(ACTIVATION_PATH,manifest)
-        runtime=ProductionRuntime.from_verified_activation(manifest,activation,None,store,signer,client)
+        if LAUNCH_PATH.is_file(): launch=LaunchAuthorization.load(LAUNCH_PATH,manifest,activation.context())
+        runtime=ProductionRuntime.from_verified_activation(manifest,activation,None,store,signer,client,launch=launch)
     status=runtime.engine.advance_production_lifecycle()
     receipts=[]
     if status!=SeasonStatus.FINALIZED:
@@ -104,11 +109,11 @@ def _cycle(client: httpx.Client) -> dict:
     flushed=runtime.outbox.flush(runtime.events)
     final_artifact=False
     if auto["status"]==SeasonStatus.FINALIZED:
-        write_final_artifact(build_final_artifact(store,MANIFEST_PATH,ACTIVATION_PATH,WORLD_PATH),FINAL_ARTIFACT_PATH); final_artifact=True
+        write_final_artifact(build_final_artifact(store,MANIFEST_PATH,ACTIVATION_PATH,WORLD_PATH,RECOVERY_PATH,LAUNCH_PATH),FINAL_ARTIFACT_PATH); final_artifact=True
     return {"status":auto["status"],"receipts":len(receipts),"recovered":recovered,
         "published":flushed["published"],"pending":flushed["pending"],
         "settled_epochs":auto["settled_epochs"],"resolved_attacks":auto["resolved_attacks"],
-        "final_artifact":final_artifact}
+        "final_artifact":final_artifact,"launch_authorized":launch is not None}
 
 
 def main() -> int:

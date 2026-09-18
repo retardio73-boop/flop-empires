@@ -94,3 +94,22 @@ Stop new commands at the separately authorized end boundary, resolve only action
 allowed by frozen rules, drain and verify the outbox, verify event chain and full
 replay, snapshot final state/hash, and archive public receipts. Do not settle
 tokens or monetary value. Any rule change is versioned for Season 1.
+
+## Explicit launch gate
+
+Season 0 Recovery v1 does **not** authorize gameplay to start.
+
+Production may remain in `REGISTRATION` indefinitely after the recovery record's original `season_start`.
+The wall clock alone must never transition the recovered season to `ACTIVE`.
+
+A transition to `ACTIVE` requires a separate, referee-signed
+`flop-empires-launch-authorization-v1` artifact bound to the exact current production binding
+(Recovery ID when recovery is active), frozen manifest hash, season ID, and referee DID.
+
+If `season/SEASON-0-LAUNCH-AUTHORIZATION-v1.json` is absent, the runner fails closed:
+registration remains open, gameplay actions remain unavailable, and the watchdog reports
+`launch_authorized: false`.
+
+When a launch authorization is eventually issued, its `effective_start` becomes the real
+registration close / gameplay start and its `effective_end` preserves the full frozen
+Season 0 duration. Never create or sign this artifact merely to test the UI.

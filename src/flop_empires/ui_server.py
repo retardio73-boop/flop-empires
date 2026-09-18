@@ -28,6 +28,7 @@ DEFAULT_DB = Path(os.environ.get(
 WORLD = ROOT / "season" / "world-season-0-v1.json"
 ACTIVATION = ROOT / "season" / "SEASON-0-ACTIVATION-v1.json"
 RECOVERY = ROOT / "season" / "SEASON-0-RECOVERY-v1.json"
+LAUNCH = ROOT / "season" / "SEASON-0-LAUNCH-AUTHORIZATION-v1.json"
 MANIFEST = ROOT / "season" / "SEASON-0-MANIFEST-FREEZE-V2-CANDIDATE.json"
 RUNNER_STATUS = Path(os.environ.get("LOCALAPPDATA", ROOT)) / "FLOPEmpires" / "season0-runtime-v1" / "runner-status.json"
 AUTH = AuthManager()
@@ -83,8 +84,8 @@ class Handler(SimpleHTTPRequestHandler):
         if path in {"/api/readiness","/api/verification","/api/replay","/api/scoreboard"}:
             store=Store(DEFAULT_DB, readonly=True)
             try:
-                if path=="/api/readiness": payload=readiness_report(store,MANIFEST,ACTIVATION,WORLD,RUNNER_STATUS)
-                elif path=="/api/verification": payload=verify_season_artifacts(store,MANIFEST,ACTIVATION,WORLD)
+                if path=="/api/readiness": payload=readiness_report(store,MANIFEST,ACTIVATION,WORLD,RUNNER_STATUS,RECOVERY,LAUNCH)
+                elif path=="/api/verification": payload=verify_season_artifacts(store,MANIFEST,ACTIVATION,WORLD,RECOVERY,LAUNCH)
                 elif path=="/api/replay": payload=replay_timeline(store)
                 else: payload=descriptive_scoreboard(store,WORLD)
             finally: store.close()

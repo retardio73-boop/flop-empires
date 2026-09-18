@@ -323,6 +323,12 @@ class TechnocoreIngestor:
         for item in source.records_after(cursor):
             if not isinstance(item, MailboxItem) or not item.next_cursor:
                 raise RuleViolation("invalid Technocore mailbox item")
+            if item.record.signer_did==self.engine.signer.did and verify_signed_record(item.record):
+                with self.store.transaction():
+                    self.store.conn.execute("UPDATE technocore_state SET cursor=? WHERE mailbox=?",
+                        (item.next_cursor,self.mailbox))
+                cursor=item.next_cursor
+                continue
             try:
                 receipt = self.ingest(item.record, item.next_cursor, accepted_at=0)
                 receipts.append(receipt)
